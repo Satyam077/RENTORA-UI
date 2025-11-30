@@ -1,0 +1,17 @@
+<div class="sidebar">
+    <!-- Logo Section -->
+    <div class="sidebar-header">
+        <h1 class="logo">PMS</h1>
+    </div>
+
+    <!-- Menu Items -->
+    <nav class="sidebar-nav">
+        <div *ngFor="let item of menuItems" class="menu-item" [class.active]="item.active"
+            (click)="navigateTo(item.route)">
+            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path [attr.d]="getIconPath(item.icon)" />
+            </svg>
+            <span class="menu-label">{{ item.label }}</span>
+        </div>
+    </nav>
+</div>
