@@ -13,10 +13,10 @@ export class LandingComponent {
     constructor(private router: Router) { }
 
     enterAsLandlord(): void {
-        this.router.navigate(['/login'], { queryParams: { role: 'landlord' } });
+        this.router.navigate(['/login'], { queryParams: { role: 3 } });
     }
 
     enterAsTenant(): void {
-        this.router.navigate(['/login'], { queryParams: { role: 'tenant' } });
+        this.router.navigate(['/login'], { queryParams: { role: 4 } });
     }
 }

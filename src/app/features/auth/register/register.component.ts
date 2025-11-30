@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { Role } from '../../../core/models/role.enum';
 
 @Component({
   selector: 'app-register',
@@ -22,7 +23,7 @@ export class RegisterComponent implements OnInit {
   submitted = false;
   error = '';
   success = '';
-  role: string = 'tenant';
+  role: Role = Role.Tenants; // Default to Tenants
   showPassword = false;
   showConfirmPassword = false;
 
@@ -31,12 +32,12 @@ export class RegisterComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Get role from query params
     this.route.queryParams.subscribe((params) => {
-      this.role = params['role'] || 'tenant';
+      this.role = params['role'] ? parseInt(params['role']) as Role : Role.Tenants;
     });
 
     this.registerForm = this.formBuilder.group(
@@ -50,7 +51,7 @@ export class RegisterComponent implements OnInit {
         dateOfBirth: [''],
         role: [this.role],
         tenantId: [null],
-        ownerId : [null]
+        ownerId: [null]
       },
       {
         validators: this.passwordMatchValidator,
@@ -114,8 +115,9 @@ export class RegisterComponent implements OnInit {
           setTimeout(() => {
             // Navigate based on role
             if (
-              response.user.role === 'landlord' ||
-              response.user.role === 'owner'
+              response.user.role === Role.Landlords ||
+              response.user.role === Role.SuperAdmin ||
+              response.user.role === Role.Admin
             ) {
               this.router.navigate(['/dashboard']);
             } else {

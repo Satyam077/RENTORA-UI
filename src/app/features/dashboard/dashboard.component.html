@@ -1,1 +1,89 @@
-<p>dashboard works!</p>
+<!-- Dashboard Content -->
+<div class="dashboard-content">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Welcome back! Here's your property overview.</p>
+    </div>
+    <div class="header-right">
+      <button class="btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path
+            d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z">
+          </path>
+        </svg>
+        Generate Invoices
+      </button>
+      <button class="btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add Property
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of stats">
+      <div class="stat-content">
+        <div class="stat-header">
+          <h3 class="stat-title">{{ stat.title }}</h3>
+          <div class="stat-icon" [style.background-color]="stat.iconBg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path [attr.d]="getIconPath(stat.icon)"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-value">{{ stat.value }}</div>
+        <div class="stat-footer">
+          <span class="stat-change" [class.positive]="stat.changePositive" [class.negative]="!stat.changePositive">
+            {{ stat.change }}
+          </span>
+          <span class="stat-subtitle" *ngIf="stat.subtitle">{{ stat.subtitle }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity & Quick Actions -->
+  <div class="content-grid">
+    <!-- Recent Activity -->
+    <div class="content-card">
+      <h2 class="card-title">Recent Activity</h2>
+      <div class="activity-list">
+        <div class="activity-item" *ngFor="let activity of recentActivities">
+          <div class="activity-left">
+            <div class="activity-type">{{ activity.type }}</div>
+            <div class="activity-description">{{ activity.description }}</div>
+          </div>
+          <div class="activity-right">
+            <div class="activity-amount" *ngIf="activity.amount">{{ activity.amount }}</div>
+            <div class="activity-status" *ngIf="activity.status"
+              [class]="'status-' + activity.status.toLowerCase().replace(' ', '-')">
+              {{ activity.status }}
+            </div>
+            <div class="activity-time">{{ activity.time }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="content-card">
+      <h2 class="card-title">Quick Actions</h2>
+      <div class="quick-actions-list">
+        <button class="quick-action-btn" *ngFor="let action of quickActions">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path [attr.d]="getIconPath(action.icon)"></path>
+          </svg>
+          <span>{{ action.label }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

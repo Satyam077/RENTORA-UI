@@ -8,6 +8,7 @@ import {
 } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { Role } from '../../../core/models/role.enum';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +22,7 @@ export class LoginComponent implements OnInit {
   loading = false;
   submitted = false;
   error = '';
-  role: string = 'tenant';
+  role: number = 1; //'tenant';
   showPassword = false;
 
   constructor(
@@ -32,7 +33,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Get role from query params
     this.route.queryParams.subscribe((params) => {
       this.role = params['role'] || 'tenant';
     });
@@ -64,15 +64,35 @@ export class LoginComponent implements OnInit {
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
         if (response.success) {
-          // Navigate based on role
-          if (
-            response.user.role === 'landlord' ||
-            response.user.role === 'owner'
-          ) {
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.router.navigate(['/tenant-dashboard']);
+          const roleName = Role[response.user.role];
+          console.log('User role:', roleName);
+          let path = '/login';
+          switch (roleName) {
+            case 'SuperAdmin':
+              path = '/super-admin-dashboard';
+              break;
+
+            case 'Admin':
+              path = '/admin/dashboard';
+              break;
+
+            case 'Landlords':
+              path = '/dashboard';
+              break;
+
+            case 'Tenants':
+              path = '/tenant-dashboard';
+              break;
+
+            case 'Agents':
+              path = '/agent/dashboard';
+              break;
+
+            default:
+              path = '/login';
           }
+          this.loading = false;
+          this.router.navigate([path]);
         } else {
           this.error = response.message || 'Login failed';
           this.loading = false;
