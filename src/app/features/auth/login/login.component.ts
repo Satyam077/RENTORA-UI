@@ -73,7 +73,7 @@ export class LoginComponent implements OnInit {
               break;
 
             case 'Admin':
-              path = '/admin/dashboard';
+              path = '/super-admin-dashboard';
               break;
 
             case 'Landlords':

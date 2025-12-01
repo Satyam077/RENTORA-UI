@@ -1,0 +1,287 @@
+<div class="dialog-overlay" (click)="close()">
+  <div class="dialog-container" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h2 class="dialog-title">{{ isEditMode ? 'Edit User' : 'Create New User' }}</h2>
+      <button class="dialog-close" (click)="close()" type="button">×</button>
+    </div>
+
+    <div class="dialog-body">
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
+        <!-- Personal Information Section -->
+        <div class="form-section">
+          <h2 class="section-title">Personal Information</h2>
+          <div class="form-grid">
+            <!-- Profile Picture Upload -->
+            <div class="form-group full-width">
+              <label>Profile Picture</label>
+              <div class="profile-picture-upload">
+                <div class="profile-picture-preview">
+                  <img *ngIf="imagePreview" [src]="imagePreview" alt="Profile Preview" class="profile-preview-img">
+                  <div *ngIf="!imagePreview" class="profile-placeholder">
+                    <span class="placeholder-icon">👤</span>
+                  </div>
+                </div>
+                <div class="upload-controls">
+                  <input
+                    type="file"
+                    id="profilePicture"
+                    accept="image/*"
+                    (change)="onFileSelected($event)"
+                    style="display: none;">
+                  <label for="profilePicture" class="btn-upload">
+                    {{ imagePreview ? 'Change Picture' : 'Upload Picture' }}
+                  </label>
+                  <button
+                    type="button"
+                    *ngIf="imagePreview"
+                    class="btn-remove"
+                    (click)="imagePreview = null; selectedFile = null; userForm.patchValue({profileImageUrl: ''})">
+                    Remove
+                  </button>
+                </div>
+                <span class="error-message" *ngIf="isFieldInvalid('profileImageUrl')">
+                  {{ getErrorMessage('profileImageUrl') }}
+                </span>
+                <span class="upload-hint">Max size: 5MB. Formats: JPG, PNG, GIF, WebP</span>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="fullName">Full Name <span class="required">*</span></label>
+              <input
+                type="text"
+                id="fullName"
+                formControlName="fullName"
+                [class.invalid]="isFieldInvalid('fullName')"
+                placeholder="Enter full name">
+              <span class="error-message" *ngIf="isFieldInvalid('fullName')">
+                {{ getErrorMessage('fullName') }}
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select id="gender" formControlName="gender">
+                <option value="">Select Gender</option>
+                <option *ngFor="let gender of genderOptions" [value]="gender">{{ gender }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="dateOfBirth">Date of Birth</label>
+              <input
+                type="date"
+                id="dateOfBirth"
+                formControlName="dateOfBirth">
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="form-section">
+          <h2 class="section-title">Contact Information</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="email">Email <span class="required">*</span></label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                [class.invalid]="isFieldInvalid('email')"
+                placeholder="Enter email address">
+              <span class="error-message" *ngIf="isFieldInvalid('email')">
+                {{ getErrorMessage('email') }}
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="mobile">Mobile <span class="required">*</span></label>
+              <input
+                type="tel"
+                id="mobile"
+                formControlName="mobile"
+                [class.invalid]="isFieldInvalid('mobile')"
+                placeholder="Enter mobile number">
+              <span class="error-message" *ngIf="isFieldInvalid('mobile')">
+                {{ getErrorMessage('mobile') }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Password Section (only for create mode) -->
+        <div class="form-section" *ngIf="!isEditMode">
+          <h2 class="section-title">Password</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="password">Password <span class="required">*</span></label>
+              <input
+                type="password"
+                id="password"
+                formControlName="password"
+                [class.invalid]="isFieldInvalid('password')"
+                placeholder="Enter password">
+              <span class="error-message" *ngIf="isFieldInvalid('password')">
+                {{ getErrorMessage('password') }}
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+              <input
+                type="password"
+                id="confirmPassword"
+                formControlName="confirmPassword"
+                [class.invalid]="isFieldInvalid('confirmPassword')"
+                placeholder="Confirm password">
+              <span class="error-message" *ngIf="isFieldInvalid('confirmPassword')">
+                {{ getErrorMessage('confirmPassword') }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role & Access Section -->
+        <div class="form-section">
+          <h2 class="section-title">Role & Access</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="role">Role <span class="required">*</span></label>
+              <select
+                id="role"
+                formControlName="role"
+                [class.invalid]="isFieldInvalid('role')">
+                <option *ngFor="let role of roles" [value]="role">
+                  {{ getRoleLabel(role) }}
+                </option>
+              </select>
+              <span class="error-message" *ngIf="isFieldInvalid('role')">
+                {{ getErrorMessage('role') }}
+              </span>
+            </div>
+
+            <div class="form-group" *ngIf="userForm.get('role')?.value === Role.Tenants">
+              <label for="tenantId">Tenant ID</label>
+              <input
+                type="text"
+                id="tenantId"
+                formControlName="tenantId"
+                placeholder="Enter tenant ID">
+            </div>
+
+            <div class="form-group" *ngIf="userForm.get('role')?.value === Role.Landlords">
+              <label for="ownerId">Owner ID</label>
+              <input
+                type="text"
+                id="ownerId"
+                formControlName="ownerId"
+                placeholder="Enter owner ID">
+            </div>
+
+            <div class="form-group" *ngIf="isEditMode">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  formControlName="isActive">
+                <span>Active User</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Section -->
+        <div class="form-section">
+          <h2 class="section-title">Address (Optional)</h2>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="addressLine1">Address Line 1</label>
+              <input
+                type="text"
+                id="addressLine1"
+                formControlName="addressLine1"
+                placeholder="Street address, P.O. box">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="addressLine2">Address Line 2</label>
+              <input
+                type="text"
+                id="addressLine2"
+                formControlName="addressLine2"
+                placeholder="Apartment, suite, unit, building, floor, etc.">
+            </div>
+
+            <div class="form-group">
+              <label for="city">City</label>
+              <input
+                type="text"
+                id="city"
+                formControlName="city"
+                placeholder="Enter city">
+            </div>
+
+            <div class="form-group">
+              <label for="state">State</label>
+              <input
+                type="text"
+                id="state"
+                formControlName="state"
+                placeholder="Enter state">
+            </div>
+
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input
+                type="text"
+                id="country"
+                formControlName="country"
+                placeholder="Enter country">
+            </div>
+
+            <div class="form-group">
+              <label for="zipCode">Zip Code</label>
+              <input
+                type="text"
+                id="zipCode"
+                formControlName="zipCode"
+                placeholder="Enter zip code">
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Information Section -->
+        <div class="form-section">
+          <h2 class="section-title">Additional Information</h2>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="profileImageUrl">Profile Image URL</label>
+              <input
+                type="url"
+                id="profileImageUrl"
+                formControlName="profileImageUrl"
+                placeholder="https://example.com/image.jpg">
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="close()">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="userForm.invalid || uploadingImage">
+            <span *ngIf="uploadingImage">Uploading...</span>
+            <span *ngIf="!uploadingImage">{{ isEditMode ? 'Update User' : 'Create User' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

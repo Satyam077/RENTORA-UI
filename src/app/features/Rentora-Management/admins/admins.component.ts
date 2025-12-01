@@ -1,278 +1,263 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { UsersService } from '../../../core/services/users.service';
-import { User, UserCreateRequest, UserUpdateRequest, Address } from '../../../core/models/user.model';
+import {
+  User,
+  UserCreateRequest,
+  UserUpdateRequest,
+} from '../../../core/models/user.model';
 import { Role } from '../../../core/models/role.enum';
+import { UserDialogComponent } from './user-dialog.component';
 
 @Component({
   selector: 'app-admins',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, UserDialogComponent],
   templateUrl: './admins.component.html',
-  styleUrl: './admins.component.css'
+  styleUrl: './admins.component.css',
 })
 export class AdminsComponent implements OnInit {
   Role = Role;
-  userForm: FormGroup;
-  isEditMode = false;
-  editingUserId: string | null = null;
-  roles = Object.values(Role).filter(value => typeof value === 'number') as number[];
+  users: User[] = [];
+  filteredUsers: User[] = [];
+  searchTerm: string = '';
+  showDialog: boolean = false;
+  dialogUser: User | null = null;
+  pendingImageFile: File | null = null;
+  loading = false;
+  errorMessage = '';
+  successMessage = '';
+
+  // Pagination
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
+
   roleLabels: { [key: number]: string } = {
     [Role.SuperAdmin]: 'Super Admin',
     [Role.Admin]: 'Admin',
     [Role.Landlords]: 'Landlord',
     [Role.Tenants]: 'Tenant',
-    [Role.Agents]: 'Agent'
+    [Role.Agents]: 'Agent',
   };
-  genderOptions = ['Male', 'Female', 'Other'];
-  loading = false;
-  errorMessage = '';
-  successMessage = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private usersService: UsersService
-  ) {
-    this.userForm = this.createForm();
-  }
+  constructor(private usersService: UsersService) {}
 
   ngOnInit(): void {
+    this.loadUsers();
   }
 
-  createForm(): FormGroup {
-    return this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      gender: [''],
-      dateOfBirth: [''],
-      email: ['', [Validators.required, Validators.email]],
-      mobile: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]],
-      profileImageUrl: [''],
-      role: [Role.Tenants, [Validators.required]],
-      tenantId: [''],
-      ownerId: [''],
-      // Address fields
-      addressLine1: [''],
-      addressLine2: [''],
-      city: [''],
-      state: [''],
-      country: [''],
-      zipCode: [''],
-      isActive: [true]
-    }, { validators: this.passwordMatchValidator });
+  loadUsers(): void {
+    this.loading = true;
+    this.usersService.getAllUsers().subscribe({
+      next: (res) => {
+        const payload: any = res;
+        this.users = Array.isArray(payload) ? payload : payload?.users || [];
+        //console.log('Users after assignment:', this.users);
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage =
+          error.error?.message || error.message || 'Failed to load users';
+        this.loading = false;
+      },
+    });
   }
 
-  passwordMatchValidator(form: FormGroup) {
-    const password = form.get('password');
-    const confirmPassword = form.get('confirmPassword');
+  applyFilters(): void {
+    let filtered = [...this.users];
 
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      const search = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(
+        (user) =>
+          user.fullName?.toLowerCase().includes(search) ||
+          user.email?.toLowerCase().includes(search) ||
+          user.mobile?.toLowerCase().includes(search) ||
+          this.getRoleLabel(user.role)?.toLowerCase().includes(search) ||
+          user.address?.city?.toLowerCase().includes(search) ||
+          user.address?.state?.toLowerCase().includes(search)
+      );
     }
-    return null;
+
+    this.filteredUsers = filtered;
+    this.totalPages = Math.ceil(this.filteredUsers.length / this.itemsPerPage);
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    }
+  }
+
+  onSearchChange(): void {
+    this.currentPage = 1;
+    this.applyFilters();
   }
 
   getRoleLabel(role: number): string {
     return this.roleLabels[role] || 'Unknown';
   }
 
-  onSubmit(): void {
-    if (this.userForm.invalid) {
-      this.markFormGroupTouched(this.userForm);
-      return;
-    }
+  getAddressString(user: User): string {
+    if (!user.address) return '-';
+    const parts = [
+      user.address.addressLine1,
+      user.address.city,
+      user.address.state,
+      user.address.country,
+    ].filter((p) => p);
+    return parts.length > 0 ? parts.join(', ') : '-';
+  }
 
+  getProfileImageUrl(user: User): string {
+    if (!user.profileImageUrl) {
+      return '';
+    }
+    if (user.profileImageUrl.startsWith('http')) {
+      return user.profileImageUrl;
+    }
+    return `https://localhost:7197${user.profileImageUrl}`;
+  }
+
+  getInitials(user: User): string {
+    if (!user.fullName) return '?';
+    const names = user.fullName.trim().split(' ');
+    if (names.length >= 2) {
+      return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+    }
+    return user.fullName.substring(0, 2).toUpperCase();
+  }
+
+  openAddDialog(): void {
+    this.dialogUser = null;
+    this.showDialog = true;
+  }
+
+  openEditDialog(user: User): void {
+    this.dialogUser = user;
+    this.showDialog = true;
+  }
+
+  closeDialog(): void {
+    this.showDialog = false;
+    this.dialogUser = null;
+  }
+
+  handleDialogSave(userRequest: UserCreateRequest | UserUpdateRequest): void {
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    const formValue = this.userForm.value;
-
-    if (this.isEditMode && this.editingUserId) {
-      this.updateUser(formValue);
+    if ('id' in userRequest) {
+      // Update user
+      this.usersService.updateUser(userRequest as UserUpdateRequest).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.successMessage =
+              response.message || 'User updated successfully!';
+            this.loadUsers();
+            setTimeout(() => this.closeDialog(), 1000);
+          } else {
+            this.errorMessage = response.message || 'Failed to update user';
+          }
+          this.loading = false;
+        },
+        error: (error) => {
+          this.errorMessage =
+            error.error?.message || error.message || 'Failed to update user';
+          this.loading = false;
+        },
+      });
     } else {
-      this.createUser(formValue);
+      // Create user
+      this.usersService.createUser(userRequest as UserCreateRequest).subscribe({
+        next: async (response) => {
+          if (response.success) {
+            // If user was created and there's a pending image file, upload it
+            const createdUserId = response.user?.id || (response as any).id;
+            if (this.pendingImageFile && createdUserId) {
+              try {
+                const uploadResponse = await this.usersService
+                  .uploadProfilePicture(createdUserId, this.pendingImageFile)
+                  .toPromise();
+                if (uploadResponse && uploadResponse.success) {
+                  this.successMessage =
+                    'User created and profile picture uploaded successfully!';
+                } else {
+                  this.successMessage =
+                    response.message ||
+                    'User created successfully! (Image upload failed)';
+                }
+              } catch (error: any) {
+                this.successMessage =
+                  response.message ||
+                  'User created successfully! (Image upload failed)';
+              }
+              this.pendingImageFile = null;
+            } else {
+              this.successMessage =
+                response.message || 'User created successfully!';
+            }
+            this.loadUsers();
+            setTimeout(() => this.closeDialog(), 1000);
+          } else {
+            this.errorMessage = response.message || 'Failed to create user';
+          }
+          this.loading = false;
+        },
+        error: (error) => {
+          this.errorMessage =
+            error.error?.message || error.message || 'Failed to create user';
+          this.loading = false;
+        },
+      });
     }
   }
 
-  createUser(formValue: any): void {
-    const address: Address = {
-      addressLine1: formValue.addressLine1,
-      addressLine2: formValue.addressLine2,
-      city: formValue.city,
-      state: formValue.state,
-      country: formValue.country,
-      zipCode: formValue.zipCode
-    };
-
-    const userRequest: UserCreateRequest = {
-      fullName: formValue.fullName,
-      gender: formValue.gender || undefined,
-      dateOfBirth: formValue.dateOfBirth || undefined,
-      email: formValue.email,
-      mobile: formValue.mobile,
-      password: formValue.password,
-      confirmPassword: formValue.confirmPassword,
-      profileImageUrl: formValue.profileImageUrl || undefined,
-      address: Object.values(address).some(v => v) ? address : undefined,
-      role: Number(formValue.role),
-      tenantId: formValue.tenantId || undefined,
-      ownerId: formValue.ownerId || undefined
-    };
-
-    this.usersService.createUser(userRequest).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.successMessage = response.message || 'User created successfully!';
-          this.resetForm();
-        } else {
-          this.errorMessage = response.message || 'Failed to create user';
-        }
-        this.loading = false;
-      },
-      error: (error) => {
-        this.errorMessage = error.error?.message || error.message || 'Failed to create user';
-        this.loading = false;
-      }
-    });
+  handleFileSelected(event: { file: File; userId?: string }): void {
+    this.pendingImageFile = event.file;
   }
 
-  updateUser(formValue: any): void {
-    if (!this.editingUserId) return;
-
-    const address: Address = {
-      addressLine1: formValue.addressLine1,
-      addressLine2: formValue.addressLine2,
-      city: formValue.city,
-      state: formValue.state,
-      country: formValue.country,
-      zipCode: formValue.zipCode
-    };
-
-    const userRequest: UserUpdateRequest = {
-      id: this.editingUserId,
-      fullName: formValue.fullName,
-      gender: formValue.gender || undefined,
-      dateOfBirth: formValue.dateOfBirth || undefined,
-      email: formValue.email,
-      mobile: formValue.mobile,
-      profileImageUrl: formValue.profileImageUrl || undefined,
-      address: Object.values(address).some(v => v) ? address : undefined,
-      role: formValue.role,
-      tenantId: formValue.tenantId || undefined,
-      ownerId: formValue.ownerId || undefined,
-      isActive: formValue.isActive
-    };
-
-    this.usersService.updateUser(userRequest).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.successMessage = response.message || 'User updated successfully!';
-          this.resetForm();
-        } else {
-          this.errorMessage = response.message || 'Failed to update user';
-        }
-        this.loading = false;
-      },
-      error: (error) => {
-        this.errorMessage = error.error?.message || error.message || 'Failed to update user';
-        this.loading = false;
-      }
-    });
+  getpaginatedUsers(): User[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.filteredUsers.slice(start, end);
   }
 
-  loadUserForEdit(user: User): void {
-    this.isEditMode = true;
-    this.editingUserId = user.id || null;
-
-    this.userForm.patchValue({
-      fullName: user.fullName,
-      gender: user.gender || '',
-      dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
-      email: user.email,
-      mobile: user.mobile,
-      profileImageUrl: user.profileImageUrl || '',
-      role: user.role,
-      tenantId: user.tenantId || '',
-      ownerId: user.ownerId || '',
-      addressLine1: user.address?.addressLine1 || '',
-      addressLine2: user.address?.addressLine2 || '',
-      city: user.address?.city || '',
-      state: user.address?.state || '',
-      country: user.address?.country || '',
-      zipCode: user.address?.zipCode || '',
-      isActive: user.isActive !== undefined ? user.isActive : true
-    });
-
-    // Remove password validators in edit mode
-    this.userForm.get('password')?.clearValidators();
-    this.userForm.get('confirmPassword')?.clearValidators();
-    this.userForm.get('password')?.updateValueAndValidity();
-    this.userForm.get('confirmPassword')?.updateValueAndValidity();
-  }
-
-  resetForm(): void {
-    this.userForm.reset({
-      role: Role.Tenants,
-      isActive: true
-    });
-    this.isEditMode = false;
-    this.editingUserId = null;
-
-    // Re-add password validators
-    this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
-    this.userForm.get('confirmPassword')?.setValidators([Validators.required]);
-    this.userForm.get('password')?.updateValueAndValidity();
-    this.userForm.get('confirmPassword')?.updateValueAndValidity();
-  }
-
-  markFormGroupTouched(formGroup: FormGroup): void {
-    Object.keys(formGroup.controls).forEach(key => {
-      const control = formGroup.get(key);
-      control?.markAsTouched();
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      }
-    });
-  }
-
-  getErrorMessage(controlName: string): string {
-    const control = this.userForm.get(controlName);
-    if (control?.hasError('required')) {
-      return `${this.getFieldLabel(controlName)} is required`;
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
     }
-    if (control?.hasError('email')) {
-      return 'Invalid email address';
-    }
-    if (control?.hasError('minlength')) {
-      return `${this.getFieldLabel(controlName)} must be at least ${control.errors?.['minlength'].requiredLength} characters`;
-    }
-    if (control?.hasError('maxlength')) {
-      return `${this.getFieldLabel(controlName)} must not exceed ${control.errors?.['maxlength'].requiredLength} characters`;
-    }
-    if (control?.hasError('passwordMismatch')) {
-      return 'Passwords do not match';
-    }
-    return '';
   }
 
-  getFieldLabel(controlName: string): string {
-    const labels: { [key: string]: string } = {
-      fullName: 'Full Name',
-      email: 'Email',
-      mobile: 'Mobile',
-      password: 'Password',
-      confirmPassword: 'Confirm Password',
-      role: 'Role'
-    };
-    return labels[controlName] || controlName;
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
   }
 
-  isFieldInvalid(controlName: string): boolean {
-    const control = this.userForm.get(controlName);
-    return !!(control && control.invalid && (control.dirty || control.touched));
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
   }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxPages = 5;
+    let start = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
+    let end = Math.min(this.totalPages, start + maxPages - 1);
+
+    if (end - start < maxPages - 1) {
+      start = Math.max(1, end - maxPages + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  Math = Math;
 }

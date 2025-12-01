@@ -12,6 +12,7 @@ interface MenuItem {
   label: string;
   route: string;
   active?: boolean;
+  roles?: Role[];
 }
 
 @Component({
@@ -23,15 +24,41 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   collapsed: boolean = false;
+  logoPath: string = 'assets/Images/Rentoralogo.png';
   private subscription?: Subscription;
   private routerSubscription?: Subscription;
   menuItems: MenuItem[] = [
-    { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
+    {
+      icon: 'dashboard',
+      label: 'Dashboard',
+      route: '/dashboard',
+      roles: [Role.Landlords, Role.Manager],
+    },
+
+    // SuperAdmin only
+    {
+      icon: 'dashboard',
+      label: 'Dashboard',
+      route: '/super-admin-dashboard',
+      roles: [Role.SuperAdmin, Role.Admin],
+    },
+
+    // SuperAdmin + Admin
+    {
+      icon: 'admins',
+      label: 'Admins',
+      route: '/admins',
+      roles: [Role.SuperAdmin, Role.Admin],
+    },
+    {
+      icon: 'landlord',
+      label: 'Landlord',
+      route: '/landlord',
+      roles: [Role.SuperAdmin, Role.Admin],
+    },
+    { icon: 'tenants', label: 'Tenants', route: '/tenants' },
     { icon: 'properties', label: 'Properties', route: '/properties' },
     { icon: 'units', label: 'Units', route: '/units' },
-    { icon: 'landlord', label: 'Landlord', route: '/landlord' },
-    { icon: 'admins', label: 'Admins', route: '/admins' },
-    { icon: 'tenants', label: 'Tenants', route: '/tenants' },
     { icon: 'agreements', label: 'Agreements', route: '/agreements' },
     { icon: 'invoices', label: 'Invoices', route: '/invoices' },
     { icon: 'payments', label: 'Payments', route: '/payments' },
@@ -56,25 +83,19 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const currentUser = JSON.parse(json);
     const role = Number(currentUser.user?.role) as Role;
 
-    console.log('Sidebar Role from localStorage:', role);
-    this.menuItems = this.menuItems.filter((item) => {
-      if (item.route === '/landlord' || item.route === '/admins') {
-        return role === Role.SuperAdmin || role === Role.Admin;
-      }
-      return true;
-    });
+    this.menuItems = this.menuItems.filter(
+      (item) => !item.roles || item.roles.includes(role)
+    );
 
     this.setActiveMenuItem();
+
     this.subscription = this.sidebarService.collapsed$.subscribe(
       (collapsed) => (this.collapsed = collapsed)
     );
 
-    // Listen to route changes to update active menu item
     this.routerSubscription = this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.setActiveMenuItem();
-      });
+      .subscribe(() => this.setActiveMenuItem());
   }
 
   ngOnDestroy(): void {
@@ -99,21 +120,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   getIconPath(icon: string): string {
-    const json = localStorage.getItem('currentUser');
-    if (!json) {
-      this.router.navigate(['/login']);
-      return '';
-    }
-
-    const currentUser = JSON.parse(json);
-    const role = Number(currentUser.user?.role) as Role;
-
-    if (
-      icon === 'landlord' ||
-      (icon === 'admins' && role !== Role.SuperAdmin && role !== Role.Admin)
-    ) {
-      return ''; // No icon
-    }
     const icons: { [key: string]: string } = {
       dashboard:
         'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',

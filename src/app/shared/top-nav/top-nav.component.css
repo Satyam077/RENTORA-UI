@@ -136,6 +136,28 @@
     font-weight: 600;
     font-size: 16px;
     transition: transform 0.2s;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid #e5e7eb;
+}
+
+.user-avatar.has-image {
+    background: transparent;
+    padding: 0;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-avatar span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 .user-avatar:hover {
@@ -151,8 +173,10 @@
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     min-width: 200px;
-    z-index: 1000;
+    z-index: 1000 !important;
     animation: dropdownFadeIn 0.2s ease;
+    pointer-events: auto;
+    isolation: isolate;
 }
 
 @keyframes dropdownFadeIn {
@@ -196,6 +220,9 @@
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1002;
 }
 
 .dropdown-item:hover {
@@ -223,12 +250,10 @@
 
 .dropdown-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 999;
+    inset: 0;
     background: transparent;
+    /* z-index: 9999 !important;   */
+    pointer-events: auto;
 }
 
 /* Responsive */

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SidebarService } from '../../core/services/sidebar.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-top-nav',
@@ -12,13 +13,42 @@ import { SidebarService } from '../../core/services/sidebar.service';
 })
 export class TopNavComponent implements OnInit {
   isProfileDropdownOpen = false;
+  currentUser: any = null;
+  apiBaseUrl = 'https://localhost:7197';
 
   constructor(
     private router: Router,
-    private sidebarService: SidebarService
+    private sidebarService: SidebarService,
+    private auth: AuthService
   ) { }
 
   ngOnInit(): void {
+    const userJson = localStorage.getItem('currentUser');
+    if (userJson) {
+      this.currentUser = JSON.parse(userJson);
+    }
+  }
+
+  getProfileImageUrl(): string {
+    if (!this.currentUser?.user?.profileImageUrl) {
+      return '';
+    }
+    const url = this.currentUser.user.profileImageUrl;
+    if (url.startsWith('http')) {
+      return url;
+    }
+    return `${this.apiBaseUrl}${url}`;
+  }
+
+  getUserInitials(): string {
+    if (!this.currentUser?.user?.fullName) {
+      return '?';
+    }
+    const names = this.currentUser.user.fullName.trim().split(' ');
+    if (names.length >= 2) {
+      return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+    }
+    return this.currentUser.user.fullName.substring(0, 2).toUpperCase();
   }
 
   toggleSidebar(): void {
@@ -45,8 +75,9 @@ export class TopNavComponent implements OnInit {
 
   logout(): void {
     console.log('Logout');
+    this.auth.logout();
+    this.router.navigate(['/login']);
     this.closeProfileDropdown();
-    // Add logout logic here
   }
 }
 

@@ -38,7 +38,7 @@ export class UsersService {
   }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/all`, {
+    return this.http.get<User[]>(`${this.apiUrl}/allUsers`, {
       headers: this.getHeaders()
     });
   }
@@ -46,6 +46,21 @@ export class UsersService {
   deleteUser(id: string): Observable<boolean> {
     return this.http.delete<boolean>(`${this.apiUrl}/${id}`, {
       headers: this.getHeaders()
+    });
+  }
+
+  uploadProfilePicture(userId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+      // Don't set Content-Type, let browser set it with boundary for multipart/form-data
+    });
+
+    return this.http.post<any>(`${this.apiUrl}/upload-profile-picture/${userId}`, formData, {
+      headers: headers
     });
   }
 }

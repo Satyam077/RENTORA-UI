@@ -13,23 +13,21 @@ export const roleGuard = (allowedRoles: Role[]) => {
 
     const currentUser = JSON.parse(json);
 
-    // FIX: role is inside currentUser.user
     const role = Number(currentUser.user?.role) as Role;
 
-    console.log('Role from localStorage:', role);
     if (!allowedRoles.includes(role)) {
       router.navigate([dashboardRoutes[role] ?? '/login']);
       return false;
     }
-
     return true;
   };
 };
 
 export const dashboardRoutes: Record<Role, string> = {
   [Role.SuperAdmin]: '/super-admin-dashboard',
-  [Role.Admin]: '/admin/dashboard',
+  [Role.Admin]: '/super-admin-dashboard',
   [Role.Landlords]: '/dashboard',
   [Role.Tenants]: '/tenant-dashboard',
   [Role.Agents]: '/agent/dashboard',
+  [Role.Manager]: '/dashboard',
 };
