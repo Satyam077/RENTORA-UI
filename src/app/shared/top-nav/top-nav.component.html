@@ -32,7 +32,7 @@
         <div class="user-profile-wrapper">
             <div class="user-profile" (click)="toggleProfileDropdown()">
                 <div class="user-avatar" [class.has-image]="getProfileImageUrl()">
-                    <img *ngIf="getProfileImageUrl()" [src]="getProfileImageUrl()" [alt]="currentUser?.user?.fullName || 'User'" 
+                    <img *ngIf="getProfileImageUrl()" [src]="getProfileImageUrl()" [alt]="currentUser?.user?.fullName || 'User'"
                          onerror="this.style.display='none'; this.parentElement.classList.remove('has-image');">
                     <span *ngIf="!getProfileImageUrl()">{{ getUserInitials() }}</span>
                 </div>
@@ -80,4 +80,3 @@
 
 <!-- Click outside to close dropdown -->
 <div class="dropdown-overlay" *ngIf="isProfileDropdownOpen" (click)="closeProfileDropdown()"></div>
-

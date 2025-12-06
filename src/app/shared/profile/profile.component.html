@@ -1,0 +1,243 @@
+<div class="profile-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">My Profile</h1>
+            <p class="page-subtitle">Manage your personal information and settings</p>
+        </div>
+        <button *ngIf="!isEditing" class="btn-primary" (click)="toggleEdit()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                <path
+                    d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
+            </svg>
+            Edit Profile
+        </button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div *ngIf="successMessage" class="alert alert-success" (click)="successMessage = ''">
+        {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-error" (click)="errorMessage = ''">
+        {{ errorMessage }}
+    </div>
+
+    <div class="profile-content">
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <!-- Profile Picture Section -->
+            <div class="profile-picture-section">
+                <div class="profile-picture-large">
+                    <div *ngIf="!profileImagePreview" class="profile-placeholder-large">
+                        <span class="profile-initials-large">{{ getInitials() }}</span>
+                    </div>
+                    <img *ngIf="profileImagePreview" [src]="profileImagePreview" alt="Profile Picture"
+                        class="profile-img-large">
+                </div>
+
+                <div *ngIf="isEditing" class="profile-picture-actions">
+                    <label class="btn-upload-profile">
+                        <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                            <path d="M12 9a3.75 3.75 0 100 7.5A3.75 3.75 0 0012 9z" />
+                            <path fill-rule="evenodd"
+                                d="M9.344 3.071a49.52 49.52 0 015.312 0c.967.052 1.83.585 2.332 1.39l.821 1.317c.24.383.645.643 1.11.71.386.054.77.113 1.152.177 1.432.239 2.429 1.493 2.429 2.909V18a3 3 0 01-3 3h-15a3 3 0 01-3-3V9.574c0-1.416.997-2.67 2.429-2.909.382-.064.766-.123 1.151-.178a1.56 1.56 0 001.11-.71l.822-1.315a2.942 2.942 0 012.332-1.39zM6.75 12.75a5.25 5.25 0 1110.5 0 5.25 5.25 0 01-10.5 0zm12-1.5a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Upload Photo
+                    </label>
+                    <button *ngIf="profileImagePreview" class="btn-remove-profile" (click)="removeProfilePicture()">
+                        Remove
+                    </button>
+                </div>
+                <p class="profile-picture-hint">Recommended: Square image, at least 400x400px</p>
+            </div>
+
+            <!-- User Info Summary -->
+            <div class="user-info-summary">
+                <h2 class="user-name-large">{{ currentUser?.fullName }}</h2>
+                <div class="user-meta">
+                    <span class="badge badge-role">{{ getRoleName(currentUser?.role!) }}</span>
+                    <span class="verification-badges">
+                        <span *ngIf="currentUser?.isEmailVerified" class="verified-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Email Verified
+                        </span>
+                        <span *ngIf="currentUser?.isMobileVerified" class="verified-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Mobile Verified
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Form -->
+        <div class="profile-form-card">
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Personal Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fullName">Full Name <span class="required">*</span></label>
+                            <input type="text" id="fullName" formControlName="fullName" class="form-input"
+                                [class.invalid]="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+                            <div class="error-message"
+                                *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched">
+                                <span *ngIf="profileForm.get('fullName')?.errors?.['required']">Full name is
+                                    required</span>
+                                <span *ngIf="profileForm.get('fullName')?.errors?.['minlength']">Name must be at least 2
+                                    characters</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email <span class="required">*</span></label>
+                            <input type="email" id="email" formControlName="email" class="form-input"
+                                [class.invalid]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+                            <small class="form-hint">Email cannot be changed</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobile">Mobile <span class="required">*</span></label>
+                            <input type="tel" id="mobile" formControlName="mobile" class="form-input"
+                                [class.invalid]="profileForm.get('mobile')?.invalid && profileForm.get('mobile')?.touched">
+                            <div class="error-message"
+                                *ngIf="profileForm.get('mobile')?.invalid && profileForm.get('mobile')?.touched">
+                                <span *ngIf="profileForm.get('mobile')?.errors?.['required']">Mobile is required</span>
+                                <span *ngIf="profileForm.get('mobile')?.errors?.['pattern']">Invalid mobile
+                                    format</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" formControlName="gender" class="form-input">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" formControlName="dateOfBirth" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Address Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="addressLine1">Address Line 1</label>
+                            <input type="text" id="addressLine1" formControlName="addressLine1" class="form-input"
+                                placeholder="Street address">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="addressLine2">Address Line 2</label>
+                            <input type="text" id="addressLine2" formControlName="addressLine2" class="form-input"
+                                placeholder="Apartment, suite, etc. (optional)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" formControlName="city" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="state">State/Province</label>
+                            <input type="text" id="state" formControlName="state" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <input type="text" id="country" formControlName="country" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zipCode">ZIP/Postal Code</label>
+                            <input type="text" id="zipCode" formControlName="zipCode" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions" *ngIf="isEditing">
+                    <button type="button" class="btn-secondary" (click)="toggleEdit()" [disabled]="loading">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || loading">
+                        <span *ngIf="!loading">Save Changes</span>
+                        <span *ngIf="loading">Saving...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Password Change Section -->
+        <div class="profile-form-card">
+            <div class="password-section-header">
+                <div>
+                    <h3 class="section-title">Security</h3>
+                    <p class="section-subtitle">Manage your password and security settings</p>
+                </div>
+                <button type="button" class="btn-secondary" (click)="togglePasswordSection()">
+                    {{ showPasswordSection ? 'Cancel' : 'Change Password' }}
+                </button>
+            </div>
+
+            <form *ngIf="showPasswordSection" [formGroup]="passwordForm" (ngSubmit)="changePassword()"
+                class="password-form">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="currentPassword">Current Password <span class="required">*</span></label>
+                        <input type="password" id="currentPassword" formControlName="currentPassword" class="form-input"
+                            [class.invalid]="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="newPassword">New Password <span class="required">*</span></label>
+                        <input type="password" id="newPassword" formControlName="newPassword" class="form-input"
+                            [class.invalid]="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+                        <div class="error-message"
+                            *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+                            <span *ngIf="passwordForm.get('newPassword')?.errors?.['minlength']">Password must be at
+                                least 6 characters</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password <span class="required">*</span></label>
+                        <input type="password" id="confirmPassword" formControlName="confirmPassword" class="form-input"
+                            [class.invalid]="passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched">
+                        <div class="error-message"
+                            *ngIf="passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched">
+                            <span *ngIf="passwordForm.get('confirmPassword')?.errors?.['passwordMismatch']">Passwords do
+                                not match</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" [disabled]="passwordForm.invalid || loading">
+                        <span *ngIf="!loading">Update Password</span>
+                        <span *ngIf="loading">Updating...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

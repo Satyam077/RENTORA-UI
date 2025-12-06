@@ -1,6 +1,6 @@
 .landing-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  background: linear-gradient(135deg, #F5C6D9 0%, #E8B4CC 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,10 +25,10 @@
   justify-content: center;
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background: linear-gradient(135deg, #C2407C 0%, #6B2C5C 100%);
   border-radius: 20px;
   margin-bottom: 1.5rem;
-  box-shadow: 0 8px 24px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 8px 24px rgba(194, 64, 124, 0.3);
 }
 
 .building-icon {
@@ -40,7 +40,7 @@
 .main-title {
   font-size: 3rem;
   font-weight: 500;
-  color: #2196F3;
+  color: #C85A8E;
   margin: 0 0 1rem 0;
   letter-spacing: -0.5px;
 }
@@ -78,7 +78,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #2196F3, #1976D2);
+  background: linear-gradient(90deg, #C2407C, #6B2C5C);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -103,13 +103,13 @@
 }
 
 .landlord-icon {
-  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-  color: #2196F3;
+  background: linear-gradient(135deg, #FCE4EC 0%, #F8BBD0 100%);
+  color: #C2407C;
 }
 
 .tenant-icon {
-  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-  color: #4CAF50;
+  background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
+  color: #8E24AA;
 }
 
 .card-icon-wrapper svg {
@@ -150,26 +150,26 @@
 }
 
 .primary-button {
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  background: linear-gradient(135deg, #C2407C 0%, #6B2C5C 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 4px 12px rgba(194, 64, 124, 0.3);
 }
 
 .primary-button:hover {
-  background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
-  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+  background: linear-gradient(135deg, #A8305E 0%, #5A2449 100%);
+  box-shadow: 0 6px 20px rgba(194, 64, 124, 0.4);
   transform: translateY(-2px);
 }
 
 .secondary-button {
   background: white;
-  color: #2196F3;
-  border: 2px solid #E3F2FD;
+  color: #C2407C;
+  border: 2px solid #FCE4EC;
 }
 
 .secondary-button:hover {
-  background: #F5F5F5;
-  border-color: #2196F3;
+  background: #FCE4EC;
+  border-color: #C2407C;
   transform: translateY(-2px);
 }
 
@@ -198,14 +198,14 @@
 }
 
 .footer-link {
-  color: #2196F3;
+  color: #C2407C;
   text-decoration: none;
   transition: color 0.3s ease;
   cursor: pointer;
 }
 
 .footer-link:hover {
-  color: #1976D2;
+  color: #6B2C5C;
 }
 
 /* Responsive Design */

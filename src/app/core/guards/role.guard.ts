@@ -5,7 +5,7 @@ import { Role } from '../models/role.enum';
 export const roleGuard = (allowedRoles: Role[]) => {
   return () => {
     const router = inject(Router);
-    const json = localStorage.getItem('currentUser');
+    const json = sessionStorage.getItem('currentUser');
     if (!json) {
       router.navigate(['/login']);
       return false;

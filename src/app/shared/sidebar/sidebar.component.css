@@ -40,7 +40,7 @@
 .logo-text {
     font-size: 1.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #2196F3 0%, #10b981 100%);
+    background: linear-gradient(135deg, #C2407C 0%, #6B2C5C 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -100,8 +100,8 @@
 }
 
 .menu-item.active {
-    background: #eff6ff;
-    color: #2196F3;
+    background: #FCE4EC;
+    color: #C2407C;
 }
 
 .menu-icon {

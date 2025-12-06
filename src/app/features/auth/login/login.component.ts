@@ -22,8 +22,9 @@ export class LoginComponent implements OnInit {
   loading = false;
   submitted = false;
   error = '';
-  role: number = 1; //'tenant';
+  role: string = 'tenants';
   showPassword = false;
+  model: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -34,7 +35,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
-      this.role = params['role'] || 'tenant';
+      this.role = params['role'] || 'tenants';
+      console.log('Role from query params:', this.role);
     });
 
     this.loginForm = this.formBuilder.group({
@@ -63,6 +65,8 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
+        this.model = response;
+        // console.log('Login response:', response,this.model);
         if (response.success) {
           const roleName = Role[response.user.role];
           console.log('User role:', roleName);

@@ -14,7 +14,7 @@ export class AuthService {
     public currentUser: Observable<LoginResponse | null>;
 
     constructor(private http: HttpClient) {
-        const storedUser = localStorage.getItem('currentUser');
+        const storedUser = sessionStorage.getItem('currentUser');
         this.currentUserSubject = new BehaviorSubject<LoginResponse | null>(
             storedUser ? JSON.parse(storedUser) : null
         );
@@ -30,8 +30,8 @@ export class AuthService {
             .pipe(
                 tap(response => {
                     if (response.success && response.token) {
-                        localStorage.setItem('currentUser', JSON.stringify(response));
-                        localStorage.setItem('token', response.token);
+                        sessionStorage.setItem('currentUser', JSON.stringify(response));
+                        sessionStorage.setItem('token', response.token);
                         this.currentUserSubject.next(response);
                     }
                 })
@@ -44,8 +44,8 @@ export class AuthService {
                 tap(response => {
                   console.log('Login response:', response);
                     if (response.success && response.token) {
-                        localStorage.setItem('currentUser', JSON.stringify(response));
-                        localStorage.setItem('token', response.token);
+                        sessionStorage.setItem('currentUser', JSON.stringify(response));
+                        sessionStorage.setItem('token', response.token);
                         this.currentUserSubject.next(response);
                     }
                 })
@@ -53,8 +53,8 @@ export class AuthService {
     }
 
     logout(): void {
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('token');
         this.currentUserSubject.next(null);
     }
 
@@ -73,6 +73,6 @@ export class AuthService {
     }
 
     getToken(): string | null {
-        return localStorage.getItem('token');
+        return sessionStorage.getItem('token');
     }
 }

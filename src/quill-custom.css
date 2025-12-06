@@ -1,0 +1,78 @@
+/* Quill Editor Global Styles */
+@import 'quill/dist/quill.core.css';
+@import 'quill/dist/quill.snow.css';
+
+/* Quill Editor Custom Styles */
+.quill-editor {
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.quill-editor .ql-toolbar {
+    background: #f9fafb;
+    border: none;
+    border-bottom: 1px solid #d1d5db;
+    padding: 12px;
+}
+
+.quill-editor .ql-container {
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.quill-editor .ql-editor {
+    min-height: 200px;
+    padding: 16px;
+    color: #111827;
+}
+
+.quill-editor .ql-editor.ql-blank::before {
+    color: #9ca3af;
+    font-style: normal;
+}
+
+.quill-editor .ql-snow .ql-stroke {
+    stroke: #6b7280;
+}
+
+.quill-editor .ql-snow .ql-fill {
+    fill: #6b7280;
+}
+
+.quill-editor .ql-snow .ql-picker-label {
+    color: #6b7280;
+}
+
+.quill-editor .ql-toolbar button:hover,
+.quill-editor .ql-toolbar button:focus,
+.quill-editor .ql-toolbar button.ql-active {
+    color: #c2407c;
+}
+
+.quill-editor .ql-toolbar button:hover .ql-stroke,
+.quill-editor .ql-toolbar button:focus .ql-stroke,
+.quill-editor .ql-toolbar button.ql-active .ql-stroke {
+    stroke: #c2407c;
+}
+
+.quill-editor .ql-toolbar button:hover .ql-fill,
+.quill-editor .ql-toolbar button:focus .ql-fill,
+.quill-editor .ql-toolbar button.ql-active .ql-fill {
+    fill: #c2407c;
+}
+
+.quill-editor:focus-within {
+    border-color: #c2407c;
+    box-shadow: 0 0 0 3px rgba(194, 64, 124, 0.1);
+}
+
+/* Modal adjustments for Quill editor */
+.modal-content .quill-editor {
+    margin-bottom: 8px;
+}

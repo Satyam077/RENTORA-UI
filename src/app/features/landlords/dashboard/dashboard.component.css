@@ -48,14 +48,14 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #C2407C 0%, #6B2C5C 100%);
     color: white;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px rgba(194, 64, 124, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 6px 16px rgba(194, 64, 124, 0.4);
 }
 
 .btn-secondary {
@@ -111,7 +111,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #2563eb;
+    color: #C2407C;
 }
 
 .stat-value {
@@ -267,8 +267,8 @@
 
 .quick-action-btn:hover {
     background-color: #f3f4f6;
-    border-color: #2563eb;
-    color: #2563eb;
+    border-color: #C2407C;
+    color: #C2407C;
     transform: translateX(4px);
 }
 
@@ -278,7 +278,7 @@
 }
 
 .quick-action-btn:hover svg {
-    color: #2563eb;
+    color: #C2407C;
 }
 
 /* Responsive Design */

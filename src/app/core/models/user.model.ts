@@ -33,6 +33,7 @@ export interface UserInfo {
   role: Role;
   isEmailVerified: boolean;
   isMobileVerified: boolean;
+  profileImageUrl?: string;
 }
 
 export interface OtpRequest {

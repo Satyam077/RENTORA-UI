@@ -1,0 +1,231 @@
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.profile-content {
+    display: grid;
+    gap: 24px;
+}
+
+/* Profile Card */
+.profile-card {
+    background: linear-gradient(135deg, #ca6d9b 0%, #b84e60 100%);
+    border-radius: 16px;
+    padding: 40px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(194, 64, 124, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.profile-picture-large {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.profile-placeholder-large {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.profile-initials-large {
+    font-size: 48px;
+    font-weight: 700;
+    color: white;
+}
+
+.profile-img-large {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-picture-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-upload-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: white;
+    color: #c2407c;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-upload-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-upload-profile .icon {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-remove-profile {
+    padding: 10px 20px;
+    background: rgba(220, 38, 38, 0.9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-remove-profile:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+.profile-picture-hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    margin: 0;
+}
+
+.user-info-summary {
+    flex: 1;
+}
+
+.user-name-large {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 16px 0;
+}
+
+.user-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.verification-badges {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.verified-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+
+.verified-badge svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Profile Form Card */
+.profile-form-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.password-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.section-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 4px 0 0 0;
+}
+
+.password-form {
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 16px;
+    }
+
+    .profile-card {
+        flex-direction: column;
+        padding: 24px;
+        text-align: center;
+    }
+
+    .user-name-large {
+        font-size: 24px;
+    }
+
+    .user-meta {
+        justify-content: center;
+    }
+
+    .profile-picture-large {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profile-initials-large {
+        font-size: 36px;
+    }
+
+    .profile-form-card {
+        padding: 20px;
+    }
+
+    .password-section-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .password-section-header button {
+        width: 100%;
+    }
+}

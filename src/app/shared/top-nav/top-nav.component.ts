@@ -23,7 +23,7 @@ export class TopNavComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const userJson = localStorage.getItem('currentUser');
+    const userJson = sessionStorage.getItem('currentUser');
     if (userJson) {
       this.currentUser = JSON.parse(userJson);
     }

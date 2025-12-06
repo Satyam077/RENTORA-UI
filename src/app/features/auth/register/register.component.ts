@@ -23,21 +23,37 @@ export class RegisterComponent implements OnInit {
   submitted = false;
   error = '';
   success = '';
-  role: Role = Role.Tenants; // Default to Tenants
+  role: Role = Role.Tenants;
   showPassword = false;
   showConfirmPassword = false;
+  roleParam: string | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    // Get role from query params
     this.route.queryParams.subscribe((params) => {
-      this.role = params['role'] ? parseInt(params['role']) as Role : Role.Tenants;
+      this.roleParam = params['role'];
+
+      if (this.roleParam) {
+        const normalized = this.roleParam.trim().toLowerCase();
+
+        // Convert string to enum KEY
+        const enumKey = Object.keys(Role).find(
+          (key) => key.toLowerCase() === normalized
+        );
+
+        // Convert key → number
+        this.role = enumKey ? Role[enumKey as keyof typeof Role] : Role.Tenants;
+      } else {
+        this.role = Role.Tenants;
+      }
+
+      console.log('Converted Role:', this.role);
     });
 
     this.registerForm = this.formBuilder.group(
@@ -51,12 +67,13 @@ export class RegisterComponent implements OnInit {
         dateOfBirth: [''],
         role: [this.role],
         tenantId: [null],
-        ownerId: [null]
+        ownerId: [null],
       },
       {
         validators: this.passwordMatchValidator,
       }
     );
+    console.log('Role set in form:', this.registerForm.value);
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -95,7 +112,6 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
-    // Check if at least email or mobile is provided
     if (!this.registerForm.value.email && !this.registerForm.value.mobile) {
       this.error = 'Please provide either email or mobile number';
       return;

@@ -74,7 +74,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const json = localStorage.getItem('currentUser');
+    const json = sessionStorage.getItem('currentUser');
     if (!json) {
       this.router.navigate(['/login']);
       return;
