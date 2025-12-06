@@ -81,6 +81,8 @@ export class SettingsComponent implements OnInit {
   isEditingEmailTemplate = false;
   isAddingEmailTemplate = false;
   isLoadingTemplates = false;
+  success = '';
+  error = '';
 
   // ApplicableFor enum and labels
   ApplicableFor = ApplicableFor;
@@ -102,8 +104,7 @@ export class SettingsComponent implements OnInit {
       value: Number(key),
       label: EmailTemplateNameLabels[Number(key) as EmailTemplateName]
     }));
-    @ViewChild('quill') quillEditor: any;
-
+  @ViewChild('quill') quillEditor: any;
 
   // Quill editor configuration
   quillModules = {
@@ -238,12 +239,10 @@ export class SettingsComponent implements OnInit {
       next: (templates) => {
         this.emailTemplates = templates;
         this.isLoadingTemplates = false;
-        console.log('Loaded email templates:', templates);
       },
       error: (error) => {
-        console.error('Error loading email templates:', error);
         this.isLoadingTemplates = false;
-        alert('Failed to load email templates. Please try again.');
+        this.error = 'Failed to load email templates. Please try again later.';
       }
     });
   }
@@ -262,21 +261,24 @@ export class SettingsComponent implements OnInit {
   }
 
   editEmailTemplate(template: EmailTemplate): void {
-    console.log('Editing email template:', template);
     this.selectedEmailTemplate = { ...template };
     this.isEditingEmailTemplate = true;
     setTimeout(() => {
-    if (this.quillEditor && this.selectedEmailTemplate?.emailBody) {
-      this.quillEditor.quillEditor.root.innerHTML = this.selectedEmailTemplate.emailBody;
-    }
-  }, 50);
+      if (this.quillEditor && this.selectedEmailTemplate?.emailBody) {
+        this.quillEditor.quillEditor.root.innerHTML = this.selectedEmailTemplate.emailBody;
+      }
+    }, 50);
   }
 
   saveEmailTemplate(): void {
     if (!this.selectedEmailTemplate) return;
 
+    // Clear previous messages
+    this.error = '';
+    this.success = '';
+
     if (!this.selectedEmailTemplate.templateName || !this.selectedEmailTemplate.emailSubject || !this.selectedEmailTemplate.emailBody) {
-      alert('Please fill in all required fields');
+      this.error = 'Please fill in all required fields';
       return;
     }
 
@@ -291,14 +293,32 @@ export class SettingsComponent implements OnInit {
       };
 
       this.emailTemplateService.createTemplate(createRequest).subscribe({
-        next: (template) => {
+        next: (response: any) => {
+          console.log('Create response:', response);
+
+          // Handle response structure - could be direct template or wrapped response
+          const template = response.data || response;
+          const message = response.message || 'Email template created successfully!';
+
           this.emailTemplates.unshift(template);
+          this.success = message;
           this.cancelEmailTemplateEdit();
-          alert('Email template created successfully!');
+
+          // Auto-clear success message after 5 seconds
+          setTimeout(() => {
+            this.success = '';
+          }, 5000);
         },
-        error: (error) => {
-          console.error('Error creating email template:', error);
-          alert('Failed to create email template. Please try again.');
+        error: (err) => {
+          if (err.error?.message) {
+            this.error = err.error.message;
+          } else if (typeof err.error === 'string') {
+            this.error = err.error;
+          } else if (err.message) {
+            this.error = err.message;
+          } else {
+            this.error = 'Failed to create email template. Please try again.';
+          }
         }
       });
     } else if (this.isEditingEmailTemplate && this.selectedEmailTemplate.id) {
@@ -314,17 +334,39 @@ export class SettingsComponent implements OnInit {
       };
 
       this.emailTemplateService.updateTemplate(updateRequest).subscribe({
-        next: (template) => {
+        next: (response: any) => {
+          console.log('Update response:', response);
+
+          // Handle response structure - backend returns { success, message, data }
+          const template = response.data || response;
+          const message = response.message || 'Email template updated successfully!';
+
           const index = this.emailTemplates.findIndex(t => t.id === template.id);
           if (index !== -1) {
             this.emailTemplates[index] = template;
           }
+
+          this.success = message;
           this.cancelEmailTemplateEdit();
-          alert('Email template updated successfully!');
+
+          // Auto-clear success message after 5 seconds
+          setTimeout(() => {
+            this.success = '';
+          }, 5000);
         },
-        error: (error) => {
-          console.error('Error updating email template:', error);
-          alert('Failed to update email template. Please try again.');
+        error: (err) => {
+          console.error('Error updating email template:', err);
+
+          // Extract error message from different response structures
+          if (err.error?.message) {
+            this.error = err.error.message;
+          } else if (typeof err.error === 'string') {
+            this.error = err.error;
+          } else if (err.message) {
+            this.error = err.message;
+          } else {
+            this.error = 'Failed to update email template. Please try again.';
+          }
         }
       });
     }
@@ -337,7 +379,7 @@ export class SettingsComponent implements OnInit {
       this.emailTemplateService.deleteTemplate(template.id).subscribe({
         next: () => {
           this.emailTemplates = this.emailTemplates.filter(t => t.id !== template.id);
-          alert('Email template deleted successfully!');
+          //alert('Email template deleted successfully!');
         },
         error: (error) => {
           console.error('Error deleting email template:', error);
@@ -369,7 +411,7 @@ export class SettingsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error toggling template status:', error);
-        alert('Failed to update template status. Please try again.');
+        // alert('Failed to update template status. Please try again.');
       }
     });
   }

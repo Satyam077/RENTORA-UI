@@ -96,42 +96,7 @@
     text-transform: capitalize;
 }
 
-/* Error Message */
-.error-message {
-    background: #fee2e2;
-    border: 1px solid #fecaca;
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #dc2626;
-    font-size: 0.875rem;
-    animation: shake 0.5s ease;
-}
 
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-10px);
-    }
-
-    75% {
-        transform: translateX(10px);
-    }
-}
-
-.error-message svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-}
 
 /* Form */
 .login-form {

@@ -1,0 +1,159 @@
+.property-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Property-specific table cell styling */
+.property-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.property-name-text {
+    font-weight: 600;
+    color: #111827;
+}
+
+.occupancy-text {
+    font-weight: 600;
+    color: #059669;
+}
+
+.occupancy-text.fully-occupied {
+    color: #dc2626;
+}
+
+.delete-link {
+    color: #dc2626 !important;
+}
+
+.delete-link:hover {
+    color: #991b1b !important;
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 16px 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Image and Document Lists */
+.image-list,
+.document-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.image-item,
+.document-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.image-item span,
+.document-item span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Small Buttons */
+.btn-add-small {
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #c2407c 0%, #6b2c5c 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-small:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(194, 64, 124, 0.3);
+}
+
+.btn-remove-small {
+    padding: 4px 8px;
+    background: white;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.btn-remove-small:hover {
+    background: #fee2e2;
+}
+
+/* Empty States */
+.empty-state-small {
+    text-align: center;
+    padding: 24px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 2px dashed #d1d5db;
+}
+
+.empty-state-small p {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .property-container {
+        padding: 16px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}

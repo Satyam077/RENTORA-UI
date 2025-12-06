@@ -57,7 +57,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: [Role.SuperAdmin, Role.Admin],
     },
     { icon: 'tenants', label: 'Tenants', route: '/tenants' },
-    { icon: 'properties', label: 'Properties', route: '/properties' },
+    { icon: 'properties', label: 'Properties', route: '/property' },
     { icon: 'units', label: 'Units', route: '/units' },
     { icon: 'agreements', label: 'Agreements', route: '/agreements' },
     { icon: 'invoices', label: 'Invoices', route: '/invoices' },

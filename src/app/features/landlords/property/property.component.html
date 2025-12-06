@@ -1,1 +1,274 @@
-<p>property works!</p>
+<div class="property-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">My Properties</h1>
+            <p class="page-subtitle">Manage all your rental properties in one place</p>
+        </div>
+        <button class="btn btn-primary btn-add" (click)="openAddPropertyModal()">
+            <span class="btn-icon">+</span>
+            Add Property
+        </button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="alert alert-success" *ngIf="success" (click)="success = ''">
+        {{ success }}
+    </div>
+    <div class="alert alert-error" *ngIf="error" (click)="error = ''">
+        {{ error }}
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="content-card">
+        <!-- Search and Filter Bar -->
+        <div class="search-filter-bar">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search properties..." [(ngModel)]="searchTerm"
+                    (ngModelChange)="onSearchChange()">
+            </div>
+            <button class="btn btn-filter">
+                <span class="filter-icon">▼</span>
+                Filters
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoadingProperties" class="loading-state">
+            <p>Loading properties...</p>
+        </div>
+
+        <!-- Properties Table -->
+        <div *ngIf="!isLoadingProperties" class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Property Name</th>
+                        <th>Type</th>
+                        <th>Address</th>
+                        <th>Rent Amount</th>
+                        <th>Occupancy</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="getPaginatedProperties().length === 0">
+                        <td colspan="7" class="no-data">No properties found</td>
+                    </tr>
+                    <tr *ngFor="let property of getPaginatedProperties()">
+                        <td>
+                            <div class="property-name-cell">
+                                <span class="property-name-text">{{ property.propertyName }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-role">{{ getPropertyTypeLabel(property.type) }}</span>
+                        </td>
+                        <td>{{ getAddressString(property) }}</td>
+                        <td>₹{{ property.defaultRentAmount | number }}</td>
+                        <td>
+                            <span class="occupancy-text" [class.fully-occupied]="property.isFullyOccupied">
+                                {{ property.occupiedUnits }}/{{ property.totalUnits }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge" [class.badge-active]="property.isActive"
+                                [class.badge-inactive]="!property.isActive">
+                                {{ property.isActive ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-link" (click)="viewProperty(property)">View</button>
+                                <button class="action-link" (click)="editProperty(property)">Edit</button>
+                                <button class="action-link delete-link"
+                                    (click)="deleteProperty(property)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="!isLoadingProperties && filteredProperties.length > 0" class="pagination">
+            <div class="pagination-info">
+                Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage,
+                filteredProperties.length) }} of {{ filteredProperties.length }} properties
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+                    Previous
+                </button>
+                <div class="pagination-numbers">
+                    <button *ngFor="let page of getPageNumbers()" class="pagination-number"
+                        [class.active]="page === currentPage" (click)="goToPage(page)">
+                        {{ page }}
+                    </button>
+                </div>
+                <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Property Modal -->
+<div *ngIf="(isEditingProperty || isAddingProperty) && selectedProperty" class="modal-overlay"
+    (click)="cancelPropertyEdit()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ isAddingProperty ? 'Add Property' : 'Edit Property' }}</h3>
+            <button class="modal-close" (click)="cancelPropertyEdit()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h2 class="section-title">Basic Information</h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Property Name <span class="required">*</span></label>
+                        <input type="text" [(ngModel)]="selectedProperty.propertyName" class="form-input"
+                            placeholder="Enter property name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Property Type <span class="required">*</span></label>
+                        <select [(ngModel)]="selectedProperty.type" class="form-input">
+                            <option *ngFor="let option of propertyTypeOptions" [ngValue]="option.value">
+                                {{ option.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Default Rent Amount <span class="required">*</span></label>
+                        <input type="number" [(ngModel)]="selectedProperty.defaultRentAmount" class="form-input"
+                            placeholder="Enter default rent">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Description <span class="required">*</span></label>
+                        <textarea [(ngModel)]="selectedProperty.description" class="form-input" rows="3"
+                            placeholder="Enter property description"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rent Due Day</label>
+                        <input type="number" [(ngModel)]="selectedProperty.defaultDueDay" class="form-input" min="1"
+                            max="31" placeholder="Day of month">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <input type="text" [(ngModel)]="selectedProperty.notes" class="form-input"
+                            placeholder="Additional notes">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="form-section">
+                <h2 class="section-title">Address</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>House No</label>
+                        <input type="text" [(ngModel)]="selectedProperty.address.houseNo" class="form-input"
+                            placeholder="House/Flat No">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Street</label>
+                        <input type="text" [(ngModel)]="selectedProperty.address.street" class="form-input"
+                            placeholder="Street name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Landmark</label>
+                        <input type="text" [(ngModel)]="selectedProperty.address.landmark" class="form-input"
+                            placeholder="Nearby landmark">
+                    </div>
+
+                    <div class="form-group">
+                        <label>City</label>
+                        <input type="text" [(ngModel)]="selectedProperty.address.city" class="form-input"
+                            placeholder="City">
+                    </div>
+
+                    <div class="form-group">
+                        <label>District</label>
+                        <input type="text" [(ngModel)]="selectedProperty.address.district" class="form-input"
+                            placeholder="District">
+                    </div>
+
+                    <div class="form-group">
+                        <label>State</label>
+                        <input type="text" [(ngModel)]="selectedProperty.address.state" class="form-input"
+                            placeholder="State">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pin Code</label>
+                        <input type="text" [(ngModel)]="selectedProperty.address.pinCode" class="form-input"
+                            placeholder="Pin code">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Country</label>
+                        <input type="text" [(ngModel)]="selectedProperty.address.country" class="form-input"
+                            placeholder="Country">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h2 class="section-title">Images</h2>
+                    <button type="button" class="btn-add-small" (click)="addImage()">+ Add Image</button>
+                </div>
+
+                <div *ngIf="selectedProperty.images.length === 0" class="empty-state-small">
+                    <p>No images added.</p>
+                </div>
+
+                <div class="image-list">
+                    <div *ngFor="let image of selectedProperty.images; let i = index" class="image-item">
+                        <span>{{ image }}</span>
+                        <button type="button" class="btn-remove-small" (click)="removeImage(i)">&times;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="form-section">
+                <div class="section-header">
+                    <h2 class="section-title">Documents</h2>
+                    <button type="button" class="btn-add-small" (click)="addDocument()">+ Add Document</button>
+                </div>
+
+                <div *ngIf="selectedProperty.documents.length === 0" class="empty-state-small">
+                    <p>No documents added.</p>
+                </div>
+
+                <div class="document-list">
+                    <div *ngFor="let document of selectedProperty.documents; let i = index" class="document-item">
+                        <span>{{ document }}</span>
+                        <button type="button" class="btn-remove-small" (click)="removeDocument(i)">&times;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="cancelPropertyEdit()">Cancel</button>
+            <button class="btn-primary" (click)="saveProperty()">
+                {{ isAddingProperty ? 'Create Property' : 'Save Changes' }}
+            </button>
+        </div>
+    </div>
+</div>

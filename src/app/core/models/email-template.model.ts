@@ -58,15 +58,6 @@ export const ApplicableForLabels: { [key in ApplicableFor]: string } = {
     [ApplicableFor.Agents]: 'Agents',
     [ApplicableFor.Manager]: 'Manager'
 };
-// export const ApplicableForLabels: Record<ApplicableFor, string> = {
-//   [ApplicableFor.SuperAdmin]: 'Super Admin',
-//   [ApplicableFor.Admin]: 'Admin',
-//   [ApplicableFor.Tenants]: 'Tenants',
-//   [ApplicableFor.Manager]: 'Manager',
-//   [ApplicableFor.Landlords]: "",
-//   [ApplicableFor.Agents]: ""
-// };
-
 
 export const EmailTemplateNameLabels: { [key in EmailTemplateName]: string } = {
     [EmailTemplateName.SuperAdminRegistration]: 'Super Admin Registration',

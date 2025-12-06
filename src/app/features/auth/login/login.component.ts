@@ -9,6 +9,7 @@ import {
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { Role } from '../../../core/models/role.enum';
+import { dashboardRoutes } from '../../../core/guards/role.guard';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +23,7 @@ export class LoginComponent implements OnInit {
   loading = false;
   submitted = false;
   error = '';
+  success = '';
   role: string = 'tenants';
   showPassword = false;
   model: any;
@@ -43,6 +45,17 @@ export class LoginComponent implements OnInit {
       emailOrMobile: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+
+    const json = sessionStorage.getItem('currentUser');
+    const token = sessionStorage.getItem('token');
+
+    if (json && token) {
+      const currentUser = JSON.parse(json);
+      const role = currentUser.user?.role as Role;
+      console.log('Already logged in user role:', Role[role]);
+      const redirectPath = dashboardRoutes[role] ?? '/dashboard';
+      this.router.navigate([redirectPath]);
+    }
   }
 
   get f() {
@@ -56,6 +69,7 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     this.submitted = true;
     this.error = '';
+    this.success = '';
 
     if (this.loginForm.invalid) {
       return;
@@ -68,6 +82,9 @@ export class LoginComponent implements OnInit {
         this.model = response;
         // console.log('Login response:', response,this.model);
         if (response.success) {
+          // Display success message from backend
+          this.success = response.message || 'Login successful! Redirecting...';
+
           const roleName = Role[response.user.role];
           console.log('User role:', roleName);
           let path = '/login';
@@ -96,14 +113,36 @@ export class LoginComponent implements OnInit {
               path = '/login';
           }
           this.loading = false;
-          this.router.navigate([path]);
+
+          // Navigate after a brief delay to show success message
+          setTimeout(() => {
+            this.router.navigate([path]);
+          }, 1000);
         } else {
-          this.error = response.message || 'Login failed';
+          // Display error message from backend
+          this.error = response.message || 'Login failed. Please try again.';
           this.loading = false;
         }
       },
       error: (err) => {
-        this.error = err.error?.message || 'An error occurred during login';
+        // Handle HTTP errors gracefully
+        console.error('Login error:', err);
+
+        // Try to extract message from different error response structures
+        if (err.error?.message) {
+          this.error = err.error.message;
+        } else if (err.error?.errors) {
+          // Handle validation errors
+          const errors = err.error.errors;
+          this.error = Object.values(errors).flat().join(', ');
+        } else if (typeof err.error === 'string') {
+          this.error = err.error;
+        } else if (err.message) {
+          this.error = err.message;
+        } else {
+          this.error = 'An unexpected error occurred. Please try again.';
+        }
+
         this.loading = false;
       },
     });
