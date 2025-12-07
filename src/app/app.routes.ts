@@ -15,6 +15,7 @@ import { Role } from './core/models/role.enum';
 import { SuperAdminDashboardComponent } from './features/Rentora-Management/super-admin-dashboard/super-admin-dashboard.component';
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { PropertyComponent } from './features/landlords/property/property.component';
+import { UnitsComponent } from './features/landlords/units/units.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -66,6 +67,7 @@ export const routes: Routes = [
           ]),
         ],
       },
+      { path: 'units', component: UnitsComponent, canActivate: [authGuard] },
     ],
   },
   {
@@ -73,6 +75,7 @@ export const routes: Routes = [
     component: TenantDashboardComponent,
     canActivate: [authGuard],
   },
+
 
   { path: '**', redirectTo: '' },
 ];

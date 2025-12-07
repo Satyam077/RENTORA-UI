@@ -1,0 +1,181 @@
+<div class="units-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">My Units</h1>
+            <p class="page-subtitle">Manage all your rental units in one place</p>
+        </div>
+        <button class="btn btn-primary btn-add" (click)="openAddUnitModal()">
+            <span class="btn-icon">+</span>
+            Add Unit
+        </button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="alert alert-success" *ngIf="success" (click)="success = ''">
+        {{ success }}
+    </div>
+    <div class="alert alert-error" *ngIf="error" (click)="error = ''">
+        {{ error }}
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="content-card">
+        <!-- Search and Filter Bar -->
+        <div class="search-filter-bar">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search units..." [(ngModel)]="searchTerm"
+                    (ngModelChange)="onSearchChange()">
+            </div>
+            <button class="btn btn-filter">
+                <span class="filter-icon">▼</span>
+                Filters
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoadingUnits" class="loading-state">
+            <p>Loading units...</p>
+        </div>
+
+        <!-- Units Grid -->
+        <div *ngIf="!isLoadingUnits" class="units-grid">
+            <div *ngIf="getPaginatedUnits().length === 0" class="empty-state">
+                <p>No units found</p>
+            </div>
+            <div *ngFor="let unit of getPaginatedUnits()" class="unit-card">
+                <div class="unit-card-header">
+                    <div class="unit-name-section">
+                        <h3 class="unit-name">{{ unit.unitName }}</h3>
+                        <span class="unit-property">{{ getPropertyName(unit.propertyId) }}</span>
+                    </div>
+                    <span class="badge" [class.badge-active]="unit.isOccupied"
+                        [class.badge-inactive]="!unit.isOccupied">
+                        {{ unit.isOccupied ? 'Occupied' : 'Vacant' }}
+                    </span>
+                </div>
+                <div class="unit-card-body">
+                    <div class="unit-info-row">
+                        <span class="unit-info-label">Rent Amount:</span>
+                        <span class="unit-info-value">₹{{ unit.rentAmount | number }}</span>
+                    </div>
+                    <div class="unit-info-row">
+                        <span class="unit-info-label">Security Deposit:</span>
+                        <span class="unit-info-value">₹{{ unit.securityDeposit | number }}</span>
+                    </div>
+                    <div class="unit-info-row">
+                        <span class="unit-info-label">Due Day:</span>
+                        <span class="unit-info-value">{{ unit.dueDay }}<sup>th</sup> of month</span>
+                    </div>
+                    <div class="unit-info-row" *ngIf="unit.notes">
+                        <span class="unit-info-label">Notes:</span>
+                        <span class="unit-info-value unit-notes">{{ unit.notes }}</span>
+                    </div>
+                </div>
+                <div class="unit-card-footer">
+                    <div class="action-buttons">
+                        <button class="action-link" (click)="editUnit(unit)">Edit</button>
+                        <button class="action-link delete-link" (click)="deleteUnit(unit)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="!isLoadingUnits && filteredUnits.length > 0" class="pagination">
+            <div class="pagination-info">
+                Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage,
+                filteredUnits.length) }} of {{ filteredUnits.length }} units
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+                    Previous
+                </button>
+                <div class="pagination-numbers">
+                    <button *ngFor="let page of getPageNumbers()" class="pagination-number"
+                        [class.active]="page === currentPage" (click)="goToPage(page)">
+                        {{ page }}
+                    </button>
+                </div>
+                <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Unit Modal -->
+<div *ngIf="(isEditingUnit || isAddingUnit) && selectedUnit" class="modal-overlay"
+    (click)="cancelUnitEdit()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ isAddingUnit ? 'Add Unit' : 'Edit Unit' }}</h3>
+            <button class="modal-close" (click)="cancelUnitEdit()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="user-form">
+                <div class="form-section">
+                    <h2 class="section-title">Unit Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Property Name <span class="required">*</span></label>
+                            <select [(ngModel)]="selectedUnit.propertyId" class="form-input">
+                                <option value="">Select Property</option>
+                                <option *ngFor="let property of properties" [value]="property.id">
+                                    {{ property.propertyName }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Unit Name <span class="required">*</span></label>
+                            <input type="text" [(ngModel)]="selectedUnit.unitName" class="form-input"
+                                placeholder="e.g., Flat 101, Unit A">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Rent Amount <span class="required">*</span></label>
+                            <input type="number" [(ngModel)]="selectedUnit.rentAmount" class="form-input"
+                                placeholder="Enter rent amount" min="0" step="0.01">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Security Deposit</label>
+                            <input type="number" [(ngModel)]="selectedUnit.securityDeposit" class="form-input"
+                                placeholder="Enter security deposit" min="0" step="0.01">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Due Day</label>
+                            <input type="number" [(ngModel)]="selectedUnit.dueDay" class="form-input" min="1"
+                                max="31" placeholder="Day of month">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" [(ngModel)]="selectedUnit.isOccupied">
+                                <span>Is Occupied</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Notes</label>
+                            <textarea [(ngModel)]="selectedUnit.notes" class="form-input" rows="3"
+                                placeholder="Additional notes about the unit"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="cancelUnitEdit()">Cancel</button>
+            <button class="btn-primary" (click)="saveUnit()">
+                {{ isAddingUnit ? 'Create Unit' : 'Save Changes' }}
+            </button>
+        </div>
+    </div>
+</div>
