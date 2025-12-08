@@ -16,6 +16,7 @@ import { SuperAdminDashboardComponent } from './features/Rentora-Management/supe
 import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
 import { PropertyComponent } from './features/landlords/property/property.component';
 import { UnitsComponent } from './features/landlords/units/units.component';
+import { TenantsComponent } from './features/landlords/tenants/tenants.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -68,6 +69,7 @@ export const routes: Routes = [
         ],
       },
       { path: 'units', component: UnitsComponent, canActivate: [authGuard] },
+      { path: 'tenants', component: TenantsComponent, canActivate: [authGuard] },
     ],
   },
   {

@@ -1,0 +1,467 @@
+<div class="admins-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">My Tenants</h1>
+            <p class="page-subtitle">Manage all your tenants in one place</p>
+        </div>
+        <button class="btn btn-primary btn-add" (click)="openAddTenantModal()">
+            <span class="btn-icon">+</span>
+            Add Tenant
+        </button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="alert alert-success" *ngIf="success" (click)="success = ''">
+        {{ success }}
+    </div>
+    <div class="alert alert-error" *ngIf="error" (click)="error = ''">
+        {{ error }}
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="content-card">
+        <!-- Search and Filter Bar -->
+        <div class="search-filter-bar">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search tenants by name, email, mobile, property or unit..." [(ngModel)]="searchTerm"
+                    (ngModelChange)="onSearchChange()">
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoadingTenants" class="loading-state">
+            <p>Loading tenants...</p>
+        </div>
+
+        <!-- Tenants Table -->
+        <div *ngIf="!isLoadingTenants" class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th (click)="sortBy('firstName')" style="cursor: pointer;">
+                            Name {{ sortColumn === 'firstName' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+                        </th>
+                        <th (click)="sortBy('email')" style="cursor: pointer;">
+                            Email {{ sortColumn === 'email' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+                        </th>
+                        <th (click)="sortBy('mobile')" style="cursor: pointer;">
+                            Mobile {{ sortColumn === 'mobile' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+                        </th>
+                        <th (click)="sortBy('property')" style="cursor: pointer;">
+                            Property {{ sortColumn === 'property' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+                        </th>
+                        <th (click)="sortBy('unit')" style="cursor: pointer;">
+                            Unit {{ sortColumn === 'unit' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+                        </th>
+                        <th (click)="sortBy('rentAmount')" style="cursor: pointer;">
+                            Rent {{ sortColumn === 'rentAmount' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+                        </th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="getPaginatedTenants().length === 0">
+                        <td colspan="8" class="no-data">No tenants found</td>
+                    </tr>
+                    <tr *ngFor="let tenant of getPaginatedTenants()">
+                        <td>{{ tenant.firstName }} {{ tenant.lastName }}</td>
+                        <td>{{ tenant.email }}</td>
+                        <td>{{ tenant.mobile }}</td>
+                        <td>{{ getPropertyName(tenant.propertyId) }}</td>
+                        <td>{{ getUnitName(tenant.unitId) }}</td>
+                        <td>₹{{ tenant.rentAmount | number }}</td>
+                        <td>
+                            <span class="badge" [class.badge-active]="tenant.isActiveTenant"
+                                [class.badge-inactive]="!tenant.isActiveTenant">
+                                {{ tenant.isActiveTenant ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-link" (click)="viewTenantDetails(tenant)">View</button>
+                                <button class="action-link" (click)="editTenant(tenant)">Edit</button>
+                                <button class="action-link" (click)="deleteTenant(tenant)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="!isLoadingTenants && filteredTenants.length > 0" class="pagination">
+            <div class="pagination-info">
+                Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage,
+                filteredTenants.length) }} of {{ filteredTenants.length }} tenants
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+                    Previous
+                </button>
+                <div class="pagination-numbers">
+                    <button *ngFor="let page of getPageNumbers()" class="pagination-number"
+                        [class.active]="page === currentPage" (click)="goToPage(page)">
+                        {{ page }}
+                    </button>
+                </div>
+                <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Tenant Modal -->
+<div *ngIf="(isEditingTenant || isAddingTenant) && selectedTenant" class="dialog-overlay"
+    (click)="cancelTenantEdit()">
+    <div class="dialog-container" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+            <h3 class="dialog-title">{{ isAddingTenant ? 'Add Tenant' : 'Edit Tenant' }}</h3>
+            <button class="dialog-close" (click)="cancelTenantEdit()">&times;</button>
+        </div>
+
+        <div class="dialog-body">
+            <div class="user-form">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h2 class="section-title">Personal Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>First Name <span class="required">*</span></label>
+                            <input type="text" [(ngModel)]="selectedTenant.firstName" placeholder="Enter first name">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Last Name <span class="required">*</span></label>
+                            <input type="text" [(ngModel)]="selectedTenant.lastName" placeholder="Enter last name">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email <span class="required">*</span></label>
+                            <input type="email" [(ngModel)]="selectedTenant.email" placeholder="Enter email">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mobile <span class="required">*</span></label>
+                            <input type="tel" [(ngModel)]="selectedTenant.mobile" placeholder="Enter mobile number">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select [(ngModel)]="selectedTenant.gender">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" [(ngModel)]="selectedTenant.dateOfBirth">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Father's Name</label>
+                            <input type="text" [(ngModel)]="selectedTenant.fatherName" placeholder="Enter father's name">
+                        </div>
+
+                        <div class="form-group">
+                            <label>ID Proof Type</label>
+                            <select [(ngModel)]="selectedTenant.idProofType">
+                                <option value="">Select ID Proof</option>
+                                <option value="Aadhaar">Aadhaar</option>
+                                <option value="PAN">PAN Card</option>
+                                <option value="Passport">Passport</option>
+                                <option value="Driving License">Driving License</option>
+                                <option value="Voter ID">Voter ID</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>ID Proof Number</label>
+                            <input type="text" [(ngModel)]="selectedTenant.idProofNumber" placeholder="Enter ID proof number">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Permanent Address</label>
+                            <textarea [(ngModel)]="selectedTenant.permanentAddress" rows="2"
+                                placeholder="Enter permanent address"></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Current Address</label>
+                            <textarea [(ngModel)]="selectedTenant.currentAddress" rows="2"
+                                placeholder="Enter current address"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property & Unit Details -->
+                <div class="form-section">
+                    <h2 class="section-title">Property & Unit Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Property <span class="required">*</span></label>
+                            <select [(ngModel)]="selectedTenant.propertyId" (ngModelChange)="onPropertyChange()">
+                                <option value="">Select Property</option>
+                                <option *ngFor="let property of properties" [value]="property.id">
+                                    {{ property.propertyName }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Unit <span class="required">*</span></label>
+                            <select [(ngModel)]="selectedTenant.unitId">
+                                <option value="">Select Unit</option>
+                                <option *ngFor="let unit of units" [value]="unit.id">
+                                    {{ unit.unitName }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rent & Agreement Details -->
+                <div class="form-section">
+                    <h2 class="section-title">Rent & Agreement Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Rent Amount <span class="required">*</span></label>
+                            <input type="number" [(ngModel)]="selectedTenant.rentAmount" placeholder="Enter rent amount"
+                                min="0" step="0.01">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Security Deposit</label>
+                            <input type="number" [(ngModel)]="selectedTenant.securityDeposit"
+                                placeholder="Enter security deposit" min="0" step="0.01">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Rent Due Day</label>
+                            <input type="number" [(ngModel)]="selectedTenant.rentDueDay" min="1" max="31"
+                                placeholder="Day of month">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Move-In Date</label>
+                            <input type="date" [(ngModel)]="selectedTenant.moveInDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Agreement Start Date <span class="required">*</span></label>
+                            <input type="date" [(ngModel)]="selectedTenant.agreementStartDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Agreement End Date <span class="required">*</span></label>
+                            <input type="date" [(ngModel)]="selectedTenant.agreementEndDate">
+                        </div>
+
+                        <div class="form-group full-width" *ngIf="isEditingTenant">
+                            <label class="checkbox-label">
+                                <input type="checkbox" [(ngModel)]="selectedTenant.isActiveTenant">
+                                <span>Active Tenant</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group full-width" *ngIf="isEditingTenant">
+                            <label class="checkbox-label">
+                                <input type="checkbox" [(ngModel)]="selectedTenant.isMovedOut">
+                                <span>Moved Out</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group full-width" *ngIf="isEditingTenant && selectedTenant.isMovedOut">
+                            <label>Move-Out Date</label>
+                            <input type="date" [(ngModel)]="selectedTenant.moveOutDate">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Notes</label>
+                            <textarea [(ngModel)]="selectedTenant.notes" rows="3"
+                                placeholder="Additional notes about the tenant"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-secondary" (click)="cancelTenantEdit()">Cancel</button>
+            <button class="btn btn-primary" (click)="saveTenant()">
+                {{ isAddingTenant ? 'Create Tenant' : 'Save Changes' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- View Tenant Modal -->
+<div *ngIf="isViewingTenant && viewTenant" class="dialog-overlay" (click)="closeViewModal()">
+    <div class="dialog-container" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+            <h3 class="dialog-title">Tenant Details</h3>
+            <button class="dialog-close" (click)="closeViewModal()">&times;</button>
+        </div>
+
+        <div class="dialog-body">
+            <div class="view-details">
+                <!-- Personal Information -->
+                <div class="details-section">
+                    <h3 class="details-section-title">Personal Information</h3>
+                    <table class="details-table">
+                        <tr>
+                            <th>Full Name</th>
+                            <td>{{ viewTenant.firstName }} {{ viewTenant.lastName }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>{{ viewTenant.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Mobile</th>
+                            <td>{{ viewTenant.mobile }}</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.gender">
+                            <th>Gender</th>
+                            <td>{{ viewTenant.gender }}</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.dateOfBirth">
+                            <th>Date of Birth</th>
+                            <td>{{ formatDate(viewTenant.dateOfBirth) }}</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.fatherName">
+                            <th>Father's Name</th>
+                            <td>{{ viewTenant.fatherName }}</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.idProofType">
+                            <th>ID Proof Type</th>
+                            <td>{{ viewTenant.idProofType }}</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.idProofNumber">
+                            <th>ID Proof Number</th>
+                            <td>{{ viewTenant.idProofNumber }}</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.permanentAddress">
+                            <th>Permanent Address</th>
+                            <td>{{ viewTenant.permanentAddress }}</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.currentAddress">
+                            <th>Current Address</th>
+                            <td>{{ viewTenant.currentAddress }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Property & Unit Details -->
+                <div class="details-section">
+                    <h3 class="details-section-title">Property & Unit Details</h3>
+                    <table class="details-table">
+                        <tr>
+                            <th>Property</th>
+                            <td>{{ getPropertyName(viewTenant.propertyId) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Unit</th>
+                            <td>{{ getUnitName(viewTenant.unitId) }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Rent & Agreement Details -->
+                <div class="details-section">
+                    <h3 class="details-section-title">Rent & Agreement Details</h3>
+                    <table class="details-table">
+                        <tr>
+                            <th>Rent Amount</th>
+                            <td>₹{{ viewTenant.rentAmount | number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Security Deposit</th>
+                            <td>₹{{ viewTenant.securityDeposit | number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rent Due Day</th>
+                            <td>{{ viewTenant.rentDueDay }}<sup>th</sup> of month</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.moveInDate">
+                            <th>Move-In Date</th>
+                            <td>{{ formatDate(viewTenant.moveInDate) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Agreement Start Date</th>
+                            <td>{{ formatDate(viewTenant.agreementStartDate) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Agreement End Date</th>
+                            <td>{{ formatDate(viewTenant.agreementEndDate) }}</td>
+                        </tr>
+                        <tr *ngIf="viewTenant.moveOutDate">
+                            <th>Move-Out Date</th>
+                            <td>{{ formatDate(viewTenant.moveOutDate) }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Status Information -->
+                <div class="details-section">
+                    <h3 class="details-section-title">Status Information</h3>
+                    <table class="details-table">
+                        <tr>
+                            <th>Active Tenant</th>
+                            <td>
+                                <span class="badge" [class.badge-active]="viewTenant.isActiveTenant"
+                                    [class.badge-inactive]="!viewTenant.isActiveTenant">
+                                    {{ viewTenant.isActiveTenant ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Moved Out</th>
+                            <td>
+                                <span class="badge" [class.badge-active]="!viewTenant.isMovedOut"
+                                    [class.badge-inactive]="viewTenant.isMovedOut">
+                                    {{ viewTenant.isMovedOut ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Rent Pending</th>
+                            <td>
+                                <span class="badge" [class.badge-inactive]="viewTenant.isRentPending"
+                                    [class.badge-active]="!viewTenant.isRentPending">
+                                    {{ viewTenant.isRentPending ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Agreement Expired</th>
+                            <td>
+                                <span class="badge" [class.badge-inactive]="viewTenant.isAgreementExpired"
+                                    [class.badge-active]="!viewTenant.isAgreementExpired">
+                                    {{ viewTenant.isAgreementExpired ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Notes -->
+                <div class="details-section" *ngIf="viewTenant.notes">
+                    <h3 class="details-section-title">Notes</h3>
+                    <p class="details-notes">{{ viewTenant.notes }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-secondary" (click)="closeViewModal()">Close</button>
+        </div>
+    </div>
+</div>
