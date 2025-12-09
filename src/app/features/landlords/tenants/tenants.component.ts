@@ -86,7 +86,7 @@ export class TenantsComponent implements OnInit {
     private tenantService: TenantService,
     private propertyService: PropertyService,
     private unitService: UnitService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const currentUser = sessionStorage.getItem('currentUser');
@@ -302,14 +302,14 @@ export class TenantsComponent implements OnInit {
       mobile: tenant.mobile,
       email: tenant.email,
       gender: tenant.gender,
-      dateOfBirth: tenant.dateOfBirth,
+      dateOfBirth: this.formatDateForInput(tenant.dateOfBirth) as any,
       permanentAddress: tenant.permanentAddress,
       currentAddress: tenant.currentAddress,
       rentAmount: tenant.rentAmount,
       securityDeposit: tenant.securityDeposit,
       rentDueDay: tenant.rentDueDay,
-      agreementStartDate: tenant.agreementStartDate,
-      agreementEndDate: tenant.agreementEndDate,
+      agreementStartDate: this.formatDateForInput(tenant.agreementStartDate) as any,
+      agreementEndDate: this.formatDateForInput(tenant.agreementEndDate) as any,
       isAgreementExpired: tenant.isAgreementExpired,
       documents: tenant.documents,
       idProofType: tenant.idProofType,
@@ -317,8 +317,8 @@ export class TenantsComponent implements OnInit {
       isActiveTenant: tenant.isActiveTenant,
       isRentPending: tenant.isRentPending,
       isMovedOut: tenant.isMovedOut,
-      moveInDate: tenant.moveInDate,
-      moveOutDate: tenant.moveOutDate,
+      moveInDate: this.formatDateForInput(tenant.moveInDate) as any,
+      moveOutDate: this.formatDateForInput(tenant.moveOutDate) as any,
       notes: tenant.notes,
       isActive: tenant.isActive,
     };
@@ -561,6 +561,21 @@ export class TenantsComponent implements OnInit {
   formatDate(date: Date | null | undefined): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
+  }
+
+  /**
+   * Converts Date object to YYYY-MM-DD format required by HTML date inputs
+   */
+  formatDateForInput(date: Date | null | undefined): string | null {
+    if (!date) return null;
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return null;
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 
   Math = Math;

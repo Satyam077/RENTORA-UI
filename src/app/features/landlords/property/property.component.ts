@@ -28,6 +28,7 @@ export class PropertyComponent implements OnInit {
   isEditingProperty = false;
   isAddingProperty = false;
   isLoadingProperties = false;
+  isViewingProperty = false;
   success = '';
   error = '';
   searchTerm: string = '';
@@ -50,7 +51,7 @@ export class PropertyComponent implements OnInit {
   // Current user (owner) ID - should be fetched from auth service
   currentOwnerId: string = '';
 
-  constructor(private propertyService: PropertyService) {}
+  constructor(private propertyService: PropertyService) { }
 
   ngOnInit(): void {
     // Get current user ID from session storage
@@ -339,9 +340,13 @@ export class PropertyComponent implements OnInit {
   }
 
   viewProperty(property: PropertyModel): void {
-    // For now, just open edit dialog in view mode
-    // You can create a separate view-only modal later
-    this.editProperty(property);
+    this.selectedProperty = { ...property };
+    this.isViewingProperty = true;
+  }
+
+  closeViewModal(): void {
+    this.selectedProperty = null;
+    this.isViewingProperty = false;
   }
 
   // Pagination Methods

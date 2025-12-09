@@ -272,3 +272,157 @@
         </div>
     </div>
 </div>
+
+<!-- View Property Modal -->
+<div *ngIf="isViewingProperty && selectedProperty" class="modal-overlay" (click)="closeViewModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Property Details</h3>
+            <button class="modal-close" (click)="closeViewModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="view-details">
+                <!-- Basic Information -->
+                <div class="details-section">
+                    <h3 class="details-section-title">Basic Information</h3>
+                    <table class="details-table">
+                        <tr>
+                            <th>Property Name</th>
+                            <td>{{ selectedProperty.propertyName }}</td>
+                        </tr>
+                        <tr>
+                            <th>Property Type</th>
+                            <td>
+                                <span class="badge badge-role">{{ getPropertyTypeLabel(selectedProperty.type) }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td>{{ selectedProperty.description }}</td>
+                        </tr>
+                        <tr>
+                            <th>Default Rent Amount</th>
+                            <td>₹{{ selectedProperty.defaultRentAmount | number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rent Due Day</th>
+                            <td>{{ selectedProperty.defaultDueDay }} of every month</td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                <span class="badge" [class.badge-active]="selectedProperty.isActive"
+                                    [class.badge-inactive]="!selectedProperty.isActive">
+                                    {{ selectedProperty.isActive ? 'Active' : 'Inactive' }}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Address Information -->
+                <div class="details-section">
+                    <h3 class="details-section-title">Address</h3>
+                    <table class="details-table">
+                        <tr *ngIf="selectedProperty.address.houseNo">
+                            <th>House/Flat No</th>
+                            <td>{{ selectedProperty.address.houseNo }}</td>
+                        </tr>
+                        <tr *ngIf="selectedProperty.address.street">
+                            <th>Street</th>
+                            <td>{{ selectedProperty.address.street }}</td>
+                        </tr>
+                        <tr *ngIf="selectedProperty.address.landmark">
+                            <th>Landmark</th>
+                            <td>{{ selectedProperty.address.landmark }}</td>
+                        </tr>
+                        <tr *ngIf="selectedProperty.address.city">
+                            <th>City</th>
+                            <td>{{ selectedProperty.address.city }}</td>
+                        </tr>
+                        <tr *ngIf="selectedProperty.address.district">
+                            <th>District</th>
+                            <td>{{ selectedProperty.address.district }}</td>
+                        </tr>
+                        <tr *ngIf="selectedProperty.address.state">
+                            <th>State</th>
+                            <td>{{ selectedProperty.address.state }}</td>
+                        </tr>
+                        <tr *ngIf="selectedProperty.address.pinCode">
+                            <th>Pin Code</th>
+                            <td>{{ selectedProperty.address.pinCode }}</td>
+                        </tr>
+                        <tr *ngIf="selectedProperty.address.country">
+                            <th>Country</th>
+                            <td>{{ selectedProperty.address.country }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Occupancy Information -->
+                <div class="details-section">
+                    <h3 class="details-section-title">Occupancy Information</h3>
+                    <table class="details-table">
+                        <tr>
+                            <th>Total Units</th>
+                            <td>{{ selectedProperty.totalUnits }}</td>
+                        </tr>
+                        <tr>
+                            <th>Occupied Units</th>
+                            <td>{{ selectedProperty.occupiedUnits }}</td>
+                        </tr>
+                        <tr>
+                            <th>Occupancy Rate</th>
+                            <td>
+                                <span class="occupancy-text" [class.fully-occupied]="selectedProperty.isFullyOccupied">
+                                    {{ selectedProperty.occupiedUnits }}/{{ selectedProperty.totalUnits }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Fully Occupied</th>
+                            <td>
+                                <span class="badge" [class.badge-inactive]="selectedProperty.isFullyOccupied"
+                                    [class.badge-active]="!selectedProperty.isFullyOccupied">
+                                    {{ selectedProperty.isFullyOccupied ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Images -->
+                <div class="details-section" *ngIf="selectedProperty.images && selectedProperty.images.length > 0">
+                    <h3 class="details-section-title">Images</h3>
+                    <div class="image-list">
+                        <div *ngFor="let image of selectedProperty.images" class="image-item">
+                            <span>{{ image }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents -->
+                <div class="details-section"
+                    *ngIf="selectedProperty.documents && selectedProperty.documents.length > 0">
+                    <h3 class="details-section-title">Documents</h3>
+                    <div class="document-list">
+                        <div *ngFor="let document of selectedProperty.documents" class="document-item">
+                            <span>{{ document }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="details-section" *ngIf="selectedProperty.notes">
+                    <h3 class="details-section-title">Notes</h3>
+                    <p class="details-notes">{{ selectedProperty.notes }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="closeViewModal()">Close</button>
+        </div>
+    </div>
+</div>
