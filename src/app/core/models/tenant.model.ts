@@ -1,34 +1,49 @@
+// TenantModel now matches TenantResponseDTO from backend
+// This combines Tenant and User data (no redundancy)
 export interface TenantModel {
+    // Tenant ID
     id?: string;
+
+    // User Information (from Registration/Users collection)
+    userId: string;
+    fullName: string;
+    email: string;
+    mobile: string;
+    gender?: string;
+    dateOfBirth?: Date | null;
+    isEmailVerified?: boolean;
+    isMobileVerified?: boolean;
+    profileImageUrl?: string;
+
+    // Tenant-specific Information (from Tenants collection)
     ownerId: string;
     propertyId: string;
     unitId: string;
-    firstName: string;
-    lastName: string;
-    mobile: string;
-    email: string;
-    password?: string;
-    otp?: string;
-    gender?: string;
-    fatherName?: string;
-    dateOfBirth?: Date | null;
     permanentAddress?: string;
     currentAddress?: string;
+
+    // Rent & Agreement Info
     rentAmount: number;
     securityDeposit?: number;
     rentDueDay?: number;
     agreementStartDate: Date;
     agreementEndDate: Date;
     isAgreementExpired?: boolean;
+
+    // KYC / ID Proof
     documents?: string[];
     idProofType?: string;
     idProofNumber?: string;
+
+    // Status Tracking
     isActiveTenant?: boolean;
     isRentPending?: boolean;
     isMovedOut?: boolean;
     moveInDate?: Date | null;
     moveOutDate?: Date | null;
     notes?: string;
+
+    // Base Entity Fields
     isActive?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
@@ -44,9 +59,7 @@ export interface TenantCreateRequest {
     lastName: string;
     mobile: string;
     email: string;
-    password?: string;
     gender?: string;
-    fatherName?: string;
     dateOfBirth?: Date | null;
     permanentAddress?: string;
     currentAddress?: string;
@@ -72,9 +85,7 @@ export interface TenantUpdateRequest {
     lastName: string;
     mobile: string;
     email: string;
-    password?: string;
     gender?: string;
-    fatherName?: string;
     dateOfBirth?: Date | null;
     permanentAddress?: string;
     currentAddress?: string;
