@@ -41,16 +41,18 @@
 }
 
 .page-title {
-    font-size: 32px;
+    font-size: 20px;
     font-weight: 700;
     color: #111827;
     margin: 0 0 8px 0;
+    font-family: sans-serif;
 }
 
 .page-subtitle {
-    font-size: 15px;
+    font-size: 12px;
     color: #6b7280;
     margin: 0;
+    font-family: sans-serif;
 }
 
 /* ============================================
@@ -844,7 +846,7 @@ input[type="date"].valid:focus {
 .data-table th {
     padding: 12px 16px;
     text-align: left;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
     color: #374151;
     border-bottom: 1px solid #e5e7eb;
@@ -852,7 +854,7 @@ input[type="date"].valid:focus {
 
 .data-table td {
     padding: 16px;
-    font-size: 14px;
+    font-size: 16px;
     color: #111827;
     border-bottom: 1px solid #e5e7eb;
 }

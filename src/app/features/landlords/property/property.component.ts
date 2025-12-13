@@ -412,31 +412,164 @@ export class PropertyComponent implements OnInit {
     this.selectedProperty.units.splice(index, 1);
   }
 
-  // Image Management
-  addImage(): void {
-    if (!this.selectedProperty) return;
-    const imageUrl = prompt('Enter image URL:');
-    if (imageUrl) {
-      this.selectedProperty.images.push(imageUrl);
+  // File Upload Properties
+  selectedImageFile: File | null = null;
+  selectedDocumentFile: File | null = null;
+  isUploadingImage: boolean = false;
+  isUploadingDocument: boolean = false;
+
+  // Image Management with File Upload
+  onImageFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        this.error = 'Invalid file type. Allowed types: JPG, JPEG, PNG, WEBP';
+        event.target.value = '';
+        return;
+      }
+
+      // Validate file size (5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        this.error = 'File size exceeds 5MB limit';
+        event.target.value = '';
+        return;
+      }
+
+      this.selectedImageFile = file;
+      this.uploadImage();
     }
+  }
+
+  uploadImage(): void {
+    if (!this.selectedImageFile || !this.selectedProperty) return;
+
+    this.isUploadingImage = true;
+    this.error = '';
+
+    this.propertyService.uploadPropertyImage(this.selectedImageFile).subscribe({
+      next: (response) => {
+        this.isUploadingImage = false;
+        if (response.success && response.data) {
+          this.selectedProperty!.images.push(response.data.fileUrl);
+          this.success = 'Image uploaded successfully';
+          this.selectedImageFile = null;
+          setTimeout(() => (this.success = ''), 3000);
+        } else {
+          this.error = response.message || 'Failed to upload image';
+        }
+      },
+      error: (err) => {
+        this.isUploadingImage = false;
+        this.selectedImageFile = null;
+        this.error = err.error?.message || 'Error uploading image. Please try again.';
+        console.error('Error uploading image:', err);
+      },
+    });
   }
 
   removeImage(index: number): void {
     if (!this.selectedProperty) return;
-    this.selectedProperty.images.splice(index, 1);
+    if (confirm('Are you sure you want to remove this image?')) {
+      this.selectedProperty.images.splice(index, 1);
+    }
   }
 
-  // Document Management
-  addDocument(): void {
-    if (!this.selectedProperty) return;
-    const documentUrl = prompt('Enter document URL:');
-    if (documentUrl) {
-      this.selectedProperty.documents.push(documentUrl);
+  getFullImageUrl(relativeUrl: string): string {
+    if (!relativeUrl) return '';
+    if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
+      return relativeUrl;
     }
+    const baseUrl = 'https://localhost:7197';
+    return `${baseUrl}${relativeUrl}`;
+  }
+
+  getImageFileName(url: string): string {
+    if (!url) return '';
+    const parts = url.split('/');
+    return parts[parts.length - 1];
+  }
+
+  // Document Management with File Upload
+  onDocumentFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/jpeg',
+        'image/jpg',
+        'image/png'
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        this.error = 'Invalid file type. Allowed types: PDF, DOC, DOCX, JPG, PNG';
+        event.target.value = '';
+        return;
+      }
+
+      // Validate file size (10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        this.error = 'File size exceeds 10MB limit';
+        event.target.value = '';
+        return;
+      }
+
+      this.selectedDocumentFile = file;
+      this.uploadDocument();
+    }
+  }
+
+  uploadDocument(): void {
+    if (!this.selectedDocumentFile || !this.selectedProperty) return;
+
+    this.isUploadingDocument = true;
+    this.error = '';
+
+    this.propertyService.uploadPropertyDocument(this.selectedDocumentFile).subscribe({
+      next: (response) => {
+        this.isUploadingDocument = false;
+        if (response.success && response.data) {
+          this.selectedProperty!.documents.push(response.data.fileUrl);
+          this.success = 'Document uploaded successfully';
+          this.selectedDocumentFile = null;
+          setTimeout(() => (this.success = ''), 3000);
+        } else {
+          this.error = response.message || 'Failed to upload document';
+        }
+      },
+      error: (err) => {
+        this.isUploadingDocument = false;
+        this.selectedDocumentFile = null;
+        this.error = err.error?.message || 'Error uploading document. Please try again.';
+        console.error('Error uploading document:', err);
+      },
+    });
   }
 
   removeDocument(index: number): void {
     if (!this.selectedProperty) return;
-    this.selectedProperty.documents.splice(index, 1);
+    if (confirm('Are you sure you want to remove this document?')) {
+      this.selectedProperty.documents.splice(index, 1);
+    }
+  }
+
+  getFullDocumentUrl(relativeUrl: string): string {
+    if (!relativeUrl) return '';
+    if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
+      return relativeUrl;
+    }
+    const baseUrl = 'https://localhost:7197';
+    return `${baseUrl}${relativeUrl}`;
+  }
+
+  getDocumentFileName(url: string): string {
+    if (!url) return '';
+    const parts = url.split('/');
+    return parts[parts.length - 1];
   }
 }

@@ -17,6 +17,8 @@ import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-
 import { PropertyComponent } from './features/landlords/property/property.component';
 import { UnitsComponent } from './features/landlords/units/units.component';
 import { TenantsComponent } from './features/landlords/tenants/tenants.component';
+import { AgreementComponent } from './features/landlords/agreement/agreement.component';
+import { MaintenanceComponent } from './features/landlords/maintenance/maintenance.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -70,6 +72,8 @@ export const routes: Routes = [
       },
       { path: 'units', component: UnitsComponent, canActivate: [authGuard] },
       { path: 'tenants', component: TenantsComponent, canActivate: [authGuard] },
+      { path: 'agreements', component: AgreementComponent, canActivate: [authGuard] },
+      { path: 'maintenance', component: MaintenanceComponent, canActivate: [authGuard] },
     ],
   },
   {

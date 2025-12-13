@@ -73,4 +73,34 @@ export class PropertyService {
             headers: this.getHeaders()
         });
     }
+
+    /**
+     * Upload property image
+     */
+    uploadPropertyImage(file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = sessionStorage.getItem('token');
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`
+        });
+
+        return this.http.post<any>(`${this.apiUrl}/upload-image`, formData, { headers });
+    }
+
+    /**
+     * Upload property document
+     */
+    uploadPropertyDocument(file: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = sessionStorage.getItem('token');
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`
+        });
+
+        return this.http.post<any>(`${this.apiUrl}/upload-document`, formData, { headers });
+    }
 }

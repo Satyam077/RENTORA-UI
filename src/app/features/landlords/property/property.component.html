@@ -229,17 +229,28 @@
             <div class="form-section">
                 <div class="section-header">
                     <h2 class="section-title">Images</h2>
-                    <button type="button" class="btn-add-small" (click)="addImage()">+ Add Image</button>
+                    <input type="file" #imageInput (change)="onImageFileSelected($event)"
+                        accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+                    <button type="button" class="btn-add-small" (click)="imageInput.click()"
+                        [disabled]="isUploadingImage">
+                        {{ isUploadingImage ? 'Uploading...' : '+ Upload Image' }}
+                    </button>
                 </div>
 
                 <div *ngIf="selectedProperty.images.length === 0" class="empty-state-small">
-                    <p>No images added.</p>
+                    <p>No images uploaded. Click "Upload Image" to add property images.</p>
                 </div>
 
                 <div class="image-list">
-                    <div *ngFor="let image of selectedProperty.images; let i = index" class="image-item">
-                        <span>{{ image }}</span>
-                        <button type="button" class="btn-remove-small" (click)="removeImage(i)">&times;</button>
+                    <div *ngFor="let image of selectedProperty.images; let i = index" class="uploaded-file-item">
+                        <div class="file-info">
+                            <span class="file-icon">🖼️</span>
+                            <span class="file-name">{{ getImageFileName(image) }}</span>
+                        </div>
+                        <div class="file-actions-inline">
+                            <a [href]="getFullImageUrl(image)" target="_blank" class="btn-view-inline">View</a>
+                            <button type="button" class="btn-remove-inline" (click)="removeImage(i)">Remove</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -248,17 +259,28 @@
             <div class="form-section">
                 <div class="section-header">
                     <h2 class="section-title">Documents</h2>
-                    <button type="button" class="btn-add-small" (click)="addDocument()">+ Add Document</button>
+                    <input type="file" #documentInput (change)="onDocumentFileSelected($event)"
+                        accept=".pdf,.doc,.docx,image/jpeg,image/jpg,image/png" style="display: none;">
+                    <button type="button" class="btn-add-small" (click)="documentInput.click()"
+                        [disabled]="isUploadingDocument">
+                        {{ isUploadingDocument ? 'Uploading...' : '+ Upload Document' }}
+                    </button>
                 </div>
 
                 <div *ngIf="selectedProperty.documents.length === 0" class="empty-state-small">
-                    <p>No documents added.</p>
+                    <p>No documents uploaded. Click "Upload Document" to add property documents.</p>
                 </div>
 
                 <div class="document-list">
-                    <div *ngFor="let document of selectedProperty.documents; let i = index" class="document-item">
-                        <span>{{ document }}</span>
-                        <button type="button" class="btn-remove-small" (click)="removeDocument(i)">&times;</button>
+                    <div *ngFor="let document of selectedProperty.documents; let i = index" class="uploaded-file-item">
+                        <div class="file-info">
+                            <span class="file-icon">📄</span>
+                            <span class="file-name">{{ getDocumentFileName(document) }}</span>
+                        </div>
+                        <div class="file-actions-inline">
+                            <a [href]="getFullDocumentUrl(document)" target="_blank" class="btn-view-inline">View</a>
+                            <button type="button" class="btn-remove-inline" (click)="removeDocument(i)">Remove</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -395,9 +417,13 @@
                 <!-- Images -->
                 <div class="details-section" *ngIf="selectedProperty.images && selectedProperty.images.length > 0">
                     <h3 class="details-section-title">Images</h3>
-                    <div class="image-list">
-                        <div *ngFor="let image of selectedProperty.images" class="image-item">
-                            <span>{{ image }}</span>
+                    <div class="view-file-list">
+                        <div *ngFor="let image of selectedProperty.images; let i = index" class="view-file-item">
+                            <div class="file-info">
+                                <span class="file-icon">🖼️</span>
+                                <span class="file-name">{{ getImageFileName(image) }}</span>
+                            </div>
+                            <a [href]="getFullImageUrl(image)" target="_blank" class="btn-view-file">View Image</a>
                         </div>
                     </div>
                 </div>
@@ -406,9 +432,14 @@
                 <div class="details-section"
                     *ngIf="selectedProperty.documents && selectedProperty.documents.length > 0">
                     <h3 class="details-section-title">Documents</h3>
-                    <div class="document-list">
-                        <div *ngFor="let document of selectedProperty.documents" class="document-item">
-                            <span>{{ document }}</span>
+                    <div class="view-file-list">
+                        <div *ngFor="let document of selectedProperty.documents; let i = index" class="view-file-item">
+                            <div class="file-info">
+                                <span class="file-icon">📄</span>
+                                <span class="file-name">{{ getDocumentFileName(document) }}</span>
+                            </div>
+                            <a [href]="getFullDocumentUrl(document)" target="_blank" class="btn-view-file">View
+                                Document</a>
                         </div>
                     </div>
                 </div>
