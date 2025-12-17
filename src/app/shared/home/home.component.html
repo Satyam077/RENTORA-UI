@@ -1,0 +1,388 @@
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="8" fill="url(#gradient1)" />
+                        <path
+                            d="M12 18L20 12L28 18V30C28 30.5304 27.7893 31.0391 27.4142 31.4142C27.0391 31.7893 26.5304 32 26 32H14C13.4696 32 12.9609 31.7893 12.5858 31.4142C12.2107 31.0391 12 30.5304 12 30V18Z"
+                            stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M18 32V22H22V32" stroke="white" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="gradient1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#c2407c" />
+                                <stop offset="1" stop-color="#6b2c5c" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span class="logo-text">RENTORA</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                    <button class="btn-login" (click)="navigateToLogin()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        Login
+                    </button>
+                    <button class="btn-register" (click)="navigateToRegister()">Register</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Text -->
+        <div class="hero-text">
+            <h1 class="hero-title">Complete Property Management Solutions</h1>
+            <p class="hero-subtitle">
+                Streamline your property management with RENTORA - The all-in-one platform for landlords,
+                property managers, and real estate professionals
+            </p>
+            <div class="hero-actions">
+                <button class="btn-get-started" (click)="navigateToRegister()">
+                    Get Started
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+                <button class="btn-learn-more">
+                    Learn More
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick Action Cards -->
+        <div class="quick-actions">
+            <div class="action-card" (click)="navigateToRegister()">
+                <div class="action-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </div>
+                <div class="action-text">
+                    <h3>List Property</h3>
+                    <p>Add your properties</p>
+                </div>
+            </div>
+
+            <div class="action-card" (click)="navigateToRegister()">
+                <div class="action-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <div class="action-text">
+                    <h3>Manage Tenants</h3>
+                    <p>Track tenant details</p>
+                </div>
+            </div>
+
+            <div class="action-card" (click)="navigateToRegister()">
+                <div class="action-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <div class="action-text">
+                    <h3>Track Payments</h3>
+                    <p>Monitor rent collection</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section id="features" class="features-section">
+    <div class="section-container">
+        <div class="section-header-center">
+            <h2 class="section-title">Comprehensive Property Management Features</h2>
+            <p class="section-description">
+                Everything you need to manage your properties efficiently in one powerful platform
+            </p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card" *ngFor="let feature of features">
+                <div class="feature-icon" [ngClass]="'icon-' + feature.icon">
+                    <!-- Property Icon -->
+                    <svg *ngIf="feature.icon === 'property'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+
+                    <!-- Tenant Icon -->
+                    <svg *ngIf="feature.icon === 'tenant'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+
+                    <!-- Payment Icon -->
+                    <svg *ngIf="feature.icon === 'payment'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+
+                    <!-- Maintenance Icon -->
+                    <svg *ngIf="feature.icon === 'maintenance'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5">
+                        <path
+                            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+                        </path>
+                    </svg>
+
+                    <!-- Agreement Icon -->
+                    <svg *ngIf="feature.icon === 'agreement'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+
+                    <!-- Analytics Icon -->
+                    <svg *ngIf="feature.icon === 'analytics'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </div>
+                <h3 class="feature-title">{{ feature.title }}</h3>
+                <p class="feature-description">{{ feature.description }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section id="about" class="stats-section">
+    <div class="section-container">
+        <div class="section-header-center">
+            <h2 class="section-title">Our Journey</h2>
+            <p class="section-description">
+                At RENTORA, we focus on complete property management ecosystem solutions. Our numbers are just a
+                reflection of the same!
+            </p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card" *ngFor="let stat of stats">
+                <div class="stat-icon">
+                    <!-- Building Icon -->
+                    <svg *ngIf="stat.icon === 'building'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+
+                    <!-- Users Icon -->
+                    <svg *ngIf="stat.icon === 'users'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+
+                    <!-- Trust Icon -->
+                    <svg *ngIf="stat.icon === 'trust'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-label">{{ stat.label }}</h3>
+                    <p class="stat-value">{{ stat.value }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-button-wrapper">
+            <button class="btn-cta" (click)="navigateToRegister()">Get Started</button>
+        </div>
+    </div>
+</section>
+
+<!-- App Showcase Section -->
+<section class="app-section">
+    <div class="section-container">
+        <div class="app-content">
+            <div class="app-mockup">
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="app-header">
+                            <div class="app-logo-small">
+                                <svg width="32" height="32" viewBox="0 0 40 40" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="40" height="40" rx="8" fill="url(#gradient2)" />
+                                    <path
+                                        d="M12 18L20 12L28 18V30C28 30.5304 27.7893 31.0391 27.4142 31.4142C27.0391 31.7893 26.5304 32 26 32H14C13.4696 32 12.9609 31.7893 12.5858 31.4142C12.2107 31.0391 12 30.5304 12 30V18Z"
+                                        stroke="white" stroke-width="2" />
+                                    <defs>
+                                        <linearGradient id="gradient2" x1="0" y1="0" x2="40" y2="40"
+                                            gradientUnits="userSpaceOnUse">
+                                            <stop stop-color="#c2407c" />
+                                            <stop offset="1" stop-color="#6b2c5c" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+                            <span class="app-title-small">RENTORA</span>
+                        </div>
+                        <div class="app-stats-mini">
+                            <div class="mini-stat">
+                                <span class="mini-label">Properties</span>
+                                <span class="mini-value">24</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-label">Tenants</span>
+                                <span class="mini-value">156</span>
+                            </div>
+                            <div class="mini-stat">
+                                <span class="mini-label">Revenue</span>
+                                <span class="mini-value">₹2.4M</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="app-text">
+                <h2 class="app-section-title">Your partners in your digital journey</h2>
+                <div class="app-feature-list">
+                    <div class="app-feature-item">
+                        <div class="check-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="app-feature-text">
+                            <h4>RENTORA For Landlords</h4>
+                            <p>From property listing to tenant management, the RENTORA platform empowers landlords with
+                                complete control</p>
+                        </div>
+                    </div>
+                    <div class="app-feature-item">
+                        <div class="check-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="app-feature-text">
+                            <h4>RENTORA For Property Managers</h4>
+                            <p>Streamline operations, automate workflows, and manage multiple properties with ease</p>
+                        </div>
+                    </div>
+                    <div class="app-feature-item">
+                        <div class="check-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="app-feature-text">
+                            <h4>RENTORA For Tenants</h4>
+                            <p>Easy rent payments, maintenance requests, and seamless communication with landlords</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer id="contact" class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3 class="footer-title">RENTORA</h3>
+            <p class="footer-description">Complete property management solutions for modern landlords and property
+                managers</p>
+            <div class="social-links">
+                <a href="#" class="social-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                    </svg>
+                </a>
+                <a href="#" class="social-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z" />
+                        <path
+                            d="M12 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                </a>
+                <a href="#" class="social-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                    </svg>
+                </a>
+                <a href="#" class="social-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-section">
+            <h4 class="footer-heading">Our Services</h4>
+            <ul class="footer-links">
+                <li><a href="#">Property Management</a></li>
+                <li><a href="#">Tenant Management</a></li>
+                <li><a href="#">Payment Tracking</a></li>
+                <li><a href="#">Maintenance</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4 class="footer-heading">Quick Links</h4>
+            <ul class="footer-links">
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact Us</a></li>
+                <li><a href="#">FAQs</a></li>
+                <li><a href="#">Support</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h4 class="footer-heading">Contact Us</h4>
+            <ul class="footer-links">
+                <li><a href="#">I'm a Landlord</a></li>
+                <li><a href="#">I'm a Property Manager</a></li>
+                <li><a href="#">I'm a Tenant</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>Copyright © 2025 - All Rights Reserved · RENTORA Property Management Solutions</p>
+    </div>
+</footer>

@@ -50,6 +50,7 @@
     white-space: nowrap;
     overflow: hidden;
     transition: opacity 0.3s ease;
+    font-family: sans-serif;
 }
 
 .sidebar.collapsed .logo-text {
@@ -92,6 +93,7 @@
     font-size: 0.875rem;
     font-weight: 500;
     gap: 0.75rem;
+    font-family: sans-serif;
 }
 
 .menu-item:hover {

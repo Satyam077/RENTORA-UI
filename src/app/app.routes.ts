@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { LandingComponent } from './shared/landing/landing.component';
+import { HomeComponent } from './shared/home/home.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { DashboardComponent } from './features/landlords/dashboard/dashboard.component';
@@ -21,7 +21,8 @@ import { AgreementComponent } from './features/landlords/agreement/agreement.com
 import { MaintenanceComponent } from './features/landlords/maintenance/maintenance.component';
 
 export const routes: Routes = [
-  { path: '', component: LandingComponent },
+  { path: '', component: HomeComponent },
+
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
