@@ -91,4 +91,13 @@ export class TenantService {
             headers: this.getHeaders()
         });
     }
+
+    /**
+     * Get tenant dashboard data by user ID
+     */
+    getTenantDashboard(userId: string): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/dashboard/${userId}`, {
+            headers: this.getHeaders()
+        });
+    }
 }
