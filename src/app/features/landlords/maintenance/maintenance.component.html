@@ -1,1 +1,262 @@
-<p>maintenance works!</p>
+<div class="maintenance-container">
+  <!-- Header -->
+  <div class="maintenance-header">
+    <div class="header-content">
+      <h1>Maintenance</h1>
+      <p class="subtitle">Track and manage maintenance tickets</p>
+    </div>
+    <button class="btn-create-ticket" (click)="openEditModal()">
+      <i class="fas fa-plus"></i> Create Ticket
+    </button>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-section">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search tickets..." [(ngModel)]="searchQuery" (input)="onSearchChange()" />
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading maintenance requests...</p>
+  </div>
+
+  <!-- Status Columns -->
+  <div *ngIf="!isLoading" class="status-columns">
+    <!-- Open Column -->
+    <div class="status-column">
+      <div class="column-header open-header">
+        <div class="header-title">
+          <span class="status-dot open-dot"></span>
+          <span>Open</span>
+        </div>
+        <span class="count-badge open-badge">{{ statusCounts.open }}</span>
+      </div>
+      <div class="tickets-list">
+        <div *ngFor="let ticket of getRequestsByStatus(StatusEnum.Open)" class="ticket-card"
+          (click)="openEditModal(ticket)">
+          <h3 class="ticket-title">{{ ticket.title }}</h3>
+          <p class="ticket-property">
+            <i class="fas fa-building"></i>
+            {{ ticket.propertyName }}
+            <span *ngIf="ticket.unitName !== 'N/A'"> - Unit {{ ticket.unitName }}</span>
+          </p>
+          <div class="ticket-footer">
+            <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priority)">
+              {{ getPriorityText(ticket.priority) }}
+            </span>
+            <span class="ticket-date">{{ formatDate(ticket.createdAt) }}</span>
+          </div>
+        </div>
+        <div *ngIf="getRequestsByStatus(StatusEnum.Open).length === 0" class="empty-column">
+          <i class="fas fa-check-circle"></i>
+          <p>No open tickets</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assigned Column (Scheduled) -->
+    <div class="status-column">
+      <div class="column-header assigned-header">
+        <div class="header-title">
+          <span class="status-dot assigned-dot"></span>
+          <span>Assigned</span>
+        </div>
+        <span class="count-badge assigned-badge">{{ statusCounts.assigned }}</span>
+      </div>
+      <div class="tickets-list">
+        <div *ngFor="let ticket of getRequestsByStatus(StatusEnum.Scheduled)" class="ticket-card"
+          (click)="openEditModal(ticket)">
+          <h3 class="ticket-title">{{ ticket.title }}</h3>
+          <p class="ticket-property">
+            <i class="fas fa-building"></i>
+            {{ ticket.propertyName }}
+            <span *ngIf="ticket.unitName !== 'N/A'"> - Unit {{ ticket.unitName }}</span>
+          </p>
+          <div class="ticket-footer">
+            <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priority)">
+              {{ getPriorityText(ticket.priority) }}
+            </span>
+            <span class="ticket-date">{{ formatDate(ticket.scheduledDate || ticket.createdAt) }}</span>
+          </div>
+        </div>
+        <div *ngIf="getRequestsByStatus(StatusEnum.Scheduled).length === 0" class="empty-column">
+          <i class="fas fa-user-check"></i>
+          <p>No assigned tickets</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- In Progress Column -->
+    <div class="status-column">
+      <div class="column-header in-progress-header">
+        <div class="header-title">
+          <span class="status-dot in-progress-dot"></span>
+          <span>In Progress</span>
+        </div>
+        <span class="count-badge in-progress-badge">{{ statusCounts.inProgress }}</span>
+      </div>
+      <div class="tickets-list">
+        <div *ngFor="let ticket of getRequestsByStatus(StatusEnum.InProgress)" class="ticket-card"
+          (click)="openEditModal(ticket)">
+          <h3 class="ticket-title">{{ ticket.title }}</h3>
+          <p class="ticket-property">
+            <i class="fas fa-building"></i>
+            {{ ticket.propertyName }}
+            <span *ngIf="ticket.unitName !== 'N/A'"> - Unit {{ ticket.unitName }}</span>
+          </p>
+          <div class="ticket-footer">
+            <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priority)">
+              {{ getPriorityText(ticket.priority) }}
+            </span>
+            <span class="ticket-date">{{ formatDate(ticket.createdAt) }}</span>
+          </div>
+        </div>
+        <div *ngIf="getRequestsByStatus(StatusEnum.InProgress).length === 0" class="empty-column">
+          <i class="fas fa-tasks"></i>
+          <p>No tickets in progress</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resolved Column -->
+    <div class="status-column">
+      <div class="column-header resolved-header">
+        <div class="header-title">
+          <span class="status-dot resolved-dot"></span>
+          <span>Resolved</span>
+        </div>
+        <span class="count-badge resolved-badge">{{ statusCounts.resolved }}</span>
+      </div>
+      <div class="tickets-list">
+        <div *ngFor="let ticket of getRequestsByStatus(StatusEnum.Closed)" class="ticket-card"
+          (click)="openEditModal(ticket)">
+          <h3 class="ticket-title">{{ ticket.title }}</h3>
+          <p class="ticket-property">
+            <i class="fas fa-building"></i>
+            {{ ticket.propertyName }}
+            <span *ngIf="ticket.unitName !== 'N/A'"> - Unit {{ ticket.unitName }}</span>
+          </p>
+          <div class="ticket-footer">
+            <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priority)">
+              {{ getPriorityText(ticket.priority) }}
+            </span>
+            <span class="ticket-date">{{ formatDate(ticket.updatedAt || ticket.createdAt) }}</span>
+          </div>
+        </div>
+        <div *ngIf="getRequestsByStatus(StatusEnum.Closed).length === 0" class="empty-column">
+          <i class="fas fa-clipboard-check"></i>
+          <p>No resolved tickets</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit/View Modal -->
+<div *ngIf="isEditModalOpen" class="modal-overlay" (click)="closeEditModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Maintenance Details</h2>
+      <button class="btn-close" (click)="closeEditModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedMaintenance">
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" [(ngModel)]="selectedMaintenance.title" class="form-control" readonly />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" [(ngModel)]="selectedMaintenance.category" class="form-control" readonly />
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <select [(ngModel)]="selectedMaintenance.priority" class="form-control">
+              <option [value]="PriorityEnum.Low">Low</option>
+              <option [value]="PriorityEnum.Medium">Medium</option>
+              <option [value]="PriorityEnum.High">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Property</label>
+            <input type="text" [value]="selectedMaintenance.propertyName" class="form-control" readonly />
+          </div>
+          <div class="form-group">
+            <label>Unit</label>
+            <input type="text" [value]="selectedMaintenance.unitName" class="form-control" readonly />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Description</label>
+            <textarea [(ngModel)]="selectedMaintenance.description" class="form-control" rows="4" readonly></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Current Status</label>
+            <select [(ngModel)]="selectedMaintenance.status" class="form-control">
+              <option [value]="StatusEnum.Open">Open</option>
+              <option [value]="StatusEnum.Scheduled">Assigned</option>
+              <option [value]="StatusEnum.InProgress">In Progress</option>
+              <option [value]="StatusEnum.Closed">Resolved</option>
+            </select>
+          </div>
+          <div class="form-group" *ngIf="selectedMaintenance.status === StatusEnum.Scheduled">
+            <label>Scheduled Date</label>
+            <input type="date" [(ngModel)]="selectedMaintenance.scheduledDate" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="selectedMaintenance.status === StatusEnum.Closed && selectedMaintenance.rating">
+          <div class="form-group">
+            <label>Rating</label>
+            <div class="rating-display">
+              <span *ngFor="let star of [1,2,3,4,5]" class="star"
+                [class.filled]="star <= (selectedMaintenance.rating || 0)">
+                ★
+              </span>
+              <span class="rating-value">{{ selectedMaintenance.rating }}/5</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="selectedMaintenance.createdAt">
+          <div class="form-group">
+            <label>Created Date</label>
+            <input type="text" [value]="formatDate(selectedMaintenance.createdAt)" class="form-control" readonly />
+          </div>
+          <div class="form-group" *ngIf="selectedMaintenance.updatedAt">
+            <label>Last Updated</label>
+            <input type="text" [value]="formatDate(selectedMaintenance.updatedAt)" class="form-control" readonly />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeEditModal()">
+        Cancel
+      </button>
+      <button class="btn btn-primary" (click)="saveMaintenance()">
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>

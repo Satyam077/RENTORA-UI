@@ -19,6 +19,7 @@ import { UnitsComponent } from './features/landlords/units/units.component';
 import { TenantsComponent } from './features/landlords/tenants/tenants.component';
 import { AgreementComponent } from './features/landlords/agreement/agreement.component';
 import { MaintenanceComponent } from './features/landlords/maintenance/maintenance.component';
+import { TenantMaintenanceComponent } from './features/tenants/tenant-maintenance/tenant-maintenance.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -80,6 +81,11 @@ export const routes: Routes = [
   {
     path: 'tenant-dashboard',
     component: TenantDashboardComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'tenant-maintenance',
+    component: TenantMaintenanceComponent,
     canActivate: [authGuard],
   },
 

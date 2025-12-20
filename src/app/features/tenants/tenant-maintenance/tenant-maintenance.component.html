@@ -1,1 +1,148 @@
-<p>tenant-maintenance works!</p>
+<div class="maintenance-container">
+    <!-- Header -->
+    <div class="maintenance-header">
+        <div>
+            <h1 class="page-title">← Maintenance</h1>
+        </div>
+        <button class="btn-new-request" (click)="openNewRequestModal()">
+            + New Request
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-active">
+            <div class="stat-value">{{ stats.active }}</div>
+            <div class="stat-label">Active</div>
+        </div>
+        <div class="stat-card stat-completed">
+            <div class="stat-value">{{ stats.completed }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card stat-rating">
+            <div class="stat-value">{{ stats.avgRating.toFixed(1) }}</div>
+            <div class="stat-label">Avg Rating</div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <button class="tab" [class.active]="activeTab === 'active'" (click)="setActiveTab('active')">
+            Active ({{ stats.active }})
+        </button>
+        <button class="tab" [class.active]="activeTab === 'completed'" (click)="setActiveTab('completed')">
+            Completed
+        </button>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+    </div>
+
+    <!-- Maintenance List -->
+    <div class="maintenance-list">
+        <div *ngIf="loading" class="loading-state">
+            Loading maintenance requests...
+        </div>
+
+        <div *ngIf="!loading && filteredRequests.length === 0" class="empty-state">
+            <p>No {{ activeTab }} maintenance requests</p>
+        </div>
+
+        <div *ngFor="let request of filteredRequests" class="maintenance-item">
+            <div class="maintenance-icon">
+                <span class="category-icon">{{ getCategoryIcon(request.category) }}</span>
+            </div>
+            <div class="maintenance-content">
+                <div class="maintenance-header-row">
+                    <div>
+                        <h3 class="maintenance-title">{{ request.title }}</h3>
+                        <p class="maintenance-category">{{ request.category }}</p>
+                    </div>
+                    <span class="status-badge" [ngClass]="getStatusBadgeClass(request.status)">
+                        {{ getStatusLabel(request.status) }}
+                    </span>
+                </div>
+                <p class="maintenance-description">{{ request.description }}</p>
+                <div class="maintenance-footer">
+                    <span class="maintenance-date">🕐 {{ formatDate(request.createdAt) }}</span>
+                    <span *ngIf="request.updateCount > 0" class="maintenance-updates">
+                        💬 {{ request.updateCount }} update{{ request.updateCount > 1 ? 's' : '' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Maintenance Request Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>New Maintenance Request</h2>
+            <button class="modal-close" (click)="closeModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Category Se lection -->
+            <div class="form-section">
+                <label class="form-label">Select Category</label>
+                <div class="category-grid">
+                    <div *ngFor="let category of categories" class="category-card"
+                        [class.selected]="selectedCategory === category.id" (click)="selectCategory(category.id)">
+                        <div class="category-icon-circle" [style.background-color]="category.color">
+                            <span class="category-icon-large">{{ category.icon }}</span>
+                        </div>
+                        <p class="category-name">{{ category.name }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Issue Title -->
+            <div class="form-section">
+                <label class="form-label">Issue Title</label>
+                <input type="text" class="form-input" placeholder="Brief description of the issue"
+                    [(ngModel)]="newRequest.title">
+            </div>
+
+            <!-- Details -->
+            <div class="form-section">
+                <label class="form-label">Details</label>
+                <textarea class="form-textarea" rows="4" placeholder="Provide more details about the issue..."
+                    [(ngModel)]="newRequest.description"></textarea>
+            </div>
+
+            <!-- Add Photos -->
+            <div class="form-section">
+                <label class="form-label">Add Photos (Optional)</label>
+                <div class="photo-upload-area">
+                    <input type="file" id="photo-upload" multiple accept="image/*" (change)="handlePhotoUpload($event)"
+                        style="display: none;">
+                    <label for="photo-upload" class="photo-upload-label">
+                        <div class="photo-upload-icon">📷</div>
+                        <p>Tap to add photos</p>
+                    </label>
+                </div>
+
+                <!-- Photo Previews -->
+                <div class="photo-previews" *ngIf="newRequest.photoUrls.length > 0">
+                    <div *ngFor="let photo of newRequest.photoUrls; let i = index" class="photo-preview">
+                        <img [src]="photo" alt="Preview">
+                        <button class="photo-remove" (click)="removePhoto(i)">×</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+            <button class="btn-submit" (click)="submitRequest()" [disabled]="loading">
+                {{ loading ? 'Submitting...' : 'Submit Request' }}
+            </button>
+        </div>
+    </div>
+</div>

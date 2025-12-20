@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TenantService } from '../../core/services/tenant.service';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 interface DashboardData {
   tenantId: string;
@@ -32,16 +33,15 @@ interface DashboardData {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './tenant-dashboard.component.html',
-  styleUrl: './tenant-dashboard.component.css'
+  styleUrl: './tenant-dashboard.component.css',
 })
 export class TenantDashboardComponent implements OnInit {
-
   dashboardData: DashboardData | null = null;
   loading: boolean = true;
   error: string = '';
   userId: string = '';
 
-  constructor(private tenantService: TenantService) { }
+  constructor(private tenantService: TenantService, private route: Router) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -52,11 +52,9 @@ export class TenantDashboardComponent implements OnInit {
       // Get user ID from JWT token
       const token = sessionStorage.getItem('token');
       const json = sessionStorage.getItem('currentUser');
-      console.log('Token:', token);
       if (token && json) {
-         const currentUser = JSON.parse(json);
+        const currentUser = JSON.parse(json);
         this.userId = currentUser.user?.id;
-        console.log('User ID from token:', this.userId);
 
         this.tenantService.getTenantDashboard(this.userId).subscribe({
           next: (response) => {
@@ -72,7 +70,7 @@ export class TenantDashboardComponent implements OnInit {
             console.error('Error loading dashboard:', err);
             this.error = 'Failed to load dashboard data. Please try again.';
             this.loading = false;
-          }
+          },
         });
       } else {
         this.error = 'No authentication token found';
@@ -89,13 +87,17 @@ export class TenantDashboardComponent implements OnInit {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount);
   }
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   }
 
   getProgressColor(): string {
@@ -115,6 +117,7 @@ export class TenantDashboardComponent implements OnInit {
   }
 
   openMaintenance(): void {
+    this.route.navigate(['/tenant-maintenance']);
     console.log('Maintenance clicked');
     // Navigate to maintenance requests
   }
@@ -129,9 +132,11 @@ export class TenantDashboardComponent implements OnInit {
     // Navigate to messages
   }
   getInitials(fullName: string): string {
-  const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2);
-  return initials.toUpperCase();
+    const initials = fullName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .substring(0, 2);
+    return initials.toUpperCase();
+  }
 }
-}
-
-
