@@ -75,6 +75,7 @@ export class PropertyComponent implements OnInit {
         .subscribe({
           next: (response) => {
             if (response.success) {
+              console.log('Properties loaded:', response.data);
               this.properties = response.data;
               this.applyFilters();
             } else {
@@ -325,6 +326,8 @@ export class PropertyComponent implements OnInit {
   }
 
   getPropertyTypeLabel(type: number): string {
+    console.log('Getting label for property type:', type);
+    console.log('Label found:', PropertyTypeLabels[type as PropertyType]);
     return PropertyTypeLabels[type as PropertyType] || 'Unknown';
   }
 

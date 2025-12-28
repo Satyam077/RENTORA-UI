@@ -162,7 +162,7 @@
     <div class="modal-header">
       <h2>Maintenance Details</h2>
       <button class="btn-close" (click)="closeEditModal()">
-        <i class="fas fa-times"></i>
+        &times;
       </button>
     </div>
 
@@ -183,9 +183,10 @@
           <div class="form-group">
             <label>Priority</label>
             <select [(ngModel)]="selectedMaintenance.priority" class="form-control">
-              <option [value]="PriorityEnum.Low">Low</option>
-              <option [value]="PriorityEnum.Medium">Medium</option>
-              <option [value]="PriorityEnum.High">High</option>
+               <option value='0'>Select</option>
+              <option [ngValue]="PriorityEnum.Low">Low</option>
+              <option [ngValue]="PriorityEnum.Medium">Medium</option>
+              <option [ngValue]="PriorityEnum.High">High</option>
             </select>
           </div>
         </div>
@@ -212,19 +213,19 @@
           <div class="form-group">
             <label>Current Status</label>
             <select [(ngModel)]="selectedMaintenance.status" class="form-control">
-              <option [value]="StatusEnum.Open">Open</option>
-              <option [value]="StatusEnum.Scheduled">Assigned</option>
-              <option [value]="StatusEnum.InProgress">In Progress</option>
-              <option [value]="StatusEnum.Closed">Resolved</option>
+              <option [ngValue]="StatusEnum.Open">Open</option>
+              <option [ngValue]="StatusEnum.Scheduled">Assigned</option>
+              <option [ngValue]="StatusEnum.InProgress">In Progress</option>
+              <option [ngValue]="StatusEnum.Closed">Resolved</option>
             </select>
           </div>
-          <div class="form-group" *ngIf="selectedMaintenance.status === StatusEnum.Scheduled">
+          <div class="form-group" *ngIf="selectedMaintenance.status == StatusEnum.Scheduled">
             <label>Scheduled Date</label>
             <input type="date" [(ngModel)]="selectedMaintenance.scheduledDate" class="form-control" />
           </div>
         </div>
 
-        <div class="form-row" *ngIf="selectedMaintenance.status === StatusEnum.Closed && selectedMaintenance.rating">
+        <div class="form-row" *ngIf="selectedMaintenance.status == StatusEnum.Closed && selectedMaintenance.rating">
           <div class="form-group">
             <label>Rating</label>
             <div class="rating-display">

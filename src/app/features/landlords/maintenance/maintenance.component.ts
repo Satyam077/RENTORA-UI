@@ -49,7 +49,7 @@ export class MaintenanceComponent implements OnInit {
   constructor(
     private maintenanceService: MaintenanceService,
     private propertyService: PropertyService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadMaintenanceRequests();
@@ -230,8 +230,11 @@ export class MaintenanceComponent implements OnInit {
   updateStatus(newStatus: number): void {
     if (!this.selectedMaintenance) return;
 
+    // Ensure status is a number (in case it comes from a select as string)
+    const statusValue = Number(newStatus);
+
     this.maintenanceService
-      .updateStatus(this.selectedMaintenance.id!, newStatus)
+      .updateStatus(this.selectedMaintenance.id!, statusValue)
       .subscribe({
         next: (response) => {
           console.log('Status updated successfully:', response);
@@ -248,8 +251,24 @@ export class MaintenanceComponent implements OnInit {
   saveMaintenance(): void {
     if (!this.selectedMaintenance) return;
 
+    // Create a copy of the maintenance object with properly typed values
+    // HTML select elements return strings, but backend expects numbers for enums
+    const maintenanceToSave: Maintenance = {
+      ...this.selectedMaintenance,
+      status: Number(this.selectedMaintenance.status),
+      priority: Number(this.selectedMaintenance.priority),
+    };
+
+    // Remove navigation properties that shouldn't be sent to the backend
+    delete (maintenanceToSave as any).propertyName;
+    delete (maintenanceToSave as any).unitName;
+    delete (maintenanceToSave as any).property;
+    delete (maintenanceToSave as any).unit;
+
+    console.log('Saving maintenance with status:', maintenanceToSave.status, 'priority:', maintenanceToSave.priority);
+
     this.maintenanceService
-      .updateMaintenance(this.selectedMaintenance)
+      .updateMaintenance(maintenanceToSave)
       .subscribe({
         next: (response) => {
           console.log('Maintenance updated successfully:', response);

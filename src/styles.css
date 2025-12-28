@@ -930,9 +930,9 @@ input[type="date"].valid:focus {
     display: inline-block;
     padding: 4px 12px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
-    text-align: center;
+    text-transform: uppercase;
 }
 
 .badge-role {
@@ -2330,7 +2330,7 @@ section-title {
     color: #8b5cf6;
 }
 
-.badge {
+.maintenance-badge {
     position: absolute;
     top: -4px;
     right: -4px;
