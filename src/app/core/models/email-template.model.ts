@@ -14,8 +14,9 @@ export enum EmailTemplateName {
     LandlordsRegistration = 2,
     BackOfficeUserRegistration = 3,
     TenantsRegistration = 4,
-    UserLoginOtp = 5,
-    HelpdeskQuery = 6
+    ForgotPassword = 5,
+    UserLoginOtp = 6,
+    HelpdeskQuery = 7
 }
 
 export interface EmailTemplate {
@@ -65,6 +66,7 @@ export const EmailTemplateNameLabels: { [key in EmailTemplateName]: string } = {
     [EmailTemplateName.LandlordsRegistration]: 'Landlords Registration',
     [EmailTemplateName.BackOfficeUserRegistration]: 'Agents Registration',
     [EmailTemplateName.TenantsRegistration]: 'Tenants Registration',
+    [EmailTemplateName.ForgotPassword]: 'Forgot Password',
     [EmailTemplateName.UserLoginOtp]: 'User Login Otp',
     [EmailTemplateName.HelpdeskQuery]: 'Helpdesk Query'
 };

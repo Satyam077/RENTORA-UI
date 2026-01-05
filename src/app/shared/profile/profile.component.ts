@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
+import { UsersService } from '../../core/services/users.service';
 import { User, Address } from '../../core/models/user.model';
 import { Role } from '../../core/models/role.enum';
 
@@ -30,7 +31,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private usersService: UsersService
   ) { }
 
   ngOnInit(): void {
@@ -63,8 +65,8 @@ export class ProfileComponent implements OnInit {
         }
       };
 
-      this.profileImagePreview =  this.currentUser.profileImageUrl ? `${this.apiBaseUrl}/${this.currentUser.profileImageUrl}` : null;
-console.log('Populating form with user data:', this.profileImagePreview);
+      this.profileImagePreview = this.currentUser.profileImageUrl ? `${this.apiBaseUrl}/${this.currentUser.profileImageUrl}` : null;
+      console.log('Populating form with user data:', this.profileImagePreview);
       this.populateForm();
     }
   }
@@ -215,18 +217,38 @@ console.log('Populating form with user data:', this.profileImagePreview);
     this.errorMessage = '';
     this.successMessage = '';
 
-    // Simulate API call
-    setTimeout(() => {
-      this.loading = false;
-      this.successMessage = 'Password changed successfully!';
-      this.showPasswordSection = false;
-      this.passwordForm.reset();
+    const request = {
+      email: this.currentUser?.email || '',
+      oldPassword: this.passwordForm.value.currentPassword,
+      newPassword: this.passwordForm.value.newPassword,
+      confirmPassword: this.passwordForm.value.confirmPassword
+    };
 
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        this.successMessage = '';
-      }, 3000);
-    }, 1000);
+    this.usersService.resetPassword(request).subscribe({
+      next: (response) => {
+        this.loading = false;
+        if (response.success) {
+          this.successMessage = response.message || 'Password changed successfully!';
+          this.showPasswordSection = false;
+          this.passwordForm.reset();
+
+          // Clear success message after 3 seconds
+          setTimeout(() => {
+            this.successMessage = '';
+          }, 3000);
+        } else {
+          this.errorMessage = response.message || 'Failed to change password.';
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        if (err.error?.message) {
+          this.errorMessage = err.error.message;
+        } else {
+          this.errorMessage = 'An unexpected error occurred. Please try again.';
+        }
+      }
+    });
   }
 
   getRoleName(role: Role): string {

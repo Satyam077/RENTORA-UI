@@ -149,7 +149,7 @@ export class LoginComponent implements OnInit {
   }
 
   navigateToRegister(): void {
-    this.router.navigate(['/register'], { queryParams: { role: this.role } });
+    this.router.navigate(['/register']);
   }
 
   navigateToLanding(): void {

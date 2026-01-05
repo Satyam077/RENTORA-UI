@@ -63,4 +63,16 @@ export class UsersService {
       headers: headers
     });
   }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/forgot-password`, { email }, {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    });
+  }
+
+  resetPassword(request: { email: string; oldPassword: string; newPassword: string; confirmPassword: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/reset-password`, request, {
+      headers: this.getHeaders()
+    });
+  }
 }

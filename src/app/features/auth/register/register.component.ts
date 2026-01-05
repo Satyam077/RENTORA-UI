@@ -129,7 +129,6 @@ export class RegisterComponent implements OnInit {
         if (response.success) {
           this.success = 'Registration successful! Redirecting...';
           setTimeout(() => {
-            // Navigate based on role
             if (
               response.user.role === Role.Landlords ||
               response.user.role === Role.SuperAdmin ||
@@ -154,7 +153,7 @@ export class RegisterComponent implements OnInit {
   }
 
   navigateToLogin(): void {
-    this.router.navigate(['/login'], { queryParams: { role: this.role } });
+    this.router.navigate(['/login']);
   }
 
   navigateToLanding(): void {

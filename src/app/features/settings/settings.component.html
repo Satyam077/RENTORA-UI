@@ -134,6 +134,7 @@
                             <div class="form-group">
                                 <label>Template Name <span class="required">*</span></label>
                                 <select [(ngModel)]="selectedEmailTemplate.templateName" class="form-input">
+                                  
                                     <option *ngFor="let option of emailTemplateNameOptions" [ngValue]="option.label">
                                         {{ option.label }}
                                     </option>
