@@ -20,10 +20,28 @@ import { TenantsComponent } from './features/landlords/tenants/tenants.component
 import { AgreementComponent } from './features/landlords/agreement/agreement.component';
 import { MaintenanceComponent } from './features/landlords/maintenance/maintenance.component';
 import { TenantMaintenanceComponent } from './features/tenants/tenant-maintenance/tenant-maintenance.component';
+import { PrivacyPolicyComponent } from './shared/privacy-policy/privacy-policy.component';
+import { LandingComponent } from './shared/landing/landing.component';
+import { AboutUsComponent } from './shared/about-us/about-us.component';
+import { TermsConditionsComponent } from './shared/terms-conditions/terms-conditions.component';
+import { ContactUsComponent } from './shared/contact-us/contact-us.component';
+import { FaqsComponent } from './shared/faqs/faqs.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  {
+    path: '',
+    component: LandingComponent,
+    children: [
+      { path: '', component: HomeComponent }, // Default - shows home content
+      { path: 'privacy-policy', component: PrivacyPolicyComponent },
+      { path: 'about-us', component: AboutUsComponent },
+      { path: 'terms-conditions', component: TermsConditionsComponent },
+      { path: 'contact-us', component: ContactUsComponent },
+      { path: 'faqs', component: FaqsComponent },
+    ],
+  },
 
+  // Auth routes (outside landing layout)
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
@@ -73,9 +91,21 @@ export const routes: Routes = [
         ],
       },
       { path: 'units', component: UnitsComponent, canActivate: [authGuard] },
-      { path: 'tenants', component: TenantsComponent, canActivate: [authGuard] },
-      { path: 'agreements', component: AgreementComponent, canActivate: [authGuard] },
-      { path: 'maintenance', component: MaintenanceComponent, canActivate: [authGuard] },
+      {
+        path: 'tenants',
+        component: TenantsComponent,
+        canActivate: [authGuard],
+      },
+      {
+        path: 'agreements',
+        component: AgreementComponent,
+        canActivate: [authGuard],
+      },
+      {
+        path: 'maintenance',
+        component: MaintenanceComponent,
+        canActivate: [authGuard],
+      },
     ],
   },
   {
@@ -88,7 +118,6 @@ export const routes: Routes = [
     component: TenantMaintenanceComponent,
     canActivate: [authGuard],
   },
-
 
   { path: '**', redirectTo: '' },
 ];

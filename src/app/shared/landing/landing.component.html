@@ -1,71 +1,9 @@
-<div class="landing-container">
-  <div class="landing-content">
-    <!-- Header Section -->
-    <div class="header-section">
-      <div class="icon-wrapper">
-        <svg class="building-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M3 21V3h8v4h10v14h-6v-6h-4v6H3zm2-2h4v-4h2v4h2V9h-8v10zm10 0h4V9h-4v10z"/>
-        </svg>
-      </div>
-      <h1 class="main-title">Rentora - Property Management System</h1>
-      <p class="subtitle">
-        Modern, intuitive property management for landlords and tenants. Built with<br>
-        Material 3 design principles.
-      </p>
-    </div>
+<div class="landing-layout">
+  <app-nav-home></app-nav-home>
 
-    <!-- Cards Section -->
-    <div class="cards-container">
-      <!-- Landlord/Owner Card -->
-      <div class="role-card landlord-card">
-        <div class="card-icon-wrapper landlord-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3 21V3h8v4h10v14h-6v-6h-4v6H3zm2-2h4v-4h2v4h2V9h-8v10zm10 0h4V9h-4v10z"/>
-          </svg>
-        </div>
-        <h2 class="card-title">Landlord / Owner</h2>
-        <p class="card-description">
-          Manage properties, units, tenants, rent collection,<br>
-          maintenance requests, and generate reports.
-        </p>
-        <button class="primary-button" (click)="enterAsLandlord()">
-          Enter as Landlord
-          <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-          </svg>
-        </button>
-      </div>
+  <main class="landing-main-content">
+    <router-outlet></router-outlet>
+  </main>
 
-      <!-- Tenant Card -->
-      <div class="role-card tenant-card">
-        <div class="card-icon-wrapper tenant-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            <path d="M15.47 20.5L12 17l1.4-1.41 2.07 2.08 5.13-5.17 1.4 1.41z"/>
-          </svg>
-        </div>
-        <h2 class="card-title">Tenant</h2>
-        <p class="card-description">
-          View your lease details, pay rent online, submit<br>
-          maintenance requests, and communicate with your<br>
-          landlord.
-        </p>
-        <button class="secondary-button" (click)="enterAsTenant()">
-          Enter as Tenant
-          <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-      <p class="footer-text">
-        <span class="footer-link">2025 Rentora</span> •
-        <span class="footer-link">All Rights Reserved</span>
-        <span class="footer-link"></span>
-      </p>
-    </div>
-  </div>
+  <app-footer></app-footer>
 </div>

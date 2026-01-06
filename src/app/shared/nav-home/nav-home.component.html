@@ -1,0 +1,36 @@
+ <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="40" height="40" rx="8" fill="url(#gradient1)" />
+                        <path
+                            d="M12 18L20 12L28 18V30C28 30.5304 27.7893 31.0391 27.4142 31.4142C27.0391 31.7893 26.5304 32 26 32H14C13.4696 32 12.9609 31.7893 12.5858 31.4142C12.2107 31.0391 12 30.5304 12 30V18Z"
+                            stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M18 32V22H22V32" stroke="white" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <defs>
+                            <linearGradient id="gradient1" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#c2407c" />
+                                <stop offset="1" stop-color="#6b2c5c" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span class="logo-text">RENTORA</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                    <button class="btn-login" (click)="navigateToLogin()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        Login
+                    </button>
+                    <button class="btn-register" (click)="navigateToRegister()">Register</button>
+                </div>
+            </div>
+        </nav>
