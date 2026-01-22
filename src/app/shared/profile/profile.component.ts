@@ -35,7 +35,7 @@ export class ProfileComponent implements OnInit {
     private usersService: UsersService
   ) { }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.initializeForms();
     this.loadUserProfile();
   }
@@ -43,6 +43,7 @@ export class ProfileComponent implements OnInit {
   loadUserProfile(): void {
     const storedUser = this.authService.currentUserValue;
     if (storedUser && storedUser.user) {
+      console.log('Loaded user from AuthService:', storedUser.user);
       this.currentUser = {
         id: storedUser.user.id,
         fullName: storedUser.user.fullName,
@@ -51,17 +52,17 @@ export class ProfileComponent implements OnInit {
         role: storedUser.user.role,
         isEmailVerified: storedUser.user.isEmailVerified,
         isMobileVerified: storedUser.user.isMobileVerified,
-        gender: 'Male',
-        dateOfBirth: '1990-01-01',
+        gender: '',
+        dateOfBirth: '',
         profileImageUrl: storedUser.user.profileImageUrl,
 
         address: {
-          addressLine1: '123 Main Street',
-          addressLine2: 'Apt 4B',
-          city: 'New York',
-          state: 'NY',
-          country: 'USA',
-          zipCode: '10001'
+          addressLine1: '',
+          addressLine2: '',
+          city: '',
+          state: '',
+          country: '',
+          zipCode: ''
         }
       };
 

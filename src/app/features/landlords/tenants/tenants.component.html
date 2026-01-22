@@ -259,17 +259,17 @@
             </div>
 
             <div class="form-group full-width" *ngIf="isEditingTenant">
-              <label class="checkbox-label">
+              <div class="checkbox-label">
                 <input type="checkbox" [(ngModel)]="selectedTenant.isActiveTenant">
                 <span>Active Tenant</span>
-              </label>
+              </div>
             </div>
 
             <div class="form-group full-width" *ngIf="isEditingTenant">
-              <label class="checkbox-label">
+              <div class="checkbox-label">
                 <input type="checkbox" [(ngModel)]="selectedTenant.isMovedOut">
                 <span>Moved Out</span>
-              </label>
+              </div>
             </div>
 
             <div class="form-group full-width" *ngIf="isEditingTenant && selectedTenant.isMovedOut">

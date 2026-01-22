@@ -8,13 +8,13 @@ import {
   OtpRequest,
 } from '../models/user.model';
 import { JwtHelper } from '../helpers/jwt.helper';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'https://localhost:7197/api/Auth';
-
+  private apiUrl = `${environment.apiUrl}/Auth`;
   private currentUserSubject: BehaviorSubject<LoginResponse | null>;
   public currentUser: Observable<LoginResponse | null>;
 
