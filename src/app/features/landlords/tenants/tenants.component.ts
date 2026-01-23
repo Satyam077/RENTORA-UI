@@ -93,7 +93,6 @@ export class TenantsComponent implements OnInit {
     if (currentUser) {
       const user = JSON.parse(currentUser);
       this.currentOwnerId = user.user?.id || '';
-      console.log('Current Owner ID:', this.currentOwnerId);
     }
     this.loadProperties();
     this.loadUnits();
@@ -101,7 +100,7 @@ export class TenantsComponent implements OnInit {
   }
 
   loadProperties(): void {
-    this.propertyService.getAllProperties().subscribe({
+    this.propertyService.getPropertiesByOwnerId(this.currentOwnerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.properties = response.data.map((prop: PropertyModel) => ({
@@ -111,7 +110,6 @@ export class TenantsComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error loading properties:', err);
       },
     });
   }
@@ -129,7 +127,6 @@ export class TenantsComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error loading units:', err);
       },
     });
   }
@@ -162,7 +159,6 @@ export class TenantsComponent implements OnInit {
       error: (err) => {
         this.isLoadingTenants = false;
         this.error = 'Error loading tenants. Please try again.';
-        console.error('Error loading tenants:', err);
       },
     });
   }
@@ -425,7 +421,6 @@ export class TenantsComponent implements OnInit {
         error: (err) => {
           this.error =
             err.error?.message || 'Error creating tenant. Please try again.';
-          console.error('Error creating tenant:', err);
         },
       });
     } else {
@@ -477,7 +472,6 @@ export class TenantsComponent implements OnInit {
         error: (err) => {
           this.error =
             err.error?.message || 'Error updating tenant. Please try again.';
-          console.error('Error updating tenant:', err);
         },
       });
     }
@@ -505,7 +499,6 @@ export class TenantsComponent implements OnInit {
       error: (err) => {
         this.error =
           err.error?.message || 'Error deleting tenant. Please try again.';
-        console.error('Error deleting tenant:', err);
       },
     });
   }

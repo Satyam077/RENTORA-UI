@@ -47,8 +47,10 @@
                         <th>Property Name</th>
                         <th>Type</th>
                         <th>Address</th>
-                        <th>Rent Amount</th>
-                        <th>Occupancy</th>
+                        <th>Rent Amount(pm)</th>
+                        <th>Occupancy
+                          <span>(Occupied/Total)</span>
+                        </th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -70,7 +72,8 @@
                         <td>₹{{ property.defaultRentAmount | number }}</td>
                         <td>
                             <span class="occupancy-text" [class.fully-occupied]="property.isFullyOccupied">
-                                {{ property.occupiedUnits }}/{{ property.totalUnits }}
+                                {{ getOccupancyString(property) }}
+                                <span class="occupancy-percentage">({{ getOccupancyPercentage(property) }}%)</span>
                             </span>
                         </td>
                         <td>
@@ -388,17 +391,19 @@
                     <table class="details-table">
                         <tr>
                             <th>Total Units</th>
-                            <td>{{ selectedProperty.totalUnits }}</td>
+                            <td>{{ selectedProperty.totalUnits ?? 0 }}</td>
                         </tr>
                         <tr>
                             <th>Occupied Units</th>
-                            <td>{{ selectedProperty.occupiedUnits }}</td>
+                            <td>{{ selectedProperty.occupiedUnits ?? 0 }}</td>
                         </tr>
                         <tr>
                             <th>Occupancy Rate</th>
                             <td>
                                 <span class="occupancy-text" [class.fully-occupied]="selectedProperty.isFullyOccupied">
-                                    {{ selectedProperty.occupiedUnits }}/{{ selectedProperty.totalUnits }}
+                                    {{ getOccupancyString(selectedProperty) }}
+                                    <span class="occupancy-percentage">({{ getOccupancyPercentage(selectedProperty)
+                                        }}%)</span>
                                 </span>
                             </td>
                         </tr>

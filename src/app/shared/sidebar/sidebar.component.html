@@ -1,7 +1,7 @@
 <div class="sidebar" [class.collapsed]="collapsed">
     <!-- Logo Section -->
     <div class="sidebar-header">
-      <div class="logo-container">
+      <div class="logo-container" (click)="navigateToHome()">
         <img [src]="logoPath" alt="RENTORA Logo" class="logo-img" />
         <h1 class="logo-text">RENTORA</h1>
       </div>

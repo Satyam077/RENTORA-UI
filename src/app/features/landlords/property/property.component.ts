@@ -75,7 +75,6 @@ export class PropertyComponent implements OnInit {
         .subscribe({
           next: (response) => {
             if (response.success) {
-              console.log('Properties loaded:', response.data);
               this.properties = response.data;
               this.applyFilters();
             } else {
@@ -84,7 +83,6 @@ export class PropertyComponent implements OnInit {
             this.isLoadingProperties = false;
           },
           error: (err) => {
-            console.error('Error loading properties:', err);
             this.error =
               err.error?.message ||
               'Failed to load properties. Please try again.';
@@ -196,7 +194,6 @@ export class PropertyComponent implements OnInit {
         notes: this.selectedProperty.notes,
         createdBy: this.currentOwnerId,
       };
-      console.log('Create Request:', createRequest);
 
       this.propertyService.createProperty(createRequest).subscribe({
         next: (response: any) => {
@@ -216,7 +213,6 @@ export class PropertyComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error('Error creating property:', err);
           if (err.error?.message) {
             this.error = err.error.message;
           } else if (typeof err.error === 'string') {
@@ -246,7 +242,6 @@ export class PropertyComponent implements OnInit {
         isActive: this.selectedProperty.isActive ?? true,
         updatedBy: this.currentOwnerId,
       };
-      console.log('Update Request:', updateRequest);
 
       this.propertyService.updateProperty(updateRequest).subscribe({
         next: (response: any) => {
@@ -271,7 +266,6 @@ export class PropertyComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error('Error updating property:', err);
           if (err.error?.message) {
             this.error = err.error.message;
           } else if (typeof err.error === 'string') {
@@ -310,7 +304,6 @@ export class PropertyComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error('Error deleting property:', err);
           this.error =
             err.error?.message ||
             'Failed to delete property. Please try again.';
@@ -326,8 +319,6 @@ export class PropertyComponent implements OnInit {
   }
 
   getPropertyTypeLabel(type: number): string {
-    console.log('Getting label for property type:', type);
-    console.log('Label found:', PropertyTypeLabels[type as PropertyType]);
     return PropertyTypeLabels[type as PropertyType] || 'Unknown';
   }
 
@@ -340,6 +331,21 @@ export class PropertyComponent implements OnInit {
       property.address.state,
     ].filter((p) => p);
     return parts.length > 0 ? parts.join(', ') : '-';
+  }
+
+  // Get occupancy string in format "occupied/total" e.g., "2/5"
+  getOccupancyString(property: PropertyModel): string {
+    const total = property.totalUnits ?? 0;
+    const occupied = property.occupiedUnits ?? 0;
+    return `${occupied}/${total}`;
+  }
+
+  // Get occupancy percentage for reporting
+  getOccupancyPercentage(property: PropertyModel): number {
+    const total = property.totalUnits ?? 0;
+    const occupied = property.occupiedUnits ?? 0;
+    if (total === 0) return 0;
+    return Math.round((occupied / total) * 100);
   }
 
   viewProperty(property: PropertyModel): void {
@@ -468,7 +474,6 @@ export class PropertyComponent implements OnInit {
         this.isUploadingImage = false;
         this.selectedImageFile = null;
         this.error = err.error?.message || 'Error uploading image. Please try again.';
-        console.error('Error uploading image:', err);
       },
     });
   }
@@ -549,7 +554,6 @@ export class PropertyComponent implements OnInit {
         this.isUploadingDocument = false;
         this.selectedDocumentFile = null;
         this.error = err.error?.message || 'Error uploading document. Please try again.';
-        console.error('Error uploading document:', err);
       },
     });
   }

@@ -141,3 +141,24 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(194, 64, 124, 0.3);
 }
+
+/* Occupancy Display Styles */
+.occupancy-text {
+    font-weight: 600;
+    color: #374151;
+}
+
+.occupancy-text.fully-occupied {
+    color: #059669;
+}
+
+.occupancy-percentage {
+    font-size: 0.85em;
+    font-weight: 400;
+    color: #6b7280;
+    margin-left: 4px;
+}
+
+.occupancy-text.fully-occupied .occupancy-percentage {
+    color: #10b981;
+}

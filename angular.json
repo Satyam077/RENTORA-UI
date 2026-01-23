@@ -53,6 +53,10 @@
                   "maximumError": "8kB"
                 }
               ],
+              "allowedCommonJsDependencies": [
+  "quill",
+  "quill-delta"
+],
               "outputHashing": "all"
             },
             "development": {

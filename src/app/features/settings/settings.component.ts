@@ -11,8 +11,11 @@ import {
   ApplicableFor,
   ApplicableForLabels,
   EmailTemplateName,
-  EmailTemplateNameLabels
+  EmailTemplateNameLabels,
 } from '../../core/models/email-template.model';
+import { Role } from '../../core/models/role.enum';
+import { Router } from '@angular/router';
+import { ProfileComponent } from '../../shared/profile/profile.component';
 
 interface NotificationTemplate {
   id: string;
@@ -67,13 +70,23 @@ interface CommunicationLog {
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule, QuillModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    QuillModule,
+    ProfileComponent,
+  ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
-  providers: [EmailTemplateService]
+  providers: [EmailTemplateService],
 })
 export class SettingsComponent implements OnInit {
-  activeTab: 'templates' | 'global' | 'integrations' | 'logs' = 'templates';
+
+  roles?: Role[];
+  role: number = 0;
+
 
   // Email Templates
   emailTemplates: EmailTemplate[] = [];
@@ -88,10 +101,10 @@ export class SettingsComponent implements OnInit {
   ApplicableFor = ApplicableFor;
   applicableForLabels = ApplicableForLabels;
   applicableForOptions = Object.keys(ApplicableFor)
-    .filter(key => !isNaN(Number(key)))
-    .map(key => ({
+    .filter((key) => !isNaN(Number(key)))
+    .map((key) => ({
       value: Number(key),
-      label: ApplicableForLabels[Number(key) as ApplicableFor]
+      label: ApplicableForLabels[Number(key) as ApplicableFor],
     }));
 
   // EmailTemplateName enum and labels
@@ -99,10 +112,10 @@ export class SettingsComponent implements OnInit {
   emailTemplateNameLabels = EmailTemplateNameLabels;
 
   emailTemplateNameOptions = Object.keys(EmailTemplateName)
-    .filter(key => !isNaN(Number(key)))
-    .map(key => ({
+    .filter((key) => !isNaN(Number(key)))
+    .map((key) => ({
       value: Number(key),
-      label: EmailTemplateNameLabels[Number(key) as EmailTemplateName]
+      label: EmailTemplateNameLabels[Number(key) as EmailTemplateName],
     }));
   @ViewChild('quill') quillEditor: any;
 
@@ -111,18 +124,18 @@ export class SettingsComponent implements OnInit {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
       ['blockquote', 'code-block'],
-      [{ 'header': 1 }, { 'header': 2 }],
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      [{ 'script': 'sub' }, { 'script': 'super' }],
-      [{ 'indent': '-1' }, { 'indent': '+1' }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'font': [] }],
-      [{ 'align': [] }],
+      [{ header: 1 }, { header: 2 }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ script: 'sub' }, { script: 'super' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      [{ size: ['small', false, 'large', 'huge'] }],
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      [{ color: [] }, { background: [] }],
+      [{ font: [] }],
+      [{ align: [] }],
       ['clean'],
-      ['link', 'image']
-    ]
+      ['link', 'image'],
+    ],
   };
 
   // Notification Templates (old mock data - keeping for backward compatibility)
@@ -132,23 +145,26 @@ export class SettingsComponent implements OnInit {
       name: 'Welcome Email',
       type: 'email',
       subject: 'Welcome to RENTORA',
-      content: 'Dear {{name}}, Welcome to RENTORA property management system...',
-      isActive: true
+      content:
+        'Dear {{name}}, Welcome to RENTORA property management system...',
+      isActive: true,
     },
     {
       id: '2',
       name: 'Payment Reminder',
       type: 'sms',
-      content: 'Hi {{name}}, Your rent payment of {{amount}} is due on {{date}}.',
-      isActive: true
+      content:
+        'Hi {{name}}, Your rent payment of {{amount}} is due on {{date}}.',
+      isActive: true,
     },
     {
       id: '3',
       name: 'Maintenance Update',
       type: 'whatsapp',
-      content: 'Hello {{name}}, Your maintenance request #{{ticketId}} has been updated.',
-      isActive: true
-    }
+      content:
+        'Hello {{name}}, Your maintenance request #{{ticketId}} has been updated.',
+      isActive: true,
+    },
   ];
 
   selectedTemplate: NotificationTemplate | null = null;
@@ -161,7 +177,7 @@ export class SettingsComponent implements OnInit {
     currency: 'USD',
     taxRate: 10,
     lateFeePercentage: 5,
-    gracePeriodDays: 3
+    gracePeriodDays: 3,
   };
 
   // Integration Configs
@@ -171,20 +187,20 @@ export class SettingsComponent implements OnInit {
       apiKey: '',
       senderEmail: 'noreply@rentora.com',
       senderName: 'RENTORA',
-      isEnabled: false
+      isEnabled: false,
     },
     sms: {
       provider: 'Twilio',
       apiKey: '',
       senderId: 'RENTORA',
-      isEnabled: false
+      isEnabled: false,
     },
     whatsapp: {
       provider: 'Twilio',
       apiKey: '',
       phoneNumber: '',
-      isEnabled: false
-    }
+      isEnabled: false,
+    },
   };
 
   // Communication Logs
@@ -196,7 +212,7 @@ export class SettingsComponent implements OnInit {
       subject: 'Payment Confirmation',
       status: 'sent',
       sentAt: new Date('2024-12-02T10:30:00'),
-      message: 'Your payment has been received successfully.'
+      message: 'Your payment has been received successfully.',
     },
     {
       id: '2',
@@ -205,7 +221,7 @@ export class SettingsComponent implements OnInit {
       subject: 'Rent Reminder',
       status: 'sent',
       sentAt: new Date('2024-12-02T09:15:00'),
-      message: 'Your rent is due in 3 days.'
+      message: 'Your rent is due in 3 days.',
     },
     {
       id: '3',
@@ -214,21 +230,61 @@ export class SettingsComponent implements OnInit {
       subject: 'Maintenance Update',
       status: 'failed',
       sentAt: new Date('2024-12-01T14:20:00'),
-      message: 'Your maintenance request has been completed.'
-    }
+      message: 'Your maintenance request has been completed.',
+    },
   ];
 
   filteredLogs: CommunicationLog[] = [...this.communicationLogs];
   logFilterType: string = 'all';
   logFilterStatus: string = 'all';
 
-  constructor(private emailTemplateService: EmailTemplateService) { }
+  constructor(
+    private emailTemplateService: EmailTemplateService,
+    private router: Router,
+  ) {}
+
+
 
   ngOnInit(): void {
+    const json = sessionStorage.getItem('currentUser');
+    if (!json) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const currentUser = JSON.parse(json);
+    this.role = Number(currentUser.user?.role) as Role;
+    console.log('Current user role in settings:', this.role);
+
+    // Set default active tab based on role
+    if (this.role === 1 || this.role === 2) {
+      this.activeTab = 'templates';
+    } else if (this.role === 3) {
+      this.activeTab = 'profiles';
+    }
+
     this.loadEmailTemplates();
   }
-
-  setActiveTab(tab: 'templates' | 'global' | 'integrations' | 'logs') {
+activeTab:
+    | 'templates'
+    | 'global'
+    | 'integrations'
+    | 'logs'
+    | 'profiles'
+    | 'billingRates'
+    | 'payment'
+    | 'notifications' = 'templates';
+  setActiveTab(
+    tab:
+      | 'templates'
+      | 'global'
+      | 'integrations'
+      | 'logs'
+      | 'profiles'
+      | 'billingRates'
+      | 'payment'
+      | 'notifications',
+  ) {
     this.activeTab = tab;
   }
 
@@ -243,7 +299,7 @@ export class SettingsComponent implements OnInit {
       error: (error) => {
         this.isLoadingTemplates = false;
         this.error = 'Failed to load email templates. Please try again later.';
-      }
+      },
     });
   }
 
@@ -255,7 +311,7 @@ export class SettingsComponent implements OnInit {
       emailBody: '',
       applicableFor: this.applicableForLabels[ApplicableFor.Admin],
       tokens: '',
-      isActive: true
+      isActive: true,
     };
     this.isAddingEmailTemplate = true;
   }
@@ -265,7 +321,8 @@ export class SettingsComponent implements OnInit {
     this.isEditingEmailTemplate = true;
     setTimeout(() => {
       if (this.quillEditor && this.selectedEmailTemplate?.emailBody) {
-        this.quillEditor.quillEditor.root.innerHTML = this.selectedEmailTemplate.emailBody;
+        this.quillEditor.quillEditor.root.innerHTML =
+          this.selectedEmailTemplate.emailBody;
       }
     }, 50);
   }
@@ -277,7 +334,11 @@ export class SettingsComponent implements OnInit {
     this.error = '';
     this.success = '';
 
-    if (!this.selectedEmailTemplate.templateName || !this.selectedEmailTemplate.emailSubject || !this.selectedEmailTemplate.emailBody) {
+    if (
+      !this.selectedEmailTemplate.templateName ||
+      !this.selectedEmailTemplate.emailSubject ||
+      !this.selectedEmailTemplate.emailBody
+    ) {
       this.error = 'Please fill in all required fields';
       return;
     }
@@ -289,7 +350,7 @@ export class SettingsComponent implements OnInit {
         emailSubject: this.selectedEmailTemplate.emailSubject,
         emailBody: this.selectedEmailTemplate.emailBody,
         applicableFor: this.selectedEmailTemplate.applicableFor,
-        tokens: this.selectedEmailTemplate.tokens
+        tokens: this.selectedEmailTemplate.tokens,
       };
 
       this.emailTemplateService.createTemplate(createRequest).subscribe({
@@ -298,7 +359,8 @@ export class SettingsComponent implements OnInit {
 
           // Handle response structure - could be direct template or wrapped response
           const template = response.data || response;
-          const message = response.message || 'Email template created successfully!';
+          const message =
+            response.message || 'Email template created successfully!';
 
           this.emailTemplates.unshift(template);
           this.success = message;
@@ -319,7 +381,7 @@ export class SettingsComponent implements OnInit {
           } else {
             this.error = 'Failed to create email template. Please try again.';
           }
-        }
+        },
       });
     } else if (this.isEditingEmailTemplate && this.selectedEmailTemplate.id) {
       // Update existing template
@@ -330,18 +392,18 @@ export class SettingsComponent implements OnInit {
         emailBody: this.selectedEmailTemplate.emailBody,
         applicableFor: this.selectedEmailTemplate.applicableFor,
         tokens: this.selectedEmailTemplate.tokens,
-        isActive: this.selectedEmailTemplate.isActive ?? true
+        isActive: this.selectedEmailTemplate.isActive ?? true,
       };
 
       this.emailTemplateService.updateTemplate(updateRequest).subscribe({
         next: (response: any) => {
-          console.log('Update response:', response);
-
-          // Handle response structure - backend returns { success, message, data }
           const template = response.data || response;
-          const message = response.message || 'Email template updated successfully!';
+          const message =
+            response.message || 'Email template updated successfully!';
 
-          const index = this.emailTemplates.findIndex(t => t.id === template.id);
+          const index = this.emailTemplates.findIndex(
+            (t) => t.id === template.id,
+          );
           if (index !== -1) {
             this.emailTemplates[index] = template;
           }
@@ -349,15 +411,11 @@ export class SettingsComponent implements OnInit {
           this.success = message;
           this.cancelEmailTemplateEdit();
 
-          // Auto-clear success message after 5 seconds
           setTimeout(() => {
             this.success = '';
           }, 5000);
         },
         error: (err) => {
-          console.error('Error updating email template:', err);
-
-          // Extract error message from different response structures
           if (err.error?.message) {
             this.error = err.error.message;
           } else if (typeof err.error === 'string') {
@@ -367,7 +425,7 @@ export class SettingsComponent implements OnInit {
           } else {
             this.error = 'Failed to update email template. Please try again.';
           }
-        }
+        },
       });
     }
   }
@@ -375,16 +433,20 @@ export class SettingsComponent implements OnInit {
   deleteEmailTemplate(template: EmailTemplate): void {
     if (!template.id) return;
 
-    if (confirm(`Are you sure you want to delete the template "${template.templateName}"?`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete the template "${template.templateName}"?`,
+      )
+    ) {
       this.emailTemplateService.deleteTemplate(template.id).subscribe({
         next: () => {
-          this.emailTemplates = this.emailTemplates.filter(t => t.id !== template.id);
-          //alert('Email template deleted successfully!');
+          this.emailTemplates = this.emailTemplates.filter(
+            (t) => t.id !== template.id,
+          );
         },
         error: (error) => {
-          console.error('Error deleting email template:', error);
           alert('Failed to delete email template. Please try again.');
-        }
+        },
       });
     }
   }
@@ -399,20 +461,17 @@ export class SettingsComponent implements OnInit {
       emailBody: template.emailBody,
       applicableFor: template.applicableFor,
       tokens: template.tokens,
-      isActive: !template.isActive
+      isActive: !template.isActive,
     };
 
     this.emailTemplateService.updateTemplate(updatedTemplate).subscribe({
       next: (updated) => {
-        const index = this.emailTemplates.findIndex(t => t.id === updated.id);
+        const index = this.emailTemplates.findIndex((t) => t.id === updated.id);
         if (index !== -1) {
           this.emailTemplates[index] = updated;
         }
       },
-      error: (error) => {
-        console.error('Error toggling template status:', error);
-        // alert('Failed to update template status. Please try again.');
-      }
+      error: (error) => {},
     });
   }
 
@@ -426,7 +485,6 @@ export class SettingsComponent implements OnInit {
     return ApplicableForLabels[applicableFor] || 'Unknown';
   }
 
-  // Template Methods (old - keeping for backward compatibility)
   editTemplate(template: NotificationTemplate) {
     this.selectedTemplate = { ...template };
     this.isEditingTemplate = true;
@@ -434,7 +492,9 @@ export class SettingsComponent implements OnInit {
 
   saveTemplate() {
     if (this.selectedTemplate) {
-      const index = this.notificationTemplates.findIndex(t => t.id === this.selectedTemplate!.id);
+      const index = this.notificationTemplates.findIndex(
+        (t) => t.id === this.selectedTemplate!.id,
+      );
       if (index !== -1) {
         this.notificationTemplates[index] = { ...this.selectedTemplate };
       }
@@ -451,13 +511,10 @@ export class SettingsComponent implements OnInit {
     template.isActive = !template.isActive;
   }
 
-  // Global Settings Methods
   saveGlobalSettings() {
     console.log('Saving global settings:', this.globalSettings);
-    alert('Global settings saved successfully!');
   }
 
-  // Integration Methods
   saveIntegrationConfig() {
     console.log('Saving integration config:', this.integrationConfig);
     alert('Integration settings saved successfully!');
@@ -470,15 +527,19 @@ export class SettingsComponent implements OnInit {
 
   // Communication Logs Methods
   filterLogs() {
-    this.filteredLogs = this.communicationLogs.filter(log => {
-      const typeMatch = this.logFilterType === 'all' || log.type === this.logFilterType;
-      const statusMatch = this.logFilterStatus === 'all' || log.status === this.logFilterStatus;
+    this.filteredLogs = this.communicationLogs.filter((log) => {
+      const typeMatch =
+        this.logFilterType === 'all' || log.type === this.logFilterType;
+      const statusMatch =
+        this.logFilterStatus === 'all' || log.status === this.logFilterStatus;
       return typeMatch && statusMatch;
     });
   }
 
   viewLogDetails(log: CommunicationLog) {
-    alert(`Log Details:\n\nRecipient: ${log.recipient}\nType: ${log.type}\nSubject: ${log.subject}\nStatus: ${log.status}\nSent: ${log.sentAt}\nMessage: ${log.message}`);
+    alert(
+      `Log Details:\n\nRecipient: ${log.recipient}\nType: ${log.type}\nSubject: ${log.subject}\nStatus: ${log.status}\nSent: ${log.sentAt}\nMessage: ${log.message}`,
+    );
   }
 
   retryFailedLog(log: CommunicationLog) {

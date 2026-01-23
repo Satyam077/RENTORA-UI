@@ -5,10 +5,10 @@ import { Router } from '@angular/router';
   selector: 'app-nav-home',
   imports: [],
   templateUrl: './nav-home.component.html',
-  styleUrl: './nav-home.component.css'
+  styleUrl: './nav-home.component.css',
 })
 export class NavHomeComponent {
-  constructor(private router: Router) { }
+  constructor(private router: Router) {}
 
   navigateToLogin() {
     this.router.navigate(['/login']);
@@ -18,4 +18,7 @@ export class NavHomeComponent {
     this.router.navigate(['/register']);
   }
 
+  navigateToHome() {
+    this.router.navigate(['/home']);
+  }
 }

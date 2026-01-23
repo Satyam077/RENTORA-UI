@@ -56,13 +56,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/landlord',
       roles: [Role.SuperAdmin, Role.Admin],
     },
-    { icon: 'tenants', label: 'Tenants', route: '/tenants' },
-    { icon: 'properties', label: 'Properties', route: '/property' },
-    { icon: 'units', label: 'Units', route: '/units' },
-    { icon: 'agreements', label: 'Agreements', route: '/agreements' },
-    { icon: 'invoices', label: 'Invoices', route: '/invoices' },
-    { icon: 'payments', label: 'Payments', route: '/payments' },
-    { icon: 'maintenance', label: 'Maintenance', route: '/maintenance' },
+    { icon: 'tenants', label: 'Tenants', route: '/tenants', roles: [Role.Landlords] },
+    { icon: 'properties', label: 'Properties', route: '/property', roles: [Role.Landlords] },
+    { icon: 'units', label: 'Units', route: '/units', roles: [Role.Landlords] },
+    { icon: 'agreements', label: 'Agreements', route: '/agreements', roles: [Role.Landlords] },
+    { icon: 'invoices', label: 'Invoices', route: '/invoices', roles: [Role.Landlords] },
+    { icon: 'payments', label: 'Payments', route: '/payments', roles: [Role.Landlords] },
+    { icon: 'maintenance', label: 'Maintenance', route: '/maintenance', roles: [Role.Landlords] },
     { icon: 'reports', label: 'Reports', route: '/reports' },
     { icon: 'settings', label: 'Settings', route: '/settings' },
   ];
@@ -117,6 +117,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   navigateTo(route: string): void {
     this.router.navigate([route]);
     this.setActiveMenuItem();
+  }
+  navigateToHome(){
+    this.router.navigate(['/dashboard']);
   }
 
   getIconPath(icon: string): string {

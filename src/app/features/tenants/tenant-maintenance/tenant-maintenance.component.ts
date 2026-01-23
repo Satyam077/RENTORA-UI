@@ -74,7 +74,6 @@ export class TenantMaintenanceComponent implements OnInit {
     this.loading = true;
     this.maintenanceService.getMaintenanceByTenantId(this.tenantId).subscribe({
       next: (response) => {
-        console.log('Maintenance requests loaded:', response);
         this.maintenanceRequests = response;
         this.calculateStats();
         this.filterByTab();
@@ -89,7 +88,6 @@ export class TenantMaintenanceComponent implements OnInit {
         if (response.success) {
           this.dashboardData = response.data;
           this.loading = false;
-          console.log('Dashboard data loaded:', this.dashboardData);
         } else {
           this.error = response.message || 'Failed to load dashboard data';
           this.loading = false;
@@ -195,7 +193,6 @@ export class TenantMaintenanceComponent implements OnInit {
     this.newRequest.unitId = this.dashboardData.unitId;
     this.newRequest.createdBy = this.tenantId;
     this.newRequest.updatedBy = this.tenantId;
-    console.log('Submitting maintenance request:', this.newRequest);
     this.maintenanceService.createMaintenance(this.newRequest).subscribe({
       next: (response) => {
         this.successMessage = 'Maintenance request submitted successfully!';
@@ -204,7 +201,6 @@ export class TenantMaintenanceComponent implements OnInit {
         setTimeout(() => (this.successMessage = ''), 3000);
       },
       error: (error) => {
-        console.error('Error creating maintenance request:', error);
         this.errorMessage = 'Failed to submit maintenance request';
         this.loading = false;
       },

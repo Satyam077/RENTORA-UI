@@ -94,7 +94,6 @@ export class AgreementComponent implements OnInit {
     if (currentUser) {
       const user = JSON.parse(currentUser);
       this.currentOwnerId = user.user?.id || '';
-      console.log('Current Owner ID:', this.currentOwnerId);
     }
     this.loadProperties();
     this.loadUnits();
@@ -113,7 +112,6 @@ export class AgreementComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error loading properties:', err);
       },
     });
   }
@@ -131,7 +129,6 @@ export class AgreementComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error loading units:', err);
       },
     });
   }
@@ -146,12 +143,10 @@ export class AgreementComponent implements OnInit {
             propertyId: tenant.propertyId,
             unitId: tenant.unitId,
           }));
-          console.log('All Tenants:', this.allTenants);
           this.tenants = [...this.allTenants];
         }
       },
       error: (err) => {
-        console.error('Error loading tenants:', err);
       },
     });
   }
@@ -206,7 +201,6 @@ export class AgreementComponent implements OnInit {
         error: (err) => {
           this.isLoadingAgreements = false;
           this.error = 'Error loading agreements. Please try again.';
-          console.error('Error loading agreements:', err);
         },
       });
   }
@@ -314,7 +308,6 @@ export class AgreementComponent implements OnInit {
   }
 
   editAgreement(agreement: AgreementModel): void {
-    console.log('Editing Agreement:', agreement);
     this.selectedAgreement = {
       ...agreement,
       startDate: this.formatDateForInput(agreement.startDate) as any,
@@ -428,7 +421,6 @@ export class AgreementComponent implements OnInit {
         error: (err) => {
           this.error =
             err.error?.message || 'Error creating agreement. Please try again.';
-          console.error('Error creating agreement:', err);
         },
       });
     } else {
@@ -472,7 +464,6 @@ export class AgreementComponent implements OnInit {
         error: (err) => {
           this.error =
             err.error?.message || 'Error updating agreement. Please try again.';
-          console.error('Error updating agreement:', err);
         },
       });
     }
@@ -502,7 +493,6 @@ export class AgreementComponent implements OnInit {
       error: (err) => {
         this.error =
           err.error?.message || 'Error deleting agreement. Please try again.';
-        console.error('Error deleting agreement:', err);
       },
     });
   }
@@ -642,7 +632,6 @@ export class AgreementComponent implements OnInit {
         this.selectedFile = null;
         this.uploadedFileName = '';
         this.error = err.error?.message || 'Error uploading file. Please try again.';
-        console.error('Error uploading file:', err);
       },
     });
   }

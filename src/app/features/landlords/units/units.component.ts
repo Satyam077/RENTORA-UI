@@ -48,14 +48,13 @@ export class UnitsComponent implements OnInit {
     if (currentUser) {
       const user = JSON.parse(currentUser);
       this.currentOwnerId = user.user?.id || '';
-      console.log('Current Owner ID:', this.currentOwnerId);
     }
     this.loadProperties();
     this.loadUnits();
   }
 
   loadProperties(): void {
-    this.propertyService.getAllProperties().subscribe({
+    this.propertyService.getPropertiesByOwnerId(this.currentOwnerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.properties = response.data.map((prop: PropertyModel) => ({
@@ -65,7 +64,6 @@ export class UnitsComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error loading properties:', err);
       }
     });
   }
@@ -86,7 +84,6 @@ export class UnitsComponent implements OnInit {
       error: (err) => {
         this.isLoadingUnits = false;
         this.error = 'Error loading units. Please try again.';
-        console.error('Error loading units:', err);
       }
     });
   }
@@ -189,7 +186,6 @@ export class UnitsComponent implements OnInit {
         },
         error: (err) => {
           this.error = err.error?.message || 'Error creating unit. Please try again.';
-          console.error('Error creating unit:', err);
         }
       });
     } else {
@@ -223,7 +219,6 @@ export class UnitsComponent implements OnInit {
         },
         error: (err) => {
           this.error = err.error?.message || 'Error updating unit. Please try again.';
-          console.error('Error updating unit:', err);
         }
       });
     }
@@ -248,7 +243,6 @@ export class UnitsComponent implements OnInit {
       },
       error: (err) => {
         this.error = err.error?.message || 'Error deleting unit. Please try again.';
-        console.error('Error deleting unit:', err);
       }
     });
   }
