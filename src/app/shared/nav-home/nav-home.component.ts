@@ -21,4 +21,8 @@ export class NavHomeComponent {
   navigateToHome() {
     this.router.navigate(['/home']);
   }
+
+  navigateToAbout() {
+    this.router.navigate(['/about-us']);
+  }
 }

@@ -12,6 +12,10 @@
     z-index: 1000;
     transition: width 0.3s ease;
 }
+a {
+  text-decoration: none;
+}
+
 
 .sidebar.collapsed {
     width: 60px;
@@ -39,7 +43,7 @@
 
 .logo-text {
     font-size: 1.5rem;
-    font-weight: 700;
+    /* font-weight: 700; */
     background: linear-gradient(135deg, #C2407C 0%, #6B2C5C 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

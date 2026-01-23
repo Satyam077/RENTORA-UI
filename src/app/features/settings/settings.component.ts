@@ -16,6 +16,8 @@ import {
 import { Role } from '../../core/models/role.enum';
 import { Router } from '@angular/router';
 import { ProfileComponent } from '../../shared/profile/profile.component';
+import { FeaturesComponent } from "../Rentora-Management/features/features.component";
+import { PlansComponent } from "../Rentora-Management/plans/plans.component";
 
 interface NotificationTemplate {
   id: string;
@@ -77,7 +79,9 @@ interface CommunicationLog {
     HttpClientModule,
     QuillModule,
     ProfileComponent,
-  ],
+    FeaturesComponent,
+    PlansComponent
+],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
   providers: [EmailTemplateService],
@@ -267,7 +271,8 @@ export class SettingsComponent implements OnInit {
   }
 activeTab:
     | 'templates'
-    | 'global'
+    | 'features'
+    | 'plans'
     | 'integrations'
     | 'logs'
     | 'profiles'
@@ -277,7 +282,8 @@ activeTab:
   setActiveTab(
     tab:
       | 'templates'
-      | 'global'
+      | 'features'
+    | 'plans'
       | 'integrations'
       | 'logs'
       | 'profiles'

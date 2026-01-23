@@ -24,7 +24,7 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   collapsed: boolean = false;
-  logoPath: string = 'assets/Images/Rentoralogo.png';
+  logoPath: string = 'assets/Images/appicon.png';
   private subscription?: Subscription;
   private routerSubscription?: Subscription;
   menuItems: MenuItem[] = [
@@ -118,9 +118,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.router.navigate([route]);
     this.setActiveMenuItem();
   }
-  navigateToHome(){
-    this.router.navigate(['/dashboard']);
-  }
+
 
   getIconPath(icon: string): string {
     const icons: { [key: string]: string } = {

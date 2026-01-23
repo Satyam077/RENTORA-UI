@@ -26,18 +26,20 @@ import { AboutUsComponent } from './shared/about-us/about-us.component';
 import { TermsConditionsComponent } from './shared/terms-conditions/terms-conditions.component';
 import { ContactUsComponent } from './shared/contact-us/contact-us.component';
 import { FaqsComponent } from './shared/faqs/faqs.component';
+import { BlogsComponent } from './shared/blogs/blogs.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: LandingComponent,
     children: [
-      { path: '', component: HomeComponent }, // Default - shows home content
+      { path: '', component: HomeComponent },
       { path: 'privacy-policy', component: PrivacyPolicyComponent },
       { path: 'about-us', component: AboutUsComponent },
       { path: 'terms-conditions', component: TermsConditionsComponent },
       { path: 'contact-us', component: ContactUsComponent },
       { path: 'faqs', component: FaqsComponent },
+      { path: 'blogs', component: BlogsComponent },
     ],
   },
 

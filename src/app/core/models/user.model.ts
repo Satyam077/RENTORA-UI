@@ -26,7 +26,8 @@ export interface LoginResponse {
 }
 
 export interface UserInfo {
-  address: { addressLine1: string; addressLine2: string; city: string; state: string; country: string; zipCode: string; };
+  address:
+  { addressLine1: string; addressLine2: string; city: string; state: string; country: string; zipCode: string; };
   dateOfBirth: string;
   gender: string;
   id: string;

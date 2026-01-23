@@ -13,6 +13,7 @@ import {
   PropertyType,
   PropertyTypeLabels,
 } from '../../../core/models/property-type.enum';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-property',
@@ -33,12 +34,10 @@ export class PropertyComponent implements OnInit {
   error = '';
   searchTerm: string = '';
 
-  // Pagination
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalPages: number = 1;
-
-  // Property Type enum and labels
+  private apiBaseUrl = `${environment.apiUrl}`;
   PropertyType = PropertyType;
   propertyTypeLabels = PropertyTypeLabels;
   propertyTypeOptions = Object.keys(PropertyType)
@@ -48,13 +47,11 @@ export class PropertyComponent implements OnInit {
       label: PropertyTypeLabels[Number(key) as PropertyType],
     }));
 
-  // Current user (owner) ID - should be fetched from auth service
   currentOwnerId: string = '';
 
-  constructor(private propertyService: PropertyService) { }
+  constructor(private propertyService: PropertyService) {}
 
   ngOnInit(): void {
-    // Get current user ID from session storage
     const currentUser = sessionStorage.getItem('currentUser');
     if (currentUser) {
       const user = JSON.parse(currentUser);
@@ -109,13 +106,13 @@ export class PropertyComponent implements OnInit {
             ?.toLowerCase()
             .includes(search) ||
           property.address?.city?.toLowerCase().includes(search) ||
-          property.address?.state?.toLowerCase().includes(search)
+          property.address?.state?.toLowerCase().includes(search),
       );
     }
 
     this.filteredProperties = filtered;
     this.totalPages = Math.ceil(
-      this.filteredProperties.length / this.itemsPerPage
+      this.filteredProperties.length / this.itemsPerPage,
     );
     if (this.currentPage > this.totalPages && this.totalPages > 0) {
       this.currentPage = this.totalPages;
@@ -248,7 +245,7 @@ export class PropertyComponent implements OnInit {
           if (response.success) {
             const property = response.data;
             const index = this.properties.findIndex(
-              (p) => p.id === property.id
+              (p) => p.id === property.id,
             );
             if (index !== -1) {
               this.properties[index] = property;
@@ -285,14 +282,14 @@ export class PropertyComponent implements OnInit {
 
     if (
       confirm(
-        `Are you sure you want to delete the property "${property.propertyName}"?`
+        `Are you sure you want to delete the property "${property.propertyName}"?`,
       )
     ) {
       this.propertyService.deleteProperty(property.id).subscribe({
         next: (response) => {
           if (response.success) {
             this.properties = this.properties.filter(
-              (p) => p.id !== property.id
+              (p) => p.id !== property.id,
             );
             this.success = response.message || 'Property deleted successfully!';
             this.loadProperties();
@@ -432,7 +429,12 @@ export class PropertyComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+      ];
       if (!allowedTypes.includes(file.type)) {
         this.error = 'Invalid file type. Allowed types: JPG, JPEG, PNG, WEBP';
         event.target.value = '';
@@ -473,7 +475,8 @@ export class PropertyComponent implements OnInit {
       error: (err) => {
         this.isUploadingImage = false;
         this.selectedImageFile = null;
-        this.error = err.error?.message || 'Error uploading image. Please try again.';
+        this.error =
+          err.error?.message || 'Error uploading image. Please try again.';
       },
     });
   }
@@ -487,7 +490,10 @@ export class PropertyComponent implements OnInit {
 
   getFullImageUrl(relativeUrl: string): string {
     if (!relativeUrl) return '';
-    if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
+    if (
+      relativeUrl.startsWith('http://') ||
+      relativeUrl.startsWith('https://')
+    ) {
       return relativeUrl;
     }
     const baseUrl = 'https://localhost:7197';
@@ -511,10 +517,11 @@ export class PropertyComponent implements OnInit {
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'image/jpeg',
         'image/jpg',
-        'image/png'
+        'image/png',
       ];
       if (!allowedTypes.includes(file.type)) {
-        this.error = 'Invalid file type. Allowed types: PDF, DOC, DOCX, JPG, PNG';
+        this.error =
+          'Invalid file type. Allowed types: PDF, DOC, DOCX, JPG, PNG';
         event.target.value = '';
         return;
       }
@@ -538,24 +545,27 @@ export class PropertyComponent implements OnInit {
     this.isUploadingDocument = true;
     this.error = '';
 
-    this.propertyService.uploadPropertyDocument(this.selectedDocumentFile).subscribe({
-      next: (response) => {
-        this.isUploadingDocument = false;
-        if (response.success && response.data) {
-          this.selectedProperty!.documents.push(response.data.fileUrl);
-          this.success = 'Document uploaded successfully';
+    this.propertyService
+      .uploadPropertyDocument(this.selectedDocumentFile)
+      .subscribe({
+        next: (response) => {
+          this.isUploadingDocument = false;
+          if (response.success && response.data) {
+            this.selectedProperty!.documents.push(response.data.fileUrl);
+            this.success = 'Document uploaded successfully';
+            this.selectedDocumentFile = null;
+            setTimeout(() => (this.success = ''), 3000);
+          } else {
+            this.error = response.message || 'Failed to upload document';
+          }
+        },
+        error: (err) => {
+          this.isUploadingDocument = false;
           this.selectedDocumentFile = null;
-          setTimeout(() => (this.success = ''), 3000);
-        } else {
-          this.error = response.message || 'Failed to upload document';
-        }
-      },
-      error: (err) => {
-        this.isUploadingDocument = false;
-        this.selectedDocumentFile = null;
-        this.error = err.error?.message || 'Error uploading document. Please try again.';
-      },
-    });
+          this.error =
+            err.error?.message || 'Error uploading document. Please try again.';
+        },
+      });
   }
 
   removeDocument(index: number): void {
@@ -567,11 +577,13 @@ export class PropertyComponent implements OnInit {
 
   getFullDocumentUrl(relativeUrl: string): string {
     if (!relativeUrl) return '';
-    if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
+    if (
+      relativeUrl.startsWith('http://') ||
+      relativeUrl.startsWith('https://')
+    ) {
       return relativeUrl;
     }
-    const baseUrl = 'https://localhost:7197';
-    return `${baseUrl}${relativeUrl}`;
+    return `${this.apiBaseUrl}${relativeUrl}`;
   }
 
   getDocumentFileName(url: string): string {
