@@ -1,16 +1,10 @@
-/* ============================================
-   RENTORA - Optimized Global Styles
-   Cleaned and organized for better performance
-   ============================================ */
-
-/* ============================================
-   0. GLOBAL STYLES
-   ============================================ */
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+a {
+  text-decoration: none;
 }
 
 body {
@@ -1150,7 +1144,8 @@ input[type="date"].valid:focus {
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: dialogSlideIn 0.3s ease-out;
 }
@@ -2216,7 +2211,9 @@ input:checked + .toggle-slider:before {
   height: 100%;
   background: linear-gradient(90deg, #10b981 0%, #059669 100%);
   border-radius: 10px;
-  transition: width 0.5s ease, background 0.3s ease;
+  transition:
+    width 0.5s ease,
+    background 0.3s ease;
 }
 
 .progress-text {
@@ -3584,7 +3581,6 @@ section-title {
   .static-page-container {
     padding: 48px 16px;
   }
-
   .privacy-policy-container h1,
   .static-page-container h1 {
     font-size: 28px;

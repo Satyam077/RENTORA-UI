@@ -258,7 +258,6 @@ export class SettingsComponent implements OnInit {
 
     const currentUser = JSON.parse(json);
     this.role = Number(currentUser.user?.role) as Role;
-    console.log('Current user role in settings:', this.role);
 
     // Set default active tab based on role
     if (this.role === 1 || this.role === 2) {

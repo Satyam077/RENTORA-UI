@@ -186,7 +186,7 @@
         </div>
 
         <!-- Additional Information Section -->
-        <div class="form-section">
+        <!-- <div class="form-section">
           <h2 class="section-title">Additional Information</h2>
           <div class="form-grid">
             <div class="form-group full-width">
@@ -195,7 +195,7 @@
                 placeholder="https://example.com/image.jpg" class="form-input">
             </div>
           </div>
-        </div>
+        </div> -->
       </form>
     </div>
 
@@ -206,7 +206,7 @@
       </button>
       <button type="submit" class="btn-primary" (click)="onSubmit()" [disabled]="userForm.invalid || uploadingImage">
         <span *ngIf="uploadingImage">Uploading...</span>
-        <span *ngIf="!uploadingImage">{{ isEditMode ? 'Update User' : 'Create User' }}</span>
+        <span *ngIf="!uploadingImage">{{ isEditMode ? 'Save' : 'Save' }}</span>
       </button>
     </div>
   </div>

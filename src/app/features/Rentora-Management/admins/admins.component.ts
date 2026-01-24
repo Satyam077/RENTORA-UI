@@ -9,6 +9,7 @@ import {
 } from '../../../core/models/user.model';
 import { Role } from '../../../core/models/role.enum';
 import { UserDialogComponent } from './user-dialog.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-admins',
@@ -41,6 +42,7 @@ export class AdminsComponent implements OnInit {
     [Role.Tenants]: 'Tenant',
     [Role.Agents]: 'Agent',
   };
+  private apiBaseUrl = `${environment.apiUrl}`;
 
   constructor(private usersService: UsersService) {}
 
@@ -54,7 +56,6 @@ export class AdminsComponent implements OnInit {
       next: (res) => {
         const payload: any = res;
         this.users = Array.isArray(payload) ? payload : payload?.users || [];
-        //console.log('Users after assignment:', this.users);
         this.applyFilters();
         this.loading = false;
       },
@@ -79,7 +80,7 @@ export class AdminsComponent implements OnInit {
           user.mobile?.toLowerCase().includes(search) ||
           this.getRoleLabel(user.role)?.toLowerCase().includes(search) ||
           user.address?.city?.toLowerCase().includes(search) ||
-          user.address?.state?.toLowerCase().includes(search)
+          user.address?.state?.toLowerCase().includes(search),
       );
     }
 
@@ -117,7 +118,7 @@ export class AdminsComponent implements OnInit {
     if (user.profileImageUrl.startsWith('http')) {
       return user.profileImageUrl;
     }
-    return `https://localhost:7197${user.profileImageUrl}`;
+    return `${this.apiBaseUrl}${user.profileImageUrl}`;
   }
 
   getInitials(user: User): string {

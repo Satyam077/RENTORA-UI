@@ -19,6 +19,8 @@ import { GoogleAuthService } from '../../../core/services/google-auth.service';
   styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent implements OnInit, AfterViewInit {
+
+  logoPath: string = 'assets/Images/appicon.png';
   registerForm!: FormGroup;
   loading = false;
   submitted = false;

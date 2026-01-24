@@ -27,6 +27,9 @@ import { TermsConditionsComponent } from './shared/terms-conditions/terms-condit
 import { ContactUsComponent } from './shared/contact-us/contact-us.component';
 import { FaqsComponent } from './shared/faqs/faqs.component';
 import { BlogsComponent } from './shared/blogs/blogs.component';
+import { ReportsComponent } from './features/Rentora-Management/reports/reports.component';
+import { InvoicesComponent } from './features/landlords/invoices/invoices.component';
+import { PaymentsComponent } from './features/landlords/payments/payments.component';
 
 export const routes: Routes = [
   {
@@ -106,6 +109,21 @@ export const routes: Routes = [
       {
         path: 'maintenance',
         component: MaintenanceComponent,
+        canActivate: [authGuard],
+      },
+      {
+        path: 'reports',
+        component: ReportsComponent,
+        canActivate: [authGuard],
+      },
+      {
+        path: 'invoices',
+        component: InvoicesComponent,
+        canActivate: [authGuard],
+      },
+      {
+        path: 'payments',
+        component: PaymentsComponent,
         canActivate: [authGuard],
       },
     ],

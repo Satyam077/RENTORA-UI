@@ -1,7 +1,7 @@
 <div class="admins-container">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Admins</h1>
+      <h1 class="page-title">Manage Users</h1>
       <p class="page-subtitle">Manage all your admins in one place</p>
     </div>
     <button class="btn btn-primary btn-add" (click)="openAddDialog()">
@@ -27,10 +27,6 @@
         <input type="text" class="search-input" placeholder="Search users..." [(ngModel)]="searchTerm"
           (ngModelChange)="onSearchChange()">
       </div>
-      <button class="btn btn-filter">
-        <span class="filter-icon">▼</span>
-        Filters
-      </button>
     </div>
 
     <!-- Loading State -->
@@ -47,7 +43,7 @@
             <th>Email</th>
             <th>Mobile</th>
             <th>Role</th>
-            <th>Address</th>
+            <!-- <th>Address</th> -->
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -59,11 +55,6 @@
           <tr *ngFor="let user of getpaginatedUsers()">
             <td>
               <div class="user-name-cell">
-                <div class="profile-picture-small" [class.has-image]="getProfileImageUrl(user)">
-                  <img *ngIf="getProfileImageUrl(user)" [src]="getProfileImageUrl(user)" [alt]="user.fullName"
-                    onerror="this.style.display='none'; this.parentElement.classList.remove('has-image');">
-                  <span *ngIf="!getProfileImageUrl(user)" class="profile-initials">{{ getInitials(user) }}</span>
-                </div>
                 <span class="user-name">{{ user.fullName }}</span>
               </div>
             </td>
@@ -72,7 +63,6 @@
             <td>
               <span class="badge badge-role">{{ getRoleLabel(user.role) }}</span>
             </td>
-            <td>{{ getAddressString(user) }}</td>
             <td>
               <span class="badge" [class.badge-active]="user.isActive" [class.badge-inactive]="!user.isActive">
                 {{ user.isActive ? 'Active' : 'Inactive' }}

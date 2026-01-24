@@ -52,7 +52,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     },
     {
       icon: 'landlord',
-      label: 'Landlord',
+      label: 'Landlords',
       route: '/landlord',
       roles: [Role.SuperAdmin, Role.Admin],
     },
