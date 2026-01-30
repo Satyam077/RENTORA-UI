@@ -7,6 +7,9 @@
     padding: 2rem;
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
+a {
+  text-decoration: none;
+}
 
 .register-card {
     background: white;
@@ -85,7 +88,7 @@
 }
 
 .register-title {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     /* font-weight: 100; */
     color: #1e293b;
     margin: -30px 0 0.5rem 0;
@@ -180,10 +183,10 @@
 .form-input,
 select.form-input {
     width: 100%;
-    padding: 0.875rem 1rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 1rem;
+    /* padding: 0.875rem 1rem; */
+    border: 2px solid skyblue;
+    /* border-radius: 12px; */
+    /* font-size: 1rem; */
     font-family: inherit;
     transition: all 0.3s ease;
     box-sizing: border-box;
@@ -247,7 +250,7 @@ select.form-input {
 /* Submit Button */
 .submit-button {
     width: 100%;
-    padding: 1rem;
+    padding: .7rem;
     background: linear-gradient(135deg, #C2407C 0%, #6B2C5C 100%);
     color: white;
     border: none;
@@ -258,7 +261,7 @@ select.form-input {
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     font-family: inherit;
-    margin-top: 1rem;
+    margin-top: .5rem;
 }
 
 .submit-button:hover:not(:disabled) {
@@ -297,8 +300,8 @@ select.form-input {
 /* Login Link */
 .login-link {
     text-align: center;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
+    padding-top: .5rem;
+    /* border-top: 1px solid #e2e8f0; */
 }
 
 .login-link p {

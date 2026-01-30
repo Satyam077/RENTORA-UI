@@ -132,27 +132,29 @@
           <div class="form-grid">
             <div class="form-group">
               <label>First Name <span class="required">*</span></label>
-              <input type="text" [(ngModel)]="selectedTenant.firstName" placeholder="Enter first name">
+              <input type="text" class="form-input" [(ngModel)]="selectedTenant.firstName"
+                placeholder="Enter first name">
             </div>
 
             <div class="form-group">
               <label>Last Name <span class="required">*</span></label>
-              <input type="text" [(ngModel)]="selectedTenant.lastName" placeholder="Enter last name">
+              <input type="text" class="form-input" [(ngModel)]="selectedTenant.lastName" placeholder="Enter last name">
             </div>
 
             <div class="form-group">
               <label>Email <span class="required">*</span></label>
-              <input type="email" [(ngModel)]="selectedTenant.email" placeholder="Enter email">
+              <input type="email" class="form-input" [(ngModel)]="selectedTenant.email" placeholder="Enter email">
             </div>
 
             <div class="form-group">
               <label>Mobile <span class="required">*</span></label>
-              <input type="tel" [(ngModel)]="selectedTenant.mobile" placeholder="Enter mobile number">
+              <input type="tel" class="form-input" [(ngModel)]="selectedTenant.mobile"
+                placeholder="Enter mobile number">
             </div>
 
             <div class="form-group">
               <label>Gender</label>
-              <select [(ngModel)]="selectedTenant.gender">
+              <select [(ngModel)]="selectedTenant.gender" class="form-input">
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -162,12 +164,12 @@
 
             <div class="form-group">
               <label>Date of Birth</label>
-              <input type="date" [(ngModel)]="selectedTenant.dateOfBirth">
+              <input type="date" class="form-input" [(ngModel)]="selectedTenant.dateOfBirth">
             </div>
 
             <div class="form-group">
               <label>ID Proof Type</label>
-              <select [(ngModel)]="selectedTenant.idProofType">
+              <select [(ngModel)]="selectedTenant.idProofType" class="form-input">
                 <option value="">Select ID Proof</option>
                 <option value="Aadhaar">Aadhaar</option>
                 <option value="PAN">PAN Card</option>
@@ -177,20 +179,21 @@
               </select>
             </div>
 
-            <div class="form-group full-width">
+            <div class="form-group">
               <label>ID Proof Number</label>
-              <input type="text" [(ngModel)]="selectedTenant.idProofNumber" placeholder="Enter ID proof number">
+              <input type="text" class="form-input" [(ngModel)]="selectedTenant.idProofNumber"
+                placeholder="Enter ID proof number">
             </div>
 
             <div class="form-group full-width">
               <label>Permanent Address</label>
-              <textarea [(ngModel)]="selectedTenant.permanentAddress" rows="2"
+              <textarea [(ngModel)]="selectedTenant.permanentAddress" rows="2" class="form-input"
                 placeholder="Enter permanent address"></textarea>
             </div>
 
             <div class="form-group full-width">
               <label>Current Address</label>
-              <textarea [(ngModel)]="selectedTenant.currentAddress" rows="2"
+              <textarea [(ngModel)]="selectedTenant.currentAddress" rows="2" class="form-input"
                 placeholder="Enter current address"></textarea>
             </div>
           </div>
@@ -202,7 +205,7 @@
           <div class="form-grid">
             <div class="form-group">
               <label>Property <span class="required">*</span></label>
-              <select [(ngModel)]="selectedTenant.propertyId" (ngModelChange)="onPropertyChange()">
+              <select class="form-input" [(ngModel)]="selectedTenant.propertyId" (ngModelChange)="onPropertyChange()">
                 <option value="">Select Property</option>
                 <option *ngFor="let property of properties" [value]="property.id">
                   {{ property.propertyName }}
@@ -212,7 +215,7 @@
 
             <div class="form-group">
               <label>Unit <span class="required">*</span></label>
-              <select [(ngModel)]="selectedTenant.unitId">
+              <select class="form-input" [(ngModel)]="selectedTenant.unitId">
                 <option value="">Select Unit</option>
                 <option *ngFor="let unit of units" [value]="unit.id">
                   {{ unit.unitName }}
@@ -228,58 +231,59 @@
           <div class="form-grid">
             <div class="form-group">
               <label>Rent Amount <span class="required">*</span></label>
-              <input type="number" [(ngModel)]="selectedTenant.rentAmount" placeholder="Enter rent amount" min="0"
-                step="0.01">
+              <input type="number" class="form-input" [(ngModel)]="selectedTenant.rentAmount"
+                placeholder="Enter rent amount" min="0" step="0.01">
             </div>
 
             <div class="form-group">
               <label>Security Deposit</label>
               <input type="number" [(ngModel)]="selectedTenant.securityDeposit" placeholder="Enter security deposit"
-                min="0" step="0.01">
+                min="0" step="0.01" class="form-input">
             </div>
 
             <div class="form-group">
               <label>Rent Due Day</label>
-              <input type="number" [(ngModel)]="selectedTenant.rentDueDay" min="1" max="31" placeholder="Day of month">
+              <input type="number" class="form-input" [(ngModel)]="selectedTenant.rentDueDay" min="1" max="31"
+                placeholder="Day of month">
             </div>
 
             <div class="form-group">
               <label>Move-In Date</label>
-              <input type="date" [(ngModel)]="selectedTenant.moveInDate">
+              <input type="date" class="form-input" [(ngModel)]="selectedTenant.moveInDate">
             </div>
 
             <div class="form-group">
               <label>Agreement Start Date <span class="required">*</span></label>
-              <input type="date" [(ngModel)]="selectedTenant.agreementStartDate">
+              <input type="date" class="form-input" [(ngModel)]="selectedTenant.agreementStartDate">
             </div>
 
             <div class="form-group">
               <label>Agreement End Date <span class="required">*</span></label>
-              <input type="date" [(ngModel)]="selectedTenant.agreementEndDate">
+              <input type="date" class="form-input" [(ngModel)]="selectedTenant.agreementEndDate">
             </div>
 
             <div class="form-group full-width" *ngIf="isEditingTenant">
               <div class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="selectedTenant.isActiveTenant">
+                <input class="form-input" type="checkbox" [(ngModel)]="selectedTenant.isActiveTenant">
                 <span>Active Tenant</span>
               </div>
             </div>
 
             <div class="form-group full-width" *ngIf="isEditingTenant">
               <div class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="selectedTenant.isMovedOut">
+                <input class="form-input" type="checkbox" [(ngModel)]="selectedTenant.isMovedOut">
                 <span>Moved Out</span>
               </div>
             </div>
 
             <div class="form-group full-width" *ngIf="isEditingTenant && selectedTenant.isMovedOut">
               <label>Move-Out Date</label>
-              <input type="date" [(ngModel)]="selectedTenant.moveOutDate">
+              <input type="date" class="form-input" [(ngModel)]="selectedTenant.moveOutDate">
             </div>
 
             <div class="form-group full-width">
               <label>Notes</label>
-              <textarea [(ngModel)]="selectedTenant.notes" rows="3"
+              <textarea [(ngModel)]="selectedTenant.notes" rows="3" class="form-input"
                 placeholder="Additional notes about the tenant"></textarea>
             </div>
           </div>

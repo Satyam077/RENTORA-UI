@@ -17,6 +17,9 @@ export class NavHomeComponent {
   navigateToRegister() {
     this.router.navigate(['/register']);
   }
+  navigateToPlans() {
+    this.router.navigate(['/subscriptions-plans']);
+  }
 
   navigateToHome() {
     this.router.navigate(['/home']);

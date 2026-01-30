@@ -59,6 +59,7 @@ export class TenantDashboardComponent implements OnInit {
         this.tenantService.getTenantDashboard(this.userId).subscribe({
           next: (response) => {
             if (response.success) {
+              console.log('Dashboard data loaded:', response.data);
               this.dashboardData = response.data;
               this.loading = false;
             } else {

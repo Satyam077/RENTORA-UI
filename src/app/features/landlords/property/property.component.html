@@ -28,10 +28,7 @@
         <input type="text" class="search-input" placeholder="Search properties..." [(ngModel)]="searchTerm"
           (ngModelChange)="onSearchChange()">
       </div>
-      <button class="btn btn-filter">
-        <span class="filter-icon">▼</span>
-        Filters
-      </button>
+
     </div>
 
     <!-- Loading State -->
@@ -131,7 +128,7 @@
       <div class="form-section">
         <h2 class="section-title">Basic Information</h2>
         <div class="form-grid">
-          <div class="form-group full-width">
+          <div class="form-group">
             <label>Property Name <span class="required">*</span></label>
             <input type="text" [(ngModel)]="selectedProperty.propertyName" class="form-input"
               placeholder="Enter property name">
@@ -148,14 +145,8 @@
 
           <div class="form-group">
             <label>Default Rent Amount <span class="required">*</span></label>
-            <input type="number" [(ngModel)]="selectedProperty.defaultRentAmount" class="form-input"
+            <input type="number" min="1" [(ngModel)]="selectedProperty.defaultRentAmount" class="form-input"
               placeholder="Enter default rent">
-          </div>
-
-          <div class="form-group full-width">
-            <label>Description <span class="required">*</span></label>
-            <textarea [(ngModel)]="selectedProperty.description" class="form-input" rows="3"
-              placeholder="Enter property description"></textarea>
           </div>
 
           <div class="form-group">
@@ -167,6 +158,11 @@
           <div class="form-group">
             <label>Notes</label>
             <input type="text" [(ngModel)]="selectedProperty.notes" class="form-input" placeholder="Additional notes">
+          </div>
+          <div class="form-group full-width">
+            <label>Description <span class="required">*</span></label>
+            <textarea [(ngModel)]="selectedProperty.description" class="form-input" rows="3"
+              placeholder="Enter property description"></textarea>
           </div>
         </div>
       </div>

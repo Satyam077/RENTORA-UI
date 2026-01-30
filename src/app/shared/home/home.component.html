@@ -16,13 +16,13 @@
             </p>
             <div class="hero-actions">
                 <button class="btn-get-started" (click)="navigateToRegister()">
-                    Get Started
+                    Register as Landlord
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
                 </button>
-                <button class="btn-learn-more">
+                <button class="btn-learn-more" (click)="navigateToRegister()">
                     Learn More
                 </button>
             </div>
@@ -197,7 +197,8 @@
 <section class="app-section">
     <div class="section-container">
         <div class="app-content">
-            <div class="app-mockup">
+          <img [src]="logoPath" alt="RENTORA DETAILS" class="app-mockup-image"/>
+            <!-- <div class="app-mockup">
                 <div class="phone-frame">
                     <div class="phone-screen">
                         <div class="app-header">
@@ -235,7 +236,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="app-text">
                 <h2 class="app-section-title">Your partners in your digital journey</h2>
                 <div class="app-feature-list">

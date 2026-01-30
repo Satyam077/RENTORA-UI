@@ -30,6 +30,7 @@ import { BlogsComponent } from './shared/blogs/blogs.component';
 import { ReportsComponent } from './features/Rentora-Management/reports/reports.component';
 import { InvoicesComponent } from './features/landlords/invoices/invoices.component';
 import { PaymentsComponent } from './features/landlords/payments/payments.component';
+import { PlansPricingComponent } from './features/Rentora-Management/plans-pricing/plans-pricing.component';
 
 export const routes: Routes = [
   {
@@ -43,6 +44,7 @@ export const routes: Routes = [
       { path: 'contact-us', component: ContactUsComponent },
       { path: 'faqs', component: FaqsComponent },
       { path: 'blogs', component: BlogsComponent },
+      { path: 'subscriptions-plans', component: PlansPricingComponent },
     ],
   },
 

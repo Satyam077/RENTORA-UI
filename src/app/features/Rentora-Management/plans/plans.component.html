@@ -95,10 +95,16 @@
         </div>
       </div>
 
+
       <div class="row">
         <div class="col-md-6 form-group">
           <label>Yearly Discount (%)</label>
           <input type="number" class="form-control" [(ngModel)]="currentPlan.yearlyDiscount" placeholder="0">
+        </div>
+
+        <div class="col-md-6 form-group">
+          <label>Description</label>
+          <textarea type="text" class="form-control" [(ngModel)]="currentPlan.description"></textarea>
         </div>
         <div class="col-md-6 d-flex align-items-end mb-3">
           <div

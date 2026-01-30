@@ -65,7 +65,6 @@ export class PropertyComponent implements OnInit {
     this.isLoadingProperties = true;
     this.error = '';
 
-    // Load properties by owner ID
     if (this.currentOwnerId) {
       this.propertyService
         .getPropertiesByOwnerId(this.currentOwnerId)
@@ -155,18 +154,15 @@ export class PropertyComponent implements OnInit {
   }
 
   editProperty(property: PropertyModel): void {
-    this.selectedProperty = JSON.parse(JSON.stringify(property)); // Deep copy
+    this.selectedProperty = JSON.parse(JSON.stringify(property));
     this.isEditingProperty = true;
   }
-
   saveProperty(): void {
     if (!this.selectedProperty) return;
 
-    // Clear previous messages
     this.error = '';
     this.success = '';
 
-    // Validation
     if (
       !this.selectedProperty.propertyName ||
       !this.selectedProperty.description
@@ -176,7 +172,6 @@ export class PropertyComponent implements OnInit {
     }
 
     if (this.isAddingProperty) {
-      // Create new property
       const createRequest: PropertyCreateRequest = {
         ownerId: this.selectedProperty.ownerId,
         propertyName: this.selectedProperty.propertyName,
@@ -222,7 +217,6 @@ export class PropertyComponent implements OnInit {
         },
       });
     } else if (this.isEditingProperty && this.selectedProperty.id) {
-      // Update existing property
       const updateRequest: PropertyUpdateRequest = {
         id: this.selectedProperty.id,
         ownerId: this.selectedProperty.ownerId,
@@ -254,7 +248,6 @@ export class PropertyComponent implements OnInit {
             this.loadProperties();
             this.cancelPropertyEdit();
 
-            // Auto-clear success message after 5 seconds
             setTimeout(() => {
               this.success = '';
             }, 5000);
@@ -330,14 +323,12 @@ export class PropertyComponent implements OnInit {
     return parts.length > 0 ? parts.join(', ') : '-';
   }
 
-  // Get occupancy string in format "occupied/total" e.g., "2/5"
   getOccupancyString(property: PropertyModel): string {
     const total = property.totalUnits ?? 0;
     const occupied = property.occupiedUnits ?? 0;
     return `${occupied}/${total}`;
   }
 
-  // Get occupancy percentage for reporting
   getOccupancyPercentage(property: PropertyModel): number {
     const total = property.totalUnits ?? 0;
     const occupied = property.occupiedUnits ?? 0;
@@ -355,7 +346,6 @@ export class PropertyComponent implements OnInit {
     this.isViewingProperty = false;
   }
 
-  // Pagination Methods
   getPaginatedProperties(): PropertyModel[] {
     const start = (this.currentPage - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
@@ -398,7 +388,6 @@ export class PropertyComponent implements OnInit {
 
   Math = Math;
 
-  // Unit Management
   addUnit(): void {
     if (!this.selectedProperty) return;
 
@@ -418,17 +407,14 @@ export class PropertyComponent implements OnInit {
     this.selectedProperty.units.splice(index, 1);
   }
 
-  // File Upload Properties
   selectedImageFile: File | null = null;
   selectedDocumentFile: File | null = null;
   isUploadingImage: boolean = false;
   isUploadingDocument: boolean = false;
 
-  // Image Management with File Upload
   onImageFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // Validate file type
       const allowedTypes = [
         'image/jpeg',
         'image/jpg',
@@ -441,8 +427,7 @@ export class PropertyComponent implements OnInit {
         return;
       }
 
-      // Validate file size (5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
         this.error = 'File size exceeds 5MB limit';
         event.target.value = '';
@@ -496,8 +481,7 @@ export class PropertyComponent implements OnInit {
     ) {
       return relativeUrl;
     }
-    const baseUrl = 'https://localhost:7197';
-    return `${baseUrl}${relativeUrl}`;
+    return `${this.apiBaseUrl}${relativeUrl}`;
   }
 
   getImageFileName(url: string): string {
@@ -506,11 +490,9 @@ export class PropertyComponent implements OnInit {
     return parts[parts.length - 1];
   }
 
-  // Document Management with File Upload
   onDocumentFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // Validate file type
       const allowedTypes = [
         'application/pdf',
         'application/msword',
@@ -526,8 +508,7 @@ export class PropertyComponent implements OnInit {
         return;
       }
 
-      // Validate file size (10MB)
-      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      const maxSize = 10 * 1024 * 1024;
       if (file.size > maxSize) {
         this.error = 'File size exceeds 10MB limit';
         event.target.value = '';

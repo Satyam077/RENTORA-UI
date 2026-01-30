@@ -127,6 +127,7 @@ export class TenantsComponent implements OnInit {
         }
       },
       error: (err) => {
+        console.error('Error loading units:', err);
       },
     });
   }

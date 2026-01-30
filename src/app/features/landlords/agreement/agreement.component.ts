@@ -18,8 +18,9 @@ import {
 import { PropertyModel } from '../../../core/models/property.model';
 import { UnitModel } from '../../../core/models/unit.model';
 import { TenantModel } from '../../../core/models/tenant.model';
+import { environment } from '../../../../environments/environment.prod';
 
-const baseUrl = 'https://localhost:7197';
+const baseUrl = `${environment.apiUrl}`;
 
 @Component({
   selector: 'app-agreement',
@@ -102,7 +103,7 @@ export class AgreementComponent implements OnInit {
   }
 
   loadProperties(): void {
-    this.propertyService.getAllProperties().subscribe({
+    this.propertyService.getPropertyById(this.currentOwnerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.properties = response.data.map((prop: PropertyModel) => ({

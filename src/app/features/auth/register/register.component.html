@@ -7,14 +7,12 @@
           <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
         </svg>
       </button>
-      <div class="logo-wrapper">
+      <!-- <div class="logo-wrapper">
         <img src="{{logoPath}}" alt="Rentora" class="logo-icon" />
-        <!-- <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M3 21V3h8v4h10v14h-6v-6h-4v6H3zm2-2h4v-4h2v4h2V9h-8v10zm10 0h4V9h-4v10z" />
-        </svg> -->
-      </div>
-      <h1 class="register-title">Register as a Property Owner and let Rentora manage your rent, tenants, and bills — all in one place.</h1>
-      <!-- <p class="register-subtitle">Register as {{ this.roleParam }}</p> -->
+      </div> -->
+      <h1 class="register-title">Register as a Property Owner and let Rentora manage your rent,
+        <br>tenants, and bills — all in one place.
+      </h1>
     </div>
 
     <!-- Success Message -->
@@ -37,33 +35,47 @@
     <!-- Registration Form -->
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
       <!-- Full Name -->
-      <div class="form-group">
-        <label for="fullName" class="form-label">Full Name *</label>
-        <input type="text" id="fullName" formControlName="fullName" class="form-input"
-          [class.error]="submitted && f['fullName'].errors" placeholder="Enter your full name" />
-        <div class="error-text" *ngIf="submitted && f['fullName'].errors">
-          <span *ngIf="f['fullName'].errors['required']">Full name is required</span>
-          <span *ngIf="f['fullName'].errors['minlength']">Name must be at least 2 characters</span>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fullName" class="form-label">First Name <span class="required">*</span></label>
+          <input type="text" id="fullName" formControlName="fullName" class="form-input"
+            [class.error]="submitted && f['fullName'].errors" placeholder="ENTER YOUR NAME" />
+          <div class="error-text" *ngIf="submitted && f['fullName'].errors">
+            <span *ngIf="f['fullName'].errors['required']">Full name is required</span>
+            <span *ngIf="f['fullName'].errors['minlength']">Name must be at least 2 characters</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="lastName" class="form-label">Last Name</label>
+          <input type="text" id="lastName" formControlName="lastName" class="form-input"
+           placeholder="ENTER YOUR LAST NAME" />
+          <!-- <div class="error-text" *ngIf="submitted && f['lastName'].errors">
+            <span *ngIf="f['lastName'].errors['required']">Last name is required</span>
+            <span *ngIf="f['lastName'].errors['minlength']">Name must be at least 2 characters</span>
+          </div> -->
         </div>
       </div>
+
 
       <!-- Email and Mobile (Grid) -->
       <div class="form-row">
         <div class="form-group">
-          <label for="email" class="form-label">Email</label>
+          <label for="email" class="form-label">Email <span class="required">*</span></label>
           <input type="email" id="email" formControlName="email" class="form-input"
             [class.error]="submitted && f['email'].errors" placeholder="your@email.com" />
           <div class="error-text" *ngIf="submitted && f['email'].errors">
-            <span *ngIf="f['email'].errors['email']">Invalid email format</span>
+            <span *ngIf="f['email'].errors['required']">Email is required</span>
+            <span *ngIf="f['email'].errors['email'] && !f['email'].errors['required']">Invalid email format</span>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="mobile" class="form-label">Mobile</label>
+          <label for="mobile" class="form-label">Mobile <span class="required">*</span></label>
           <input type="tel" id="mobile" formControlName="mobile" class="form-input"
-            [class.error]="submitted && f['mobile'].errors" placeholder="+1234567890" />
+            [class.error]="submitted && f['mobile'].errors" placeholder="+91 1234567890" />
           <div class="error-text" *ngIf="submitted && f['mobile'].errors">
-            <span *ngIf="f['mobile'].errors['pattern']">Invalid mobile format</span>
+            <span *ngIf="f['mobile'].errors['required']">Mobile number is required</span>
+            <span *ngIf="f['mobile'].errors['pattern'] && !f['mobile'].errors['required']">Invalid mobile format</span>
           </div>
         </div>
       </div>
@@ -71,24 +83,32 @@
       <!-- Gender and Date of Birth (Grid) -->
       <div class="form-row">
         <div class="form-group">
-          <label for="gender" class="form-label">Gender</label>
-          <select id="gender" formControlName="gender" class="form-input">
+          <label for="gender" class="form-label">Gender <span class="required">*</span></label>
+          <select id="gender" formControlName="gender" class="form-input"
+            [class.error]="submitted && f['gender'].errors">
             <option value="">Select gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             <option value="Other">Other</option>
           </select>
+          <div class="error-text" *ngIf="submitted && f['gender'].errors">
+            <span *ngIf="f['gender'].errors['required']">Gender is required</span>
+          </div>
         </div>
 
         <div class="form-group">
-          <label for="dateOfBirth" class="form-label">Date of Birth</label>
-          <input type="date" id="dateOfBirth" formControlName="dateOfBirth" class="form-input" />
+          <label for="dateOfBirth" class="form-label">Date of Birth <span class="required">*</span></label>
+          <input type="date" id="dateOfBirth" formControlName="dateOfBirth" class="form-input"
+            [class.error]="submitted && f['dateOfBirth'].errors" />
+          <div class="error-text" *ngIf="submitted && f['dateOfBirth'].errors">
+            <span *ngIf="f['dateOfBirth'].errors['required']">Date of birth is required</span>
+          </div>
         </div>
       </div>
       <div class="form-row">
         <!-- Password -->
         <div class="form-group">
-          <label for="password" class="form-label">Password *</label>
+          <label for="password" class="form-label">Password <span class="required">*</span></label>
           <div class="password-wrapper">
             <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password"
               class="form-input" [class.error]="submitted && f['password'].errors" placeholder="Create a password" />
@@ -111,7 +131,7 @@
 
         <!-- Confirm Password -->
         <div class="form-group">
-          <label for="confirmPassword" class="form-label">Confirm Password *</label>
+          <label for="confirmPassword" class="form-label">Confirm Password <span class="required">*</span></label>
           <div class="password-wrapper">
             <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword"
               formControlName="confirmPassword" class="form-input"
@@ -139,7 +159,7 @@
       <!-- Submit Button -->
       <button type="submit" class="submit-button" [disabled]="loading || googleLoading">
         <span *ngIf="!loading">Create Account</span>
-        <span *ngIf="loading" class="loading-spinner">
+        <!-- <span *ngIf="loading" class="loading-spinner">
           <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
             </circle>
@@ -148,16 +168,20 @@
             </path>
           </svg>
           Creating account...
-        </span>
+        </span> -->
       </button>
+      <p class="login-link">By creating an account, you agree to our <a href="terms-conditions" class="link-text">Terms
+          of Service</a> and <a href="privacy-policy" class="link-text">Privacy Policy</a></p>
 
       <!-- Divider -->
       <div class="divider">
-        <span>or</span>
+        <span>
+          <p>Already have an account? <a (click)="navigateToLogin()" class="link-text">Sign in</a></p>
+        </span>
       </div>
 
       <!-- Google Sign-In Button -->
-      <div class="google-btn-wrapper" [class.loading]="googleLoading">
+      <!-- <div class="google-btn-wrapper" [class.loading]="googleLoading">
         <div id="googleBtn"></div>
         <div *ngIf="googleLoading" class="google-loading-overlay">
           <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -168,13 +192,11 @@
           </svg>
           <span>Signing up with Google...</span>
         </div>
-      </div>
+      </div> -->
     </form>
 
     <!-- Login Link -->
     <div class="login-link">
-      <p>Already have an account? <a (click)="navigateToLogin()" class="link-text">Sign in</a></p>
     </div>
   </div>
 </div>
-

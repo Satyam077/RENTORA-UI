@@ -20,6 +20,7 @@ import { GoogleAuthService } from '../../../core/services/google-auth.service';
 })
 export class RegisterComponent implements OnInit, AfterViewInit {
 
+
   logoPath: string = 'assets/Images/appicon.png';
   registerForm!: FormGroup;
   loading = false;
@@ -65,12 +66,13 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     this.registerForm = this.formBuilder.group(
       {
         fullName: ['', [Validators.required, Validators.minLength(2)]],
-        email: ['', [Validators.email]],
-        mobile: ['', [Validators.pattern(/^[0-9+\-\s()]+$/)]],
+        lastName: ['', ],
+        email: ['', [Validators.required, Validators.email]],
+        mobile: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s()]+$/)]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', Validators.required],
-        gender: [''],
-        dateOfBirth: [''],
+        gender: ['', Validators.required],
+        dateOfBirth: ['', Validators.required],
         role: [this.role],
         tenantId: [null],
         ownerId: [null],
@@ -197,11 +199,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     this.success = '';
 
     if (this.registerForm.invalid) {
-      return;
-    }
-
-    if (!this.registerForm.value.email && !this.registerForm.value.mobile) {
-      this.error = 'Please provide either email or mobile number';
       return;
     }
 

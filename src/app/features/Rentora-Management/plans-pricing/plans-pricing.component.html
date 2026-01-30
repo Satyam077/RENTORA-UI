@@ -1,0 +1,150 @@
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="trust-badge">
+            <i class="bi bi-shield-check"></i>
+            <span>Trusted by 10,000+ property managers</span>
+        </div>
+
+        <h1 class="hero-title">
+            Manage Your Properties
+            <span class="gradient-text">Like a Pro</span>
+        </h1>
+
+        <p class="hero-subtitle">
+            The all-in-one property management platform that helps you streamline operations,
+            collect rent effortlessly, and delight your tenants.
+        </p>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing-section">
+    <div class="pricing-container">
+        <div class="section-header">
+            <h2>Choose Your Plan</h2>
+            <p>Start with a 1-month free trial. No credit card required.</p>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading">
+            <div class="loading-spinner"></div>
+            <p>Loading plans...</p>
+        </div>
+
+        <!-- No Plans State -->
+        <div class="no-plans-state" *ngIf="!isLoading && plans.length === 0">
+            <i class="bi bi-inbox"></i>
+            <h3>No Plans Available</h3>
+            <p>Check back soon for our subscription plans.</p>
+        </div>
+
+        <!-- Plans Grid -->
+        <div class="plans-grid" *ngIf="!isLoading && plans.length > 0">
+            <div class="plan-card" *ngFor="let plan of plans; let i = index" [class.popular]="plan.isMarkedAsPopular"
+                [class.featured]="plan.isMarkedAsPopular">
+
+                <!-- Popular Badge -->
+                <div class="popular-ribbon" *ngIf="plan.isMarkedAsPopular">
+                    <span>Most Popular</span>
+                </div>
+
+                <!-- Offer Badge -->
+                <div class="offer-badge" *ngIf="plan.yearlyDiscount > 0 && !plan.isMarkedAsPopular">
+                    <i class="bi bi-lightning-fill"></i>
+                    <span>{{ plan.yearlyDiscount }}% OFF</span>
+                </div>
+
+                <!-- Plan Icon -->
+                <div class="plan-icon"
+                    [style.background]="'linear-gradient(135deg, ' + getPlanIconColor(i, plan.isMarkedAsPopular) + '15, ' + getPlanIconColor(i, plan.isMarkedAsPopular) + '30)'">
+                    <i [class]="getPlanIcon(plan.planName)"
+                        [style.color]="getPlanIconColor(i, plan.isMarkedAsPopular)"></i>
+                </div>
+
+                <!-- Plan Name -->
+                <h3 class="plan-name">{{ plan.planName }}</h3>
+
+                <!-- Plan Description -->
+                <p class="plan-description">{{ plan.description || 'Perfect for property managers looking to grow' }}
+                </p>
+
+                <!-- Plan Price -->
+                <div class="plan-pricing">
+                    <!-- Original Price (crossed out when discount exists) -->
+                    <div class="original-price" *ngIf="plan.yearlyDiscount > 0">
+                        &#8377;{{ plan.price }}
+                    </div>
+
+                    <!-- Current/Discounted Price -->
+                    <div class="current-price">
+                        <span class="currency">&#8377;</span>
+                        <span class="amount">{{ getDiscountedPrice(plan) }}</span>
+                        <span class="period">/mo</span>
+                    </div>
+
+                    <!-- Discount Percentage Badge -->
+                    <div class="discount-badge" *ngIf="plan.yearlyDiscount > 0">
+                        {{ plan.yearlyDiscount }}% discount
+                    </div>
+                </div>
+
+                <!-- Subscribe Button -->
+                <button class="subscribe-btn" [class.primary]="plan.isMarkedAsPopular" (click)="onSubscribe(plan)">
+                    <span>Get Started</span>
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+                <!-- Features List -->
+                <div class="features-section">
+                    <h4 class="features-title">What's included:</h4>
+                    <ul class="features-list">
+                        <li *ngIf="!plan.features || plan.features.length === 0" class="no-features">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Features coming soon</span>
+                        </li>
+                        <li *ngFor="let feature of getSortedFeatures(plan.features || [])" class="feature-item">
+                            <div class="feature-check">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+                            <span>{{ feature.name }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-highlight-section">
+    <div class="features-container">
+        <div class="section-header">
+            <h2>Everything You Need</h2>
+            <p>Powerful features to manage your properties efficiently</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card" *ngFor="let feature of keyFeatures">
+                <div class="feature-icon">
+                    <i [class]="'bi ' + feature.icon"></i>
+                </div>
+                <div class="feature-content">
+                    <h4>{{ feature.title }}</h4>
+                    <p>{{ feature.description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-container">
+        <h2>Ready to Get Started?</h2>
+        <p>Join thousands of property managers who trust Rentora</p>
+        <button class="cta-btn" (click)="onStartFreeTrial()">
+            <span>Start Free Trial</span>
+            <i class="bi bi-arrow-right"></i>
+        </button>
+    </div>
+</section>

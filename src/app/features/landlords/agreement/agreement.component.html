@@ -1,421 +1,421 @@
 <div class="admins-container">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Agreements</h1>
-            <p class="page-subtitle">Manage all your rental agreements in one place</p>
-        </div>
-        <button class="btn btn-primary btn-add" (click)="openAddAgreementModal()">
-            <span class="btn-icon">+</span>
-            Add Agreement
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Agreements</h1>
+      <p class="page-subtitle">Manage all your rental agreements in one place</p>
+    </div>
+    <button class="btn btn-primary btn-add" (click)="openAddAgreementModal()">
+      <span class="btn-icon">+</span>
+      Add Agreement
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="alert alert-success" *ngIf="success" (click)="success = ''">
+    {{ success }}
+  </div>
+  <div class="alert alert-error" *ngIf="error" (click)="error = ''">
+    {{ error }}
+  </div>
+
+  <!-- Main Content Card -->
+  <div class="content-card">
+    <!-- Search and Filter Bar -->
+    <div class="search-filter-bar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Search agreements by number, tenant, property or unit..."
+          [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoadingAgreements" class="loading-state">
+      <p>Loading agreements...</p>
+    </div>
+
+    <!-- Agreements Table -->
+    <div *ngIf="!isLoadingAgreements" class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('agreementNumber')" style="cursor: pointer;">
+              Agreement # {{ sortColumn === 'agreementNumber' ? (sortDirection === 'asc' ? '▲' : '▼') : ''
+              }}
+            </th>
+            <th (click)="sortBy('tenant')" style="cursor: pointer;">
+              Tenant {{ sortColumn === 'tenant' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+            </th>
+            <th (click)="sortBy('property')" style="cursor: pointer;">
+              Property {{ sortColumn === 'property' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+            </th>
+            <th (click)="sortBy('unit')" style="cursor: pointer;">
+              Unit {{ sortColumn === 'unit' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+            </th>
+            <th (click)="sortBy('startDate')" style="cursor: pointer;">
+              Start Date {{ sortColumn === 'startDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+            </th>
+            <th (click)="sortBy('endDate')" style="cursor: pointer;">
+              End Date {{ sortColumn === 'endDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+            </th>
+            <th (click)="sortBy('rentAmount')" style="cursor: pointer;">
+              Rent {{ sortColumn === 'rentAmount' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
+            </th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="getPaginatedAgreements().length === 0">
+            <td colspan="9" class="no-data">No agreements found</td>
+          </tr>
+          <tr *ngFor="let agreement of getPaginatedAgreements()">
+            <td>{{ agreement.agreementNumber }}</td>
+            <td>{{ agreement.tenantName }}</td>
+            <td>{{ agreement.propertyName }}</td>
+            <td>{{ agreement.unitName }}</td>
+            <td>{{ formatDate(agreement.startDate) }}</td>
+            <td>{{ formatDate(agreement.endDate) }}</td>
+            <td>₹{{ agreement.rentAmount | number }}</td>
+            <td>
+              <span class="badge" [ngClass]="getStatusClass(agreement.status)">
+                {{ getAgreementStatusLabel(agreement.status) }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-link" (click)="viewAgreementDetails(agreement)">View</button>
+                <button class="action-link" (click)="editAgreement(agreement)">Edit</button>
+                <button class="action-link" (click)="deleteAgreement(agreement)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="!isLoadingAgreements && filteredAgreements.length > 0" class="pagination">
+      <div class="pagination-info">
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage,
+        filteredAgreements.length) }} of {{ filteredAgreements.length }} agreements
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+          Previous
         </button>
-    </div>
-
-    <!-- Success/Error Messages -->
-    <div class="alert alert-success" *ngIf="success" (click)="success = ''">
-        {{ success }}
-    </div>
-    <div class="alert alert-error" *ngIf="error" (click)="error = ''">
-        {{ error }}
-    </div>
-
-    <!-- Main Content Card -->
-    <div class="content-card">
-        <!-- Search and Filter Bar -->
-        <div class="search-filter-bar">
-            <div class="search-input-wrapper">
-                <span class="search-icon">🔍</span>
-                <input type="text" class="search-input"
-                    placeholder="Search agreements by number, tenant, property or unit..." [(ngModel)]="searchTerm"
-                    (ngModelChange)="onSearchChange()">
-            </div>
+        <div class="pagination-numbers">
+          <button *ngFor="let page of getPageNumbers()" class="pagination-number" [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
         </div>
-
-        <!-- Loading State -->
-        <div *ngIf="isLoadingAgreements" class="loading-state">
-            <p>Loading agreements...</p>
-        </div>
-
-        <!-- Agreements Table -->
-        <div *ngIf="!isLoadingAgreements" class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th (click)="sortBy('agreementNumber')" style="cursor: pointer;">
-                            Agreement # {{ sortColumn === 'agreementNumber' ? (sortDirection === 'asc' ? '▲' : '▼') : ''
-                            }}
-                        </th>
-                        <th (click)="sortBy('tenant')" style="cursor: pointer;">
-                            Tenant {{ sortColumn === 'tenant' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
-                        </th>
-                        <th (click)="sortBy('property')" style="cursor: pointer;">
-                            Property {{ sortColumn === 'property' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
-                        </th>
-                        <th (click)="sortBy('unit')" style="cursor: pointer;">
-                            Unit {{ sortColumn === 'unit' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
-                        </th>
-                        <th (click)="sortBy('startDate')" style="cursor: pointer;">
-                            Start Date {{ sortColumn === 'startDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
-                        </th>
-                        <th (click)="sortBy('endDate')" style="cursor: pointer;">
-                            End Date {{ sortColumn === 'endDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
-                        </th>
-                        <th (click)="sortBy('rentAmount')" style="cursor: pointer;">
-                            Rent {{ sortColumn === 'rentAmount' ? (sortDirection === 'asc' ? '▲' : '▼') : '' }}
-                        </th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngIf="getPaginatedAgreements().length === 0">
-                        <td colspan="9" class="no-data">No agreements found</td>
-                    </tr>
-                    <tr *ngFor="let agreement of getPaginatedAgreements()">
-                        <td>{{ agreement.agreementNumber }}</td>
-                        <td>{{ agreement.tenantName }}</td>
-                        <td>{{ agreement.propertyName }}</td>
-                        <td>{{ agreement.unitName }}</td>
-                        <td>{{ formatDate(agreement.startDate) }}</td>
-                        <td>{{ formatDate(agreement.endDate) }}</td>
-                        <td>₹{{ agreement.rentAmount | number }}</td>
-                        <td>
-                            <span class="badge" [ngClass]="getStatusClass(agreement.status)">
-                                {{ getAgreementStatusLabel(agreement.status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-link" (click)="viewAgreementDetails(agreement)">View</button>
-                                <button class="action-link" (click)="editAgreement(agreement)">Edit</button>
-                                <button class="action-link" (click)="deleteAgreement(agreement)">Delete</button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div *ngIf="!isLoadingAgreements && filteredAgreements.length > 0" class="pagination">
-            <div class="pagination-info">
-                Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage,
-                filteredAgreements.length) }} of {{ filteredAgreements.length }} agreements
-            </div>
-            <div class="pagination-controls">
-                <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
-                    Previous
-                </button>
-                <div class="pagination-numbers">
-                    <button *ngFor="let page of getPageNumbers()" class="pagination-number"
-                        [class.active]="page === currentPage" (click)="goToPage(page)">
-                        {{ page }}
-                    </button>
-                </div>
-                <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
-                    Next
-                </button>
-            </div>
-        </div>
+        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          Next
+        </button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Add/Edit Agreement Modal -->
 <div *ngIf="(isEditingAgreement || isAddingAgreement) && selectedAgreement" class="dialog-overlay"
-    (click)="cancelAgreementEdit()">
-    <div class="dialog-container" (click)="$event.stopPropagation()">
-        <div class="dialog-header">
-            <h3 class="dialog-title">{{ isAddingAgreement ? 'Add Agreement' : 'Edit Agreement' }}</h3>
-            <button class="dialog-close" (click)="cancelAgreementEdit()">&times;</button>
-        </div>
-
-        <div class="dialog-body">
-            <div class="user-form">
-                <!-- Agreement Details -->
-                <div class="form-section">
-                    <h2 class="section-title">Agreement Details</h2>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Agreement Number <span class="required">*</span></label>
-                            <input type="text" [(ngModel)]="selectedAgreement.agreementNumber"
-                                placeholder="Enter agreement number">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Agreement Type <span class="required">*</span></label>
-                            <select [(ngModel)]="selectedAgreement.agreementType">
-                                <option *ngFor="let type of agreementTypes" [value]="type.value">
-                                    {{ type.label }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Status <span class="required">*</span></label>
-                            <select [(ngModel)]="selectedAgreement.status">
-                                <option *ngFor="let status of agreementStatuses" [value]="status.value">
-                                    {{ status.label }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>Agreement Document</label>
-
-                            <!-- File Upload Area -->
-                            <div *ngIf="!selectedAgreement.agreementFileUrl" class="file-upload-area">
-                                <input type="file" #fileInput (change)="onFileSelected($event)"
-                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
-                                <div class="file-upload-box" (click)="fileInput.click()">
-                                    <div *ngIf="!isUploading">
-                                        <span class="upload-icon">📁</span>
-                                        <p class="upload-text">Click to upload or drag and drop</p>
-                                        <p class="upload-hint">PDF, DOC, DOCX, JPG, PNG (Max 10MB)</p>
-                                    </div>
-                                    <div *ngIf="isUploading" class="uploading-state">
-                                        <span class="upload-icon">⏳</span>
-                                        <p class="upload-text">Uploading...</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Uploaded File Display -->
-                            <div *ngIf="selectedAgreement.agreementFileUrl" class="uploaded-file">
-                                <div class="file-info">
-                                    <span class="file-icon">📄</span>
-                                    <span class="file-name">{{ getFileName(selectedAgreement.agreementFileUrl) }}</span>
-                                </div>
-                                <div class="file-actions">
-                                    <a [href]="getFullFileUrl(selectedAgreement.agreementFileUrl)" target="_blank"
-                                        class="btn-view-file">View</a>
-                                    <button type="button" class="btn-remove-file" (click)="removeFile()">Remove</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Property & Unit Details -->
-                <div class="form-section">
-                    <h2 class="section-title">Property & Unit Details</h2>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Property <span class="required">*</span></label>
-                            <select [(ngModel)]="selectedAgreement.propertyId" (ngModelChange)="onPropertyChange()">
-                                <option value="">Select Property</option>
-                                <option *ngFor="let property of properties" [value]="property.id">
-                                    {{ property.propertyName }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Unit <span class="required">*</span></label>
-                            <select [(ngModel)]="selectedAgreement.unitId" (ngModelChange)="onUnitChange()">
-                                <option value="">Select Unit</option>
-                                <option *ngFor="let unit of units" [value]="unit.id">
-                                    {{ unit.unitName }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>Tenant <span class="required">*</span></label>
-                            <select [(ngModel)]="selectedAgreement.tenantId">
-                                <option value="">Select Tenant</option>
-                                <option *ngFor="let tenant of tenants" [value]="tenant.id">
-                                    {{ tenant.fullName }}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Financial Details -->
-                <div class="form-section">
-                    <h2 class="section-title">Financial Details</h2>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Rent Amount <span class="required">*</span></label>
-                            <input type="number" [(ngModel)]="selectedAgreement.rentAmount"
-                                placeholder="Enter rent amount" min="0" step="0.01">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Security Deposit</label>
-                            <input type="number" [(ngModel)]="selectedAgreement.securityDeposit"
-                                placeholder="Enter security deposit" min="0" step="0.01">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Rent Due Day</label>
-                            <input type="number" [(ngModel)]="selectedAgreement.rentDueDay" min="1" max="31"
-                                placeholder="Day of month">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Agreement Period -->
-                <div class="form-section">
-                    <h2 class="section-title">Agreement Period</h2>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Start Date <span class="required">*</span></label>
-                            <input type="date" [(ngModel)]="selectedAgreement.startDate">
-                        </div>
-
-                        <div class="form-group">
-                            <label>End Date <span class="required">*</span></label>
-                            <input type="date" [(ngModel)]="selectedAgreement.endDate">
-                        </div>
-
-                        <div class="form-group full-width"
-                            *ngIf="isEditingAgreement && selectedAgreement.status === AgreementStatus.Terminated">
-                            <label>Terminated On</label>
-                            <input type="date" [(ngModel)]="selectedAgreement.terminatedOn">
-                        </div>
-
-                        <div class="form-group full-width"
-                            *ngIf="isEditingAgreement && selectedAgreement.status === AgreementStatus.Terminated">
-                            <label>Termination Reason</label>
-                            <textarea [(ngModel)]="selectedAgreement.terminationReason" rows="2"
-                                placeholder="Enter termination reason"></textarea>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label>Notes</label>
-                            <textarea [(ngModel)]="selectedAgreement.notes" rows="3"
-                                placeholder="Additional notes about the agreement"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button class="btn btn-secondary" (click)="cancelAgreementEdit()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveAgreement()">
-                {{ isAddingAgreement ? 'Create Agreement' : 'Save Changes' }}
-            </button>
-        </div>
+  (click)="cancelAgreementEdit()">
+  <div class="dialog-container" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h3 class="dialog-title">{{ isAddingAgreement ? 'Add Agreement' : 'Edit Agreement' }}</h3>
+      <button class="dialog-close" (click)="cancelAgreementEdit()">&times;</button>
     </div>
+
+    <div class="dialog-body">
+      <div class="user-form">
+        <!-- Agreement Details -->
+        <div class="form-section">
+          <h2 class="section-title">Agreement Details</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Agreement Number <span class="required">*</span></label>
+              <input class="form-input" type="text" [(ngModel)]="selectedAgreement.agreementNumber"
+                placeholder="Enter agreement number">
+            </div>
+
+            <div class="form-group">
+              <label>Agreement Type <span class="required">*</span></label>
+              <select class="form-input" [(ngModel)]="selectedAgreement.agreementType">
+                <option *ngFor="let type of agreementTypes" [value]="type.value">
+                  {{ type.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Status <span class="required">*</span></label>
+              <select class="form-input" [(ngModel)]="selectedAgreement.status">
+                <option *ngFor="let status of agreementStatuses" [value]="status.value">
+                  {{ status.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Agreement Document</label>
+
+              <!-- File Upload Area -->
+              <div *ngIf="!selectedAgreement.agreementFileUrl" class="file-upload-area">
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                  style="display: none;">
+                <div class="file-upload-box" (click)="fileInput.click()">
+                  <div *ngIf="!isUploading">
+                    <span class="upload-icon">📁</span>
+                    <p class="upload-text">Click to upload or drag and drop</p>
+                    <p class="upload-hint">PDF, DOC, DOCX, JPG, PNG (Max 10MB)</p>
+                  </div>
+                  <div *ngIf="isUploading" class="uploading-state">
+                    <span class="upload-icon">⏳</span>
+                    <p class="upload-text">Uploading...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Uploaded File Display -->
+              <div *ngIf="selectedAgreement.agreementFileUrl" class="uploaded-file">
+                <div class="file-info">
+                  <span class="file-icon">📄</span>
+                  <span class="file-name">{{ getFileName(selectedAgreement.agreementFileUrl) }}</span>
+                </div>
+                <div class="file-actions">
+                  <a [href]="getFullFileUrl(selectedAgreement.agreementFileUrl)" target="_blank"
+                    class="btn-view-file">View</a>
+                  <button type="button" class="btn-remove-file" (click)="removeFile()">Remove</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Property & Unit Details -->
+        <div class="form-section">
+          <h2 class="section-title">Property & Unit Details</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Property <span class="required">*</span></label>
+              <select class="form-input" [(ngModel)]="selectedAgreement.propertyId"
+                (ngModelChange)="onPropertyChange()">
+                <option value="">Select Property</option>
+                <option *ngFor="let property of properties" [value]="property.id">
+                  {{ property.propertyName }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Unit <span class="required">*</span></label>
+              <select class="form-input" [(ngModel)]="selectedAgreement.unitId" (ngModelChange)="onUnitChange()">
+                <option value="">Select Unit</option>
+                <option *ngFor="let unit of units" [value]="unit.id">
+                  {{ unit.unitName }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Tenant <span class="required">*</span></label>
+              <select class="form-input" [(ngModel)]="selectedAgreement.tenantId">
+                <option value="">Select Tenant</option>
+                <option *ngFor="let tenant of tenants" [value]="tenant.id">
+                  {{ tenant.fullName }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Details -->
+        <div class="form-section">
+          <h2 class="section-title">Financial Details</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Rent Amount <span class="required">*</span></label>
+              <input class="form-input" type="number" [(ngModel)]="selectedAgreement.rentAmount"
+                placeholder="Enter rent amount" min="0" step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label>Security Deposit</label>
+              <input class="form-input" type="number" [(ngModel)]="selectedAgreement.securityDeposit"
+                placeholder="Enter security deposit" min="0" step="0.01">
+            </div>
+
+            <div class="form-group">
+              <label>Rent Due Day</label>
+              <input class="form-input" type="number" [(ngModel)]="selectedAgreement.rentDueDay" min="1" max="31"
+                placeholder="Day of month">
+            </div>
+          </div>
+        </div>
+
+        <!-- Agreement Period -->
+        <div class="form-section">
+          <h2 class="section-title">Agreement Period</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Start Date <span class="required">*</span></label>
+              <input class="form-input" type="date" [(ngModel)]="selectedAgreement.startDate">
+            </div>
+
+            <div class="form-group">
+              <label>End Date <span class="required">*</span></label>
+              <input class="form-input" type="date" [(ngModel)]="selectedAgreement.endDate">
+            </div>
+
+            <div class="form-group full-width"
+              *ngIf="isEditingAgreement && selectedAgreement.status === AgreementStatus.Terminated">
+              <label>Terminated On</label>
+              <input class="form-input" type="date" [(ngModel)]="selectedAgreement.terminatedOn">
+            </div>
+
+            <div class="form-group full-width"
+              *ngIf="isEditingAgreement && selectedAgreement.status === AgreementStatus.Terminated">
+              <label>Termination Reason</label>
+              <textarea class="form-input" [(ngModel)]="selectedAgreement.terminationReason" rows="2"
+                placeholder="Enter termination reason"></textarea>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Notes</label>
+              <textarea class="form-input" [(ngModel)]="selectedAgreement.notes" rows="3"
+                placeholder="Additional notes about the agreement"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-secondary" (click)="cancelAgreementEdit()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveAgreement()">
+        {{ isAddingAgreement ? 'Create Agreement' : 'Save Changes' }}
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- View Agreement Modal -->
 <div *ngIf="isViewingAgreement && viewAgreement" class="dialog-overlay" (click)="closeViewModal()">
-    <div class="dialog-container" (click)="$event.stopPropagation()">
-        <div class="dialog-header">
-            <h3 class="dialog-title">Agreement Details</h3>
-            <button class="dialog-close" (click)="closeViewModal()">&times;</button>
-        </div>
-
-        <div class="dialog-body">
-            <div class="view-details">
-                <!-- Agreement Information -->
-                <div class="details-section">
-                    <h3 class="details-section-title">Agreement Information</h3>
-                    <table class="details-table">
-                        <tr>
-                            <th>Agreement Number</th>
-                            <td>{{ viewAgreement.agreementNumber }}</td>
-                        </tr>
-                        <tr>
-                            <th>Agreement Type</th>
-                            <td>{{ getAgreementTypeLabel(viewAgreement.agreementType) }}</td>
-                        </tr>
-                        <tr>
-                            <th>Status</th>
-                            <td>
-                                <span class="badge" [ngClass]="getStatusClass(viewAgreement.status)">
-                                    {{ getAgreementStatusLabel(viewAgreement.status) }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr *ngIf="viewAgreement.agreementFileUrl">
-                            <th>Agreement File</th>
-                            <td><a [href]="getFullFileUrl(viewAgreement.agreementFileUrl)" target="_blank">View
-                                    Document</a></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <!-- Property & Unit Details -->
-                <div class="details-section">
-                    <h3 class="details-section-title">Property & Unit Details</h3>
-                    <table class="details-table">
-                        <tr>
-                            <th>Property</th>
-                            <td>{{ viewAgreement.propertyName }}</td>
-                        </tr>
-                        <tr>
-                            <th>Unit</th>
-                            <td>{{ viewAgreement.unitName }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tenant</th>
-                            <td>{{ viewAgreement.tenantName }}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <!-- Financial Details -->
-                <div class="details-section">
-                    <h3 class="details-section-title">Financial Details</h3>
-                    <table class="details-table">
-                        <tr>
-                            <th>Rent Amount</th>
-                            <td>₹{{ viewAgreement.rentAmount | number }}</td>
-                        </tr>
-                        <tr>
-                            <th>Security Deposit</th>
-                            <td>₹{{ viewAgreement.securityDeposit | number }}</td>
-                        </tr>
-                        <tr>
-                            <th>Rent Due Day</th>
-                            <td>{{ viewAgreement.rentDueDay }}<sup>th</sup> of month</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <!-- Agreement Period -->
-                <div class="details-section">
-                    <h3 class="details-section-title">Agreement Period</h3>
-                    <table class="details-table">
-                        <tr>
-                            <th>Start Date</th>
-                            <td>{{ formatDate(viewAgreement.startDate) }}</td>
-                        </tr>
-                        <tr>
-                            <th>End Date</th>
-                            <td>{{ formatDate(viewAgreement.endDate) }}</td>
-                        </tr>
-                        <tr *ngIf="viewAgreement.terminatedOn">
-                            <th>Terminated On</th>
-                            <td>{{ formatDate(viewAgreement.terminatedOn) }}</td>
-                        </tr>
-                        <tr *ngIf="viewAgreement.terminationReason">
-                            <th>Termination Reason</th>
-                            <td>{{ viewAgreement.terminationReason }}</td>
-                        </tr>
-                        <tr *ngIf="viewAgreement.isRenewed">
-                            <th>Renewed</th>
-                            <td>
-                                <span class="badge badge-active">Yes</span>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-
-                <!-- Notes -->
-                <div class="details-section" *ngIf="viewAgreement.notes">
-                    <h3 class="details-section-title">Notes</h3>
-                    <p class="details-notes">{{ viewAgreement.notes }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button class="btn btn-secondary" (click)="closeViewModal()">Close</button>
-        </div>
+  <div class="dialog-container" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h3 class="dialog-title">Agreement Details</h3>
+      <button class="dialog-close" (click)="closeViewModal()">&times;</button>
     </div>
+
+    <div class="dialog-body">
+      <div class="view-details">
+        <!-- Agreement Information -->
+        <div class="details-section">
+          <h3 class="details-section-title">Agreement Information</h3>
+          <table class="details-table">
+            <tr>
+              <th>Agreement Number</th>
+              <td>{{ viewAgreement.agreementNumber }}</td>
+            </tr>
+            <tr>
+              <th>Agreement Type</th>
+              <td>{{ getAgreementTypeLabel(viewAgreement.agreementType) }}</td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(viewAgreement.status)">
+                  {{ getAgreementStatusLabel(viewAgreement.status) }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="viewAgreement.agreementFileUrl">
+              <th>Agreement File</th>
+              <td><a [href]="getFullFileUrl(viewAgreement.agreementFileUrl)" target="_blank">View
+                  Document</a></td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Property & Unit Details -->
+        <div class="details-section">
+          <h3 class="details-section-title">Property & Unit Details</h3>
+          <table class="details-table">
+            <tr>
+              <th>Property</th>
+              <td>{{ viewAgreement.propertyName }}</td>
+            </tr>
+            <tr>
+              <th>Unit</th>
+              <td>{{ viewAgreement.unitName }}</td>
+            </tr>
+            <tr>
+              <th>Tenant</th>
+              <td>{{ viewAgreement.tenantName }}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Financial Details -->
+        <div class="details-section">
+          <h3 class="details-section-title">Financial Details</h3>
+          <table class="details-table">
+            <tr>
+              <th>Rent Amount</th>
+              <td>₹{{ viewAgreement.rentAmount | number }}</td>
+            </tr>
+            <tr>
+              <th>Security Deposit</th>
+              <td>₹{{ viewAgreement.securityDeposit | number }}</td>
+            </tr>
+            <tr>
+              <th>Rent Due Day</th>
+              <td>{{ viewAgreement.rentDueDay }}<sup>th</sup> of month</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Agreement Period -->
+        <div class="details-section">
+          <h3 class="details-section-title">Agreement Period</h3>
+          <table class="details-table">
+            <tr>
+              <th>Start Date</th>
+              <td>{{ formatDate(viewAgreement.startDate) }}</td>
+            </tr>
+            <tr>
+              <th>End Date</th>
+              <td>{{ formatDate(viewAgreement.endDate) }}</td>
+            </tr>
+            <tr *ngIf="viewAgreement.terminatedOn">
+              <th>Terminated On</th>
+              <td>{{ formatDate(viewAgreement.terminatedOn) }}</td>
+            </tr>
+            <tr *ngIf="viewAgreement.terminationReason">
+              <th>Termination Reason</th>
+              <td>{{ viewAgreement.terminationReason }}</td>
+            </tr>
+            <tr *ngIf="viewAgreement.isRenewed">
+              <th>Renewed</th>
+              <td>
+                <span class="badge badge-active">Yes</span>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Notes -->
+        <div class="details-section" *ngIf="viewAgreement.notes">
+          <h3 class="details-section-title">Notes</h3>
+          <p class="details-notes">{{ viewAgreement.notes }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-secondary" (click)="closeViewModal()">Close</button>
+    </div>
+  </div>
 </div>
