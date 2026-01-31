@@ -329,7 +329,9 @@
         <app-profile></app-profile>
       </div>
       <div *ngIf="activeTab === 'billingRates'" class="tab-panel"> </div>
-      <div *ngIf="activeTab === 'payment'" class="tab-panel"> </div>
+      <div *ngIf="activeTab === 'payment'" class="tab-panel">
+        <app-subscriptions></app-subscriptions>
+      </div>
       <div *ngIf="activeTab === 'notifications'" class="tab-panel"> </div>
       }
     </div>

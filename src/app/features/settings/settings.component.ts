@@ -18,6 +18,7 @@ import { Router } from '@angular/router';
 import { ProfileComponent } from '../../shared/profile/profile.component';
 import { FeaturesComponent } from "../Rentora-Management/features/features.component";
 import { PlansComponent } from "../Rentora-Management/plans/plans.component";
+import { SubscriptionsComponent } from "../landlords/subscriptions/subscriptions.component";
 
 interface NotificationTemplate {
   id: string;
@@ -80,7 +81,8 @@ interface CommunicationLog {
     QuillModule,
     ProfileComponent,
     FeaturesComponent,
-    PlansComponent
+    PlansComponent,
+    SubscriptionsComponent
 ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
