@@ -1,0 +1,22 @@
+<div class="success-page">
+    <div class="success-card">
+        <div class="icon-container">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="success-icon">
+                <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+            </svg>
+        </div>
+        <h1>Payment Successful!</h1>
+        <p class="subtitle">Thank you for your subscription. Your plan is now active.</p>
+
+        <div class="transaction-info" *ngIf="txnId">
+            <span class="label">Transaction ID</span>
+            <span class="value">{{ txnId }}</span>
+        </div>
+
+        <div class="actions">
+            <button class="btn-primary" (click)="goToSubscriptions()">Manage Subscription</button>
+            <button class="btn-secondary" (click)="goToDashboard()">Go to Dashboard</button>
+        </div>
+    </div>
+</div>

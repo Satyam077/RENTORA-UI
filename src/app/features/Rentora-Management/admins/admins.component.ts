@@ -55,7 +55,7 @@ export class AdminsComponent implements OnInit {
     this.usersService.getAllUsers().subscribe({
       next: (res) => {
         const payload: any = res;
-        this.users = Array.isArray(payload) ? payload : payload?.users || [];
+        this.users = Array.isArray(payload) ? payload : payload?.users.filter((user: User) => user.role === Role.Admin || user.role === Role.SuperAdmin) || [];
         this.applyFilters();
         this.loading = false;
       },

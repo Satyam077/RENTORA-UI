@@ -1,1 +1,109 @@
-<h4>Landlords will available soon.</h4>
+<div class="admins-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Manage Landlords</h1>
+      <p class="page-subtitle">Manage all your landlords in one place</p>
+    </div>
+    <button class="btn btn-primary btn-add" (click)="openAddDialog()">
+      <span class="btn-icon">+</span>
+      Add Landlord
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="alert alert-success" *ngIf="successMessage" (click)="successMessage = ''">
+    {{ successMessage }}
+  </div>
+  <div class="alert alert-error" *ngIf="errorMessage" (click)="errorMessage = ''">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Main Content Card -->
+  <div class="content-card">
+    <!-- Search and Filter Bar -->
+    <div class="search-filter-bar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Search users..." [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()">
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <p>Loading users...</p>
+    </div>
+
+    <!-- Users Table -->
+    <div *ngIf="!loading" class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Role</th>
+            <!-- <th>Address</th> -->
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="getpaginatedUsers().length === 0">
+            <td colspan="7" class="no-data">No users found</td>
+          </tr>
+          <tr *ngFor="let user of getpaginatedUsers()">
+            <td>
+              <div class="user-name-cell">
+                <span class="user-name">{{ user.fullName }}</span>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.mobile }}</td>
+            <td>
+              <span class="badge badge-role">{{ getRoleLabel(user.role) }}</span>
+            </td>
+            <td>
+              <span class="badge" [class.badge-active]="user.isActive" [class.badge-inactive]="!user.isActive">
+                {{ user.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-link" (click)="openEditDialog(user)">View</button>
+                <button class="action-link" (click)="openEditDialog(user)">Edit</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="!loading && filteredUsers.length > 0" class="pagination">
+      <div class="pagination-info">
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage,
+        filteredUsers.length) }} of {{ filteredUsers.length }} users
+      </div>
+      <div class="pagination-controls">
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
+          Previous
+        </button>
+        <div class="pagination-numbers">
+          <button *ngFor="let page of getPageNumbers()" class="pagination-number" [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </div>
+        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Dialog -->
+<app-user-dialog *ngIf="showDialog" [user]="dialogUser" (onClose)="closeDialog()" (onSave)="handleDialogSave($event)"
+  (onFileSelectedEvent)="handleFileSelected({ file: $event.file, userId: $event.userId })">
+</app-user-dialog>

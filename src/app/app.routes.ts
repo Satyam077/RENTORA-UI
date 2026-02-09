@@ -128,6 +128,16 @@ export const routes: Routes = [
         component: PaymentsComponent,
         canActivate: [authGuard],
       },
+      {
+        path: 'subscription/payment-success',
+        loadComponent: () => import('./shared/payment-success/payment-success.component').then(m => m.PaymentSuccessComponent),
+        canActivate: [authGuard]
+      },
+      {
+        path: 'subscription/payment-failure',
+        loadComponent: () => import('./shared/payment-failure/payment-failure.component').then(m => m.PaymentFailureComponent),
+        canActivate: [authGuard]
+      },
     ],
   },
   {

@@ -151,22 +151,17 @@ export class PlansPricingComponent implements OnInit {
   }
 
   getPlanIconColor(index: number, isPopular: boolean): string {
-    if (isPopular) return '#6366f1'; // Indigo for popular
+    if (isPopular) return '#6366f1';
     const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'];
     return colors[index % colors.length];
   }
 
   onSubscribe(plan: Plans): void {
-    this.router.navigate(['/subscribe', plan.id]);
-    // Navigate to subscription flow or open subscription modal
-    console.log('Subscribe to plan:', plan);
-    // You can customize this to navigate to a checkout page
-    // this.router.navigate(['/checkout', plan.id]);
+    this.router.navigate(['/register']);
+    //this.router.navigate(['/subscribe', plan.id]);
   }
 
   onStartFreeTrial(): void {
-    // Navigate to free trial signup
-    console.log('Start free trial');
-    // this.router.navigate(['/signup']);
+    this.router.navigate(['/register']);
   }
 }

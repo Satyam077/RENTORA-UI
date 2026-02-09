@@ -43,7 +43,7 @@
           <tr>
             <th>Property Name</th>
             <th>Type</th>
-            <th>Address</th>
+            <!-- <th>Address</th> -->
             <th>Rent Amount(pm)</th>
             <th>Occupancy
               <span>(Occupied/Total)</span>
@@ -65,7 +65,7 @@
             <td>
               <span class="badge badge-role">{{ getPropertyTypeLabel(property.type) }}</span>
             </td>
-            <td>{{ getAddressString(property) }}</td>
+            <!-- <td>{{ getAddressString(property) }}</td> -->
             <td>₹{{ property.defaultRentAmount | number }}</td>
             <td>
               <span class="occupancy-text" [class.fully-occupied]="property.isFullyOccupied">

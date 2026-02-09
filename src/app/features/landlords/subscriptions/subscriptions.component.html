@@ -1,1 +1,423 @@
-<h4>Please upgrade your subscription to access more features.</h4>
+<div class="subscription-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Plans & Billing</h1>
+      <p class="page-subtitle">Manage your subscription, billing, and payment methods</p>
+    </div>
+  </div>
+
+  <!-- Alert Messages -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+      <path
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+    </svg>
+    <span>{{ successMessage }}</span>
+    <button class="close-btn" (click)="clearMessages()">&times;</button>
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorMessage">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+    </svg>
+    <span>{{ errorMessage }}</span>
+    <button class="close-btn" (click)="clearMessages()">&times;</button>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="setActiveTab('overview')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" />
+      </svg>
+      Overview
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'plans'" (click)="setActiveTab('plans')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+      </svg>
+      Plans
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'payment-methods'" (click)="setActiveTab('payment-methods')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
+      </svg>
+      Payment Methods
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="setActiveTab('history')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z" />
+      </svg>
+      Payment History
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading subscription details...</p>
+  </div>
+
+  <!-- Overview Tab -->
+  <div class="tab-content" *ngIf="!isLoading && activeTab === 'overview'">
+    <!-- Trial Banner -->
+    <div class="trial-banner" *ngIf="subscription?.isTrialActive">
+      <div class="trial-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+        </svg>
+      </div>
+      <div class="trial-content">
+        <h3>🎉 You're on a Free Trial!</h3>
+        <p>{{ subscription?.trialDaysRemaining }} days remaining. Upgrade now to keep all features.</p>
+      </div>
+      <button class="btn-upgrade" (click)="setActiveTab('plans')">Upgrade Now</button>
+    </div>
+
+    <!-- Current Plan Card -->
+    <div class="current-plan-card" *ngIf="subscription">
+      <div class="plan-header">
+        <div class="plan-info">
+          <span class="plan-badge" [class]="getStatusClass(subscription.status)">{{ getStatusLabel(subscription.status)
+            }}</span>
+          <h2 class="plan-name">{{ subscription.planName }}</h2>
+          <p class="plan-cycle">{{ subscription.billingCycle === 'yearly' ? 'Annual' : 'Monthly' }} billing</p>
+        </div>
+        <div class="plan-price">
+          <span class="amount">{{ formatCurrency(subscription.price) }}</span>
+          <span class="period">/{{ subscription.billingCycle === 'yearly' ? 'year' : 'month' }}</span>
+        </div>
+      </div>
+
+      <div class="plan-details">
+        <div class="detail-item">
+          <span class="label">Start Date</span>
+          <span class="value">{{ formatDate(subscription.startDate) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">{{ subscription.isTrialActive ? 'Trial Ends' : 'Renewal Date' }}</span>
+          <span class="value">{{ formatDate(subscription.endDate) }}</span>
+        </div>
+        <div class="detail-item" *ngIf="!subscription.isTrialActive">
+          <span class="label">Auto Renew</span>
+          <label class="toggle-switch">
+            <input type="checkbox" [checked]="subscription.autoRenew" (change)="toggleAutoRenew()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="plan-features" *ngIf="subscription.features.length > 0">
+        <h4>Included Features</h4>
+        <ul class="feature-list">
+          <li *ngFor="let feature of subscription.features">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+            </svg>
+            {{ feature }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="plan-actions">
+        <button class="btn-secondary" (click)="setActiveTab('plans')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14l-6-6z" />
+          </svg>
+          {{ subscription.isTrialActive ? 'Choose a Plan' : 'Change Plan' }}
+        </button>
+        <button class="btn-danger-outline"
+          *ngIf="!subscription.isTrialActive && subscription.status !== SubscriptionStatus.Cancelled"
+          (click)="openCancelModal()">
+          Cancel Subscription
+        </button>
+      </div>
+    </div>
+
+    <!-- No Subscription State -->
+    <div class="no-subscription" *ngIf="!subscription">
+      <div class="empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+        </svg>
+      </div>
+      <h3>No Active Subscription</h3>
+      <p>Choose a plan to unlock all features and manage your properties efficiently.</p>
+      <button class="btn-primary" (click)="setActiveTab('plans')">View Plans</button>
+    </div>
+  </div>
+
+  <!-- Plans Tab -->
+  <div class="tab-content" *ngIf="!isLoading && activeTab === 'plans'">
+    <!-- Billing Cycle Toggle -->
+    <div class="billing-toggle">
+      <span [class.active]="selectedBillingCycle === 'monthly'">Monthly</span>
+      <label class="toggle-switch large">
+        <input type="checkbox" [checked]="selectedBillingCycle === 'yearly'"
+          (change)="selectedBillingCycle = selectedBillingCycle === 'monthly' ? 'yearly' : 'monthly'">
+        <span class="toggle-slider"></span>
+      </label>
+      <span [class.active]="selectedBillingCycle === 'yearly'">
+        Yearly
+        <span class="save-badge">Save up to 20%</span>
+      </span>
+    </div>
+
+    <!-- Plans Grid -->
+    <div class="plans-grid">
+      <div class="plan-card" *ngFor="let plan of plans" [class.popular]="plan.isMarkedAsPopular"
+        [class.current]="subscription?.planId === plan.id">
+
+        <div class="popular-badge" *ngIf="plan.isMarkedAsPopular">Most Popular</div>
+        <div class="current-badge" *ngIf="subscription?.planId === plan.id">Current Plan</div>
+
+        <h3 class="plan-title">{{ plan.planName }}</h3>
+        <p class="plan-description">{{ plan.description }}</p>
+
+        <div class="plan-pricing">
+          <span class="price">{{ formatCurrency(getDisplayPrice(plan)) }}</span>
+          <span class="period">/month</span>
+          <div class="original-price" *ngIf="selectedBillingCycle === 'yearly' && plan.yearlyDiscount > 0">
+            <s>{{ formatCurrency(plan.price) }}</s>
+            <span class="discount">{{ plan.yearlyDiscount }}% off</span>
+          </div>
+        </div>
+
+        <div class="yearly-savings" *ngIf="selectedBillingCycle === 'yearly' && getYearlySavings(plan) > 0">
+          Save {{ formatCurrency(getYearlySavings(plan)) }} per year
+        </div>
+
+        <ul class="plan-features-list">
+          <li *ngFor="let feature of plan.features?.slice(0, 6)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+            </svg>
+            {{ feature.name }}
+          </li>
+        </ul>
+
+        <button class="btn-select" [disabled]="subscription?.planId === plan.id && !subscription?.isTrialActive"
+          (click)="selectPlan(plan)">
+          {{ subscription?.planId === plan.id && !subscription?.isTrialActive ? 'Current Plan' :
+          subscription?.isTrialActive ? 'Select Plan' : 'Upgrade' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Methods Tab -->
+  <div class="tab-content" *ngIf="!isLoading && activeTab === 'payment-methods'">
+    <div class="section-header">
+      <h2>Payment Methods</h2>
+      <button class="btn-primary" (click)="openAddPaymentMethodModal()">
+        + Add Payment Method
+      </button>
+    </div>
+
+    <div class="payment-methods-list" *ngIf="paymentMethods.length > 0">
+      <div class="payment-method-card" *ngFor="let method of paymentMethods" [class.default]="method.isDefault">
+        <div class="card-icon">
+          <i [class]="'bi ' + getCardIcon(method.cardType)"></i>
+        </div>
+        <div class="card-details">
+          <div class="card-type">{{ getPaymentMethodLabel(method.cardType) }}</div>
+          <div class="card-number">•••• •••• •••• {{ method.lastFourDigits }}</div>
+          <div class="card-expiry">Expires {{ method.expiryDate }}</div>
+        </div>
+        <div class="card-badges">
+          <span class="default-badge" *ngIf="method.isDefault">Default</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn-icon" *ngIf="!method.isDefault" (click)="setDefaultMethod(method)" title="Set as default">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" />
+            </svg>
+          </button>
+          <button class="btn-icon danger" (click)="deletePaymentMethod(method)" title="Remove">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="paymentMethods.length === 0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
+      </svg>
+      <h3>No Payment Methods</h3>
+      <p>Add a payment method to manage your subscription easily.</p>
+      <button class="btn-primary" (click)="openAddPaymentMethodModal()">Add Payment Method</button>
+    </div>
+  </div>
+
+  <!-- Payment History Tab -->
+  <div class="tab-content" *ngIf="!isLoading && activeTab === 'history'">
+    <div class="section-header">
+      <h2>Payment History</h2>
+    </div>
+
+    <div class="history-table-wrapper" *ngIf="paymentHistory.length > 0">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Transaction ID</th>
+            <th>Amount</th>
+            <th>Payment Mode</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let txn of paymentHistory">
+            <td>{{ formatDate(txn.paymentDate || txn.createdAt) }}</td>
+            <td class="txn-id">{{ txn.transactionId }}</td>
+            <td class="amount">{{ formatCurrency(txn.amount) }}</td>
+            <td>{{ txn.paymentMode || 'None' }}</td>
+            <td>
+              <span class="status-badge" [class]="getStatusClass(txn.status)">{{ getStatusLabel(txn.status) }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" *ngIf="paymentHistory.length === 0">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z" />
+      </svg>
+      <h3>No Payment History</h3>
+      <p>Your payment transactions will appear here.</p>
+    </div>
+  </div>
+
+  <!-- Upgrade Modal -->
+  <div class="modal-overlay" *ngIf="showUpgradeModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirm Upgrade</h3>
+        <button class="modal-close" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedPlan">
+        <div class="upgrade-summary">
+          <div class="plan-summary">
+            <h4>{{ selectedPlan.planName }}</h4>
+            <p>{{ selectedBillingCycle === 'yearly' ? 'Annual' : 'Monthly' }} billing</p>
+          </div>
+          <div class="price-summary">
+            <div class="price-row">
+              <span>Subtotal</span>
+              <span>{{ formatCurrency(getTotalPrice(selectedPlan)) }}</span>
+            </div>
+            <div class="price-row total">
+              <span>Total</span>
+              <span>{{ formatCurrency(getTotalPrice(selectedPlan)) }}</span>
+            </div>
+          </div>
+        </div>
+        <p class="payment-note">You will be redirected to PayU for secure payment.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()" [disabled]="isProcessing">Cancel</button>
+        <button class="btn-primary" (click)="proceedToPayment()" [disabled]="isProcessing">
+          <span *ngIf="!isProcessing">Proceed to Payment</span>
+          <span *ngIf="isProcessing">Processing...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Payment Method Modal -->
+  <div class="modal-overlay" *ngIf="showPaymentMethodModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Payment Method</h3>
+        <button class="modal-close" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Card Number</label>
+          <input type="text" [(ngModel)]="newCard.cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+        </div>
+        <div class="form-group">
+          <label>Cardholder Name</label>
+          <input type="text" [(ngModel)]="newCard.cardHolderName" placeholder="Name on card">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiry Month</label>
+            <select [(ngModel)]="newCard.expiryMonth">
+              <option value="">MM</option>
+              <option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="m < 10 ? '0'+m : m">{{ m < 10 ? '0' +m : m
+                  }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Expiry Year</label>
+            <select [(ngModel)]="newCard.expiryYear">
+              <option value="">YY</option>
+              <option *ngFor="let y of [2024,2025,2026,2027,2028,2029,2030]" [value]="y.toString().slice(-2)">{{
+                y.toString().slice(-2) }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="password" [(ngModel)]="newCard.cvv" placeholder="•••" maxlength="4">
+          </div>
+        </div>
+        <div class="form-group checkbox">
+          <label>
+            <input type="checkbox" [(ngModel)]="newCard.setAsDefault">
+            Set as default payment method
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()" [disabled]="isProcessing">Cancel</button>
+        <button class="btn-primary" (click)="savePaymentMethod()" [disabled]="isProcessing">
+          <span *ngIf="!isProcessing">Save Card</span>
+          <span *ngIf="isProcessing">Saving...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancel Subscription Modal -->
+  <div class="modal-overlay" *ngIf="showCancelModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header warning">
+        <h3>Cancel Subscription</h3>
+        <button class="modal-close" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="warning-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
+          </svg>
+        </div>
+        <p>Are you sure you want to cancel your subscription?</p>
+        <p class="warning-text">You will lose access to premium features at the end of your billing period.</p>
+        <div class="form-group">
+          <label>Reason for cancellation (optional)</label>
+          <textarea [(ngModel)]="cancellationReason" placeholder="Tell us why you're leaving..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()" [disabled]="isProcessing">Keep Subscription</button>
+        <button class="btn-danger" (click)="cancelSubscription()" [disabled]="isProcessing">
+          <span *ngIf="!isProcessing">Cancel Subscription</span>
+          <span *ngIf="isProcessing">Processing...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
