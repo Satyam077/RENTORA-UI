@@ -185,12 +185,6 @@ body {
   }
 }
 
-/* modalSlideIn removed - using dialogSlideIn instead (identical animation) */
-
-/* ============================================
-   5. FORMS
-   ============================================ */
-
 .user-form {
   background: white;
   border-radius: 6px;
@@ -200,8 +194,8 @@ body {
 }
 
 .form-section {
-  margin-bottom: 32px;
-  padding-bottom: 32px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -1376,9 +1370,9 @@ input[type="date"].valid:focus {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.tab-content {
+/* .tab-content {
   padding: 32px;
-}
+} */
 
 .tab-panel {
   animation: fadeIn 0.3s ease-in;
