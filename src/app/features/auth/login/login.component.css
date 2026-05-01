@@ -36,30 +36,6 @@
   overflow: hidden;
 }
 
-.back-btn {
-  position: absolute;
-  top: 1.1rem;
-  left: 1.1rem;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  color: #ffffff;
-  font-size: 1.15rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s, transform 0.2s;
-  z-index: 2;
-}
-
-.back-btn:hover {
-  background: rgba(255, 255, 255, 0.28);
-  transform: translateX(-2px);
-}
 
 .left-logo {
   width: min(85%, 480px);
@@ -154,13 +130,41 @@
 }
 
 .top-login {
-  margin-left: auto;
-  font-size: 0.86rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
   color: var(--text-sub);
+  margin-bottom: 2rem;
+}
+
+.auth-back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  margin-bottom: 0.4rem;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+.auth-back-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.auth-back-btn mat-icon {
+  font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .form-head {
@@ -304,9 +308,10 @@
 }
 
 .form-actions {
-  margin: 0.2rem 0 0.55rem;
+  margin: 0.5rem 0 1rem;
   font-size: 0.82rem;
-  text-align: right;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .create-btn {
@@ -408,10 +413,40 @@
   }
 
   .right-panel {
-    padding: 1.4rem 1.2rem 2rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .top-login {
+    justify-content: center;
+    margin-bottom: 2rem;
+    order: 2; /* Move below the form for better flow on mobile */
+  }
+
+  .form-head {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .field-group label {
+    font-size: 0.85rem;
   }
 
   .create-btn {
     width: 100%;
+    height: 48px;
+    font-size: 1rem;
+  }
+
+  .form-actions {
+    justify-content: center;
+  }
+  .auth-back-btn {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.4rem;
+  }
+
+  .auth-back-btn span {
+    display: none;
   }
 }

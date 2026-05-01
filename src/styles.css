@@ -2813,7 +2813,7 @@ section-title {
 }
 
 /* ============================================
-   RENTORA HOMEPAGE STYLES
+   Rentmizo HOMEPAGE STYLES
    Modern, Premium Design with Pink-Rose Gradient
    ============================================ */
 
@@ -3868,12 +3868,93 @@ section-title {
   }
 }
 
-html,
-body {
-  height: 100%;
+/* ============================================
+   16. AUTH BACK BUTTON
+   ============================================ */
+
+.auth-back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  text-decoration: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+.auth-back-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.auth-back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+  .auth-back-btn {
+    top: 1rem;
+    left: 1rem;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+
+  .auth-back-btn span {
+    display: none; /* Only show icon on mobile to save space */
+  }
+}
+
+/* ============================================
+   4. SCROLL ANIMATIONS
+   ============================================ */
+
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modern Scroll-Driven Animation (Chrome/Edge/Opera) */
+.section-card,
+.feature-card,
+.stat-card,
+.action-card,
+.app-feature-item {
+  animation: revealUp linear both;
+  animation-timeline: view();
+  animation-range: entry 5% cover 30%;
+}
+
+/* Fallback for browsers that don't support scroll-timeline */
+@supports not (animation-timeline: view()) {
+  .section-card,
+  .feature-card,
+  .stat-card,
+  .action-card,
+  .app-feature-item {
+    animation: revealUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
 }

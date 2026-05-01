@@ -123,46 +123,57 @@
 }
 
 /* Responsive Design */
-@media (max-width: 992px) {
+@media (max-width: 768px) {
   .navbar {
-    padding: 12px 0;
-    position: relative;
+    padding: 10px 0;
+    position: fixed; /* Keep it at top */
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(107, 44, 92, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
 
   .nav-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
+    padding: 0 15px;
+  }
+
+  .logo-image {
+    width: 35px;
+    height: 35px;
   }
 
   .logo-text {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .nav-links {
-    flex-direction: column;
-    width: 100%;
-    gap: 12px;
+    gap: 8px;
   }
 
   .nav-link {
     display: none;
   }
 
-  .btn-login,
-  .btn-register {
-    width: 100%;
-    justify-content: center;
-    padding: 12px 20px;
-    font-size: 14px;
-    border-radius: 12px;
-  }
-
   .btn-login {
-    order: 1; /* Ensure Login is on top */
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .btn-login svg {
+    width: 14px;
+    height: 14px;
   }
 
   .btn-register {
-    order: 2; /* Ensure Register is below */
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-text {
+    display: none; /* Hide text on very small screens to save space */
   }
 }

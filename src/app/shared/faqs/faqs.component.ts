@@ -17,32 +17,32 @@ interface FaqItem {
 export class FaqsComponent {
   faqs: FaqItem[] = [
     {
-      question: 'What is Rentora PMS?',
-      answer: 'Rentora is a property management system that helps landlords manage properties, tenants, rent, electricity bills, maintenance, and agreements in one place.'
+      question: 'What is Rentmizo PMS?',
+      answer: 'Rentmizo is a property management system that helps landlords manage properties, tenants, rent, electricity bills, maintenance, and agreements in one place.'
     },
     {
-      question: 'Who can use Rentora?',
-      answer: 'Rentora is designed for: Property owners / landlords, Real estate agents, Tenants, and Small societies and PG owners.'
+      question: 'Who can use Rentmizo?',
+      answer: 'Rentmizo is designed for: Property owners / landlords, Real estate agents, Tenants, and Small societies and PG owners.'
     },
     {
-      question: 'Is Rentora available on mobile and web?',
-      answer: 'Yes. Rentora works on both web browsers and mobile apps, so you can manage your property anytime, anywhere.'
+      question: 'Is Rentmizo available on mobile and web?',
+      answer: 'Yes. Rentmizo works on both web browsers and mobile apps, so you can manage your property anytime, anywhere.'
     },
     {
       question: 'Do tenants need to register themselves?',
       answer: 'No. Tenants are added by the landlord or admin. Tenants receive an invitation and log in using OTP/Password.'
     },
     {
-      question: 'How do tenants log in to Rentora?',
+      question: 'How do tenants log in to Rentmizo?',
       answer: 'Tenants log in using their mobile number or email with OTP/Password.'
     },
     {
-      question: 'Can I manage multiple properties in Rentora?',
+      question: 'Can I manage multiple properties in Rentmizo?',
       answer: 'Yes. You can add and manage multiple properties and units under one account.'
     },
     {
-      question: 'How is rent calculated in Rentora?',
-      answer: 'Rentora allows you to: Set fixed monthly rent, Add electricity usage (per unit), and Add maintenance charges. All are combined into one monthly bill.'
+      question: 'How is rent calculated in Rentmizo?',
+      answer: 'Rentmizo allows you to: Set fixed monthly rent, Add electricity usage (per unit), and Add maintenance charges. All are combined into one monthly bill.'
     },
     {
       question: 'Can electricity bills change every month?',
@@ -57,8 +57,8 @@ export class FaqsComponent {
       answer: 'Yes. Tenants can clearly see: Rent amount, Electricity charges, Maintenance charges, and Total payable amount.'
     },
     {
-      question: 'Does Rentora send rent reminders?',
-      answer: 'Yes. Rentora can send: Bill generation notifications, Rent due reminders, and Overdue payment alerts. This reduces manual follow-ups.'
+      question: 'Does Rentmizo send rent reminders?',
+      answer: 'Yes. Rentmizo can send: Bill generation notifications, Rent due reminders, and Overdue payment alerts. This reduces manual follow-ups.'
     },
     {
       question: 'Can tenants raise maintenance complaints?',
@@ -66,15 +66,15 @@ export class FaqsComponent {
     },
     {
       question: 'Can I upload rental agreements and documents?',
-      answer: 'Yes. Rentora allows you to upload and store: Rental agreements, Tenant ID proofs, and Property documents.'
+      answer: 'Yes. Rentmizo allows you to upload and store: Rental agreements, Tenant ID proofs, and Property documents.'
     },
     {
-      question: 'Does Rentora support online payments?',
+      question: 'Does Rentmizo support online payments?',
       answer: 'Online payment support can be enabled. For early users, payments can also be marked manually.'
     },
     {
-      question: 'Is Rentora safe and secure?',
-      answer: 'Yes. Rentora uses secure login, role-based access, and data protection to keep your information safe.'
+      question: 'Is Rentmizo safe and secure?',
+      answer: 'Yes. Rentmizo uses secure login, role-based access, and data protection to keep your information safe.'
     },
     {
       question: 'Can I track paid and pending rent?',
@@ -89,11 +89,11 @@ export class FaqsComponent {
       answer: 'You can mark the tenant as moved out. The unit becomes vacant, and tenant access is disabled.'
     },
     {
-      question: 'Is Rentora suitable for small landlords?',
-      answer: 'Yes. Rentora is perfect for: Owners with 2–3 properties, Owners with 10–50 units. It grows with your needs.'
+      question: 'Is Rentmizo suitable for small landlords?',
+      answer: 'Yes. Rentmizo is perfect for: Owners with 2–3 properties, Owners with 10–50 units. It grows with your needs.'
     },
     {
-      question: 'How do I get started with Rentora?',
+      question: 'How do I get started with Rentmizo?',
       answer: 'Simply register as a landlord, add your property and tenants, and start managing everything from one dashboard.'
     }
   ];

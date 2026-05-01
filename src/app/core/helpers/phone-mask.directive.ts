@@ -18,8 +18,9 @@ export class PhoneMaskDirective implements OnInit {
     });
   }
 
-  @HostListener('input', ['$event.target.value'])
-  onInput(value: string) {
+  @HostListener('input', ['$event'])
+  onInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
     this.formatValue(value);
   }
 

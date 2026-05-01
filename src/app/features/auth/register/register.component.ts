@@ -11,6 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Role } from '../../../core/models/role.enum';
 import { GoogleAuthService } from '../../../core/services/google-auth.service';
 import { PhoneMaskDirective } from '../../../core/helpers/phone-mask.directive';
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-register',
@@ -19,7 +20,8 @@ import { PhoneMaskDirective } from '../../../core/helpers/phone-mask.directive';
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
-    PhoneMaskDirective
+    PhoneMaskDirective,
+    MatIconModule
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
@@ -69,7 +71,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     this.registerForm = this.formBuilder.group(
       {
         fullName: ['', [Validators.required, Validators.minLength(2)]],
-        lastName: ['', ],
+        lastName: ['',],
         email: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,10}$')]],
         mobile: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s()]+$/)]],
         password: ['', [Validators.required, Validators.minLength(6)]],

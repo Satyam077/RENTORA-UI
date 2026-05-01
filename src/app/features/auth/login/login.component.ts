@@ -11,6 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Role } from '../../../core/models/role.enum';
 import { dashboardRoutes } from '../../../core/guards/role.guard';
 import { GoogleAuthService } from '../../../core/services/google-auth.service';
+import { MatIconModule } from "@angular/material/icon";
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ import { GoogleAuthService } from '../../../core/services/google-auth.service';
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
+    MatIconModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
@@ -41,7 +43,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private authService: AuthService,
     private googleAuth: GoogleAuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {

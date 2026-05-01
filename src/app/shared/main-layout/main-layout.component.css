@@ -20,8 +20,17 @@
 /* Page Content */
 .page-content {
   flex: 1;
-  padding: 15px;
-  background-color: #f5f7fa;
+  padding: 24px;
+  background-color: #f4f7fa; /* Contrast background */
+}
+
+.content-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2f6;
+  min-height: calc(100vh - 100px);
 }
 
 /* Responsive Design */

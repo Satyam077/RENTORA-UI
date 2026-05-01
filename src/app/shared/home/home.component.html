@@ -11,7 +11,7 @@
                 <br> No More Tenant Hassles.
             </h1>
             <p class="hero-subtitle">
-                Streamline your property management with RENTORA - The all-in-one platform for landlords,
+                Streamline your property management with Rentmizo - The all-in-one platform for landlords,
                 property managers, and real estate professionals
             </p>
             <div class="hero-actions">
@@ -76,68 +76,70 @@
 
 <!-- Features Section -->
 <section id="features" class="features-section">
-    <div class="section-container">
-        <div class="section-header-center">
-            <h2 class="section-title">Comprehensive Property Management Features</h2>
-            <p class="section-description">
-                Everything you need to manage your properties efficiently in one powerful platform
-            </p>
-        </div>
+    <div class="section-card">
+        <div class="section-container">
+            <div class="section-header-center">
+                <h2 class="section-title">Comprehensive Property Management Features</h2>
+                <p class="section-description">
+                    Everything you need to manage your properties efficiently in one powerful platform
+                </p>
+            </div>
 
-        <div class="features-grid">
-            <div class="feature-card" *ngFor="let feature of features">
-                <div class="feature-icon" [ngClass]="'icon-' + feature.icon">
-                    <!-- Property Icon -->
-                    <svg *ngIf="feature.icon === 'property'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="1.5">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
+            <div class="features-grid">
+                <div class="feature-card" *ngFor="let feature of features">
+                    <div class="feature-icon" [ngClass]="'icon-' + feature.icon">
+                        <!-- Property Icon -->
+                        <svg *ngIf="feature.icon === 'property'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
 
-                    <!-- Tenant Icon -->
-                    <svg *ngIf="feature.icon === 'tenant'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="1.5">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
+                        <!-- Tenant Icon -->
+                        <svg *ngIf="feature.icon === 'tenant'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
 
-                    <!-- Payment Icon -->
-                    <svg *ngIf="feature.icon === 'payment'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="1.5">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                    </svg>
+                        <!-- Payment Icon -->
+                        <svg *ngIf="feature.icon === 'payment'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
 
-                    <!-- Maintenance Icon -->
-                    <svg *ngIf="feature.icon === 'maintenance'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="1.5">
-                        <path
-                            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
-                        </path>
-                    </svg>
+                        <!-- Maintenance Icon -->
+                        <svg *ngIf="feature.icon === 'maintenance'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5">
+                            <path
+                                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+                            </path>
+                        </svg>
 
-                    <!-- Agreement Icon -->
-                    <svg *ngIf="feature.icon === 'agreement'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="1.5">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
+                        <!-- Agreement Icon -->
+                        <svg *ngIf="feature.icon === 'agreement'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
 
-                    <!-- Analytics Icon -->
-                    <svg *ngIf="feature.icon === 'analytics'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="1.5">
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                    </svg>
+                        <!-- Analytics Icon -->
+                        <svg *ngIf="feature.icon === 'analytics'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">{{ feature.title }}</h3>
+                    <p class="feature-description">{{ feature.description }}</p>
                 </div>
-                <h3 class="feature-title">{{ feature.title }}</h3>
-                <p class="feature-description">{{ feature.description }}</p>
             </div>
         </div>
     </div>
@@ -145,136 +147,140 @@
 
 <!-- Stats Section -->
 <section id="about" class="stats-section">
-    <div class="section-container">
-        <div class="section-header-center">
-            <h2 class="section-title">Our Journey</h2>
-            <p class="section-description">
-                At RENTORA, we focus on complete property management ecosystem solutions. Our numbers are just a
-                reflection of the same!
-            </p>
-        </div>
+    <div class="section-card">
+        <div class="section-container">
+            <div class="section-header-center">
+                <h2 class="section-title">Our Journey</h2>
+                <p class="section-description">
+                    At Rentmizo, we focus on complete property management ecosystem solutions. Our numbers are just a
+                    reflection of the same!
+                </p>
+            </div>
 
-        <div class="stats-grid">
-            <div class="stat-card" *ngFor="let stat of stats">
-                <div class="stat-icon">
-                    <!-- Building Icon -->
-                    <svg *ngIf="stat.icon === 'building'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>
+            <div class="stats-grid">
+                <div class="stat-card" *ngFor="let stat of stats">
+                    <div class="stat-icon">
+                        <!-- Building Icon -->
+                        <svg *ngIf="stat.icon === 'building'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
 
-                    <!-- Users Icon -->
-                    <svg *ngIf="stat.icon === 'users'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
+                        <!-- Users Icon -->
+                        <svg *ngIf="stat.icon === 'users'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
 
-                    <!-- Trust Icon -->
-                    <svg *ngIf="stat.icon === 'trust'" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-label">{{ stat.label }}</h3>
-                    <p class="stat-value">{{ stat.value }}</p>
+                        <!-- Trust Icon -->
+                        <svg *ngIf="stat.icon === 'trust'" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-label">{{ stat.label }}</h3>
+                        <p class="stat-value">{{ stat.value }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="cta-button-wrapper">
-            <button class="btn-cta" (click)="navigateToRegister()">Get Started</button>
+            <div class="cta-button-wrapper">
+                <button class="btn-cta" (click)="navigateToRegister()">Get Started</button>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- App Showcase Section -->
 <section class="app-section">
-    <div class="section-container">
-        <div class="app-content">
-          <img [src]="logoPath" alt="RENTORA DETAILS" class="app-mockup-image" style="border-radius: 70px;"/>
-            <!-- <div class="app-mockup">
-                <div class="phone-frame">
-                    <div class="phone-screen">
-                        <div class="app-header">
-                            <div class="app-logo-small">
-                                <svg width="32" height="32" viewBox="0 0 40 40" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <rect width="40" height="40" rx="8" fill="url(#gradient2)" />
-                                    <path
-                                        d="M12 18L20 12L28 18V30C28 30.5304 27.7893 31.0391 27.4142 31.4142C27.0391 31.7893 26.5304 32 26 32H14C13.4696 32 12.9609 31.7893 12.5858 31.4142C12.2107 31.0391 12 30.5304 12 30V18Z"
-                                        stroke="white" stroke-width="2" />
-                                    <defs>
-                                        <linearGradient id="gradient2" x1="0" y1="0" x2="40" y2="40"
-                                            gradientUnits="userSpaceOnUse">
-                                            <stop stop-color="#c2407c" />
-                                            <stop offset="1" stop-color="#6b2c5c" />
-                                        </linearGradient>
-                                    </defs>
+    <div class="section-card">
+        <div class="section-container">
+            <div class="app-content">
+              <img [src]="logoPath" alt="Rentmizo DETAILS" class="app-mockup-image" style="border-radius: 70px;"/>
+                <!-- <div class="app-mockup">
+                    <div class="phone-frame">
+                        <div class="phone-screen">
+                            <div class="app-header">
+                                <div class="app-logo-small">
+                                    <svg width="32" height="32" viewBox="0 0 40 40" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="40" height="40" rx="8" fill="url(#gradient2)" />
+                                        <path
+                                            d="M12 18L20 12L28 18V30C28 30.5304 27.7893 31.0391 27.4142 31.4142C27.0391 31.7893 26.5304 32 26 32H14C13.4696 32 12.9609 31.7893 12.5858 31.4142C12.2107 31.0391 12 30.5304 12 30V18Z"
+                                            stroke="white" stroke-width="2" />
+                                        <defs>
+                                            <linearGradient id="gradient2" x1="0" y1="0" x2="40" y2="40"
+                                                gradientUnits="userSpaceOnUse">
+                                                <stop stop-color="#c2407c" />
+                                                <stop offset="1" stop-color="#6b2c5c" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                <span class="app-title-small">Rentmizo</span>
+                            </div>
+                            <div class="app-stats-mini">
+                                <div class="mini-stat">
+                                    <span class="mini-label">Properties</span>
+                                    <span class="mini-value">24</span>
+                                </div>
+                                <div class="mini-stat">
+                                    <span class="mini-label">Tenants</span>
+                                    <span class="mini-value">156</span>
+                                </div>
+                                <div class="mini-stat">
+                                    <span class="mini-label">Revenue</span>
+                                    <span class="mini-value">₹2.4M</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+                <div class="app-text">
+                    <h2 class="app-section-title">Your partners in your digital journey</h2>
+                    <div class="app-feature-list">
+                        <div class="app-feature-item">
+                            <div class="check-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
                             </div>
-                            <span class="app-title-small">RENTORA</span>
-                        </div>
-                        <div class="app-stats-mini">
-                            <div class="mini-stat">
-                                <span class="mini-label">Properties</span>
-                                <span class="mini-value">24</span>
-                            </div>
-                            <div class="mini-stat">
-                                <span class="mini-label">Tenants</span>
-                                <span class="mini-value">156</span>
-                            </div>
-                            <div class="mini-stat">
-                                <span class="mini-label">Revenue</span>
-                                <span class="mini-value">₹2.4M</span>
+                            <div class="app-feature-text">
+                                <h4>Rentmizo For Landlords</h4>
+                                <p>From property listing to tenant management, the Rentmizo platform empowers landlords with
+                                    complete control</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div> -->
-            <div class="app-text">
-                <h2 class="app-section-title">Your partners in your digital journey</h2>
-                <div class="app-feature-list">
-                    <div class="app-feature-item">
-                        <div class="check-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
+                        <div class="app-feature-item">
+                            <div class="check-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <div class="app-feature-text">
+                                <h4>Rentmizo For Property Managers</h4>
+                                <p>Streamline operations, automate workflows, and manage multiple properties with ease</p>
+                            </div>
                         </div>
-                        <div class="app-feature-text">
-                            <h4>RENTORA For Landlords</h4>
-                            <p>From property listing to tenant management, the RENTORA platform empowers landlords with
-                                complete control</p>
-                        </div>
-                    </div>
-                    <div class="app-feature-item">
-                        <div class="check-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                        </div>
-                        <div class="app-feature-text">
-                            <h4>RENTORA For Property Managers</h4>
-                            <p>Streamline operations, automate workflows, and manage multiple properties with ease</p>
-                        </div>
-                    </div>
-                    <div class="app-feature-item">
-                        <div class="check-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                        </div>
-                        <div class="app-feature-text">
-                            <h4>RENTORA For Tenants</h4>
-                            <p>Easy rent payments, maintenance requests, and seamless communication with landlords</p>
+                        <div class="app-feature-item">
+                            <div class="check-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <div class="app-feature-text">
+                                <h4>Rentmizo For Tenants</h4>
+                                <p>Easy rent payments, maintenance requests, and seamless communication with landlords</p>
+                            </div>
                         </div>
                     </div>
                 </div>

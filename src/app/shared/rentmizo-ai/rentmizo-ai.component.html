@@ -1,0 +1,50 @@
+<div class="chatbot-container">
+    <!-- Chat Bubble Icon -->
+    <div class="chatbot-bubble" (click)="toggleChat()" *ngIf="!isOpen">
+        <div class="typing-preview">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <img [src]="botAvatar" alt="Rentmizo AI">
+        <div class="notification-badge">1</div>
+    </div>
+
+    <!-- Chat Window -->
+    <div class="chat-window" *ngIf="isOpen">
+        <div class="chat-header">
+            <img [src]="botAvatar" alt="Rentmizo AI" class="header-avatar">
+            <div class="header-info">
+                <h3>Rentmizo Assistant</h3>
+                <span>Online | Powered by AI</span>
+            </div>
+            <button class="close-btn" (click)="toggleChat()">&times;</button>
+        </div>
+
+        <div class="chat-messages" #scrollContainer>
+            <div *ngFor="let msg of messages" class="message" [ngClass]="msg.type === 'bot' ? 'bot-message' : 'user-message'">
+                {{ msg.text }}
+            </div>
+            <div *ngIf="isTyping" class="message bot-message">
+                <i>Rentmizo is typing...</i>
+            </div>
+        </div>
+
+        <!-- Quick Questions Suggestions -->
+        <div class="quick-questions">
+            <div *ngFor="let q of faqs" class="question-chip" (click)="selectQuestion(q)">
+                {{ q.question }}
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" [(ngModel)]="userInput" (keyup.enter)="sendMessage()" placeholder="Type your question here...">
+            <button class="send-btn" (click)="sendMessage()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>

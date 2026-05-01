@@ -2,12 +2,15 @@
 
   <!-- LEFT PANEL: gradient side (projects will be added here later) -->
   <section class="left-panel">
-    <button class="back-btn" (click)="navigateToLanding()" aria-label="Back to home">&#8592;</button>
-    <!-- <img [src]="logoPath" alt="Rentora Home" class="left-logo" /> -->
+    <button class="auth-back-btn" (click)="navigateToLanding()" aria-label="Back to home">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Back to Home</span>
+    </button>
+    <!-- <img [src]="logoPath" alt="Rentmizo Home" class="left-logo" /> -->
     <!-- Projects placeholder — content to be added later -->
     <div class="left-content">
       <h2 class="value-headline">Manage Your Properties.<br>Grow Your Income.</h2>
-      <p class="value-subtext">Rentora helps you manage tenants, track rent, automate billing, and stay organized — all
+      <p class="value-subtext">Rentmizo helps you manage tenants, track rent, automate billing, and stay organized — all
         in one powerful platform.</p>
       <ul class="value-highlights">
         <li><span class="icon">📊</span> Real-time rent tracking & reports</li>
@@ -27,7 +30,7 @@
 
     <div class="form-head">
       <h1>Register as a Property Owner</h1>
-      <p>Let Rentora manage your rent, tenants and bills - all in one place.</p>
+      <p>Let Rentmizo manage your rent, tenants and bills - all in one place.</p>
     </div>
 
     <div *ngIf="success" class="notice success">{{ success }}</div>
