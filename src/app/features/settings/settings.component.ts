@@ -16,49 +16,27 @@ import {
 import { Role } from '../../core/models/role.enum';
 import { Router } from '@angular/router';
 import { ProfileComponent } from '../../shared/profile/profile.component';
-import { FeaturesComponent } from "../Rentora-Management/features/features.component";
-import { PlansComponent } from "../Rentora-Management/plans/plans.component";
-import { SubscriptionsComponent } from "../landlords/subscriptions/subscriptions.component";
+import { FeaturesComponent } from '../Rentora-Management/features/features.component';
+import { PlansComponent } from '../Rentora-Management/plans/plans.component';
+import { SubscriptionsComponent } from '../landlords/subscriptions/subscriptions.component';
 
-interface NotificationTemplate {
-  id: string;
-  name: string;
-  type: 'email' | 'sms' | 'whatsapp';
-  subject?: string;
-  content: string;
-  isActive: boolean;
-}
-
-interface GlobalSetting {
-  paymentGateway: string;
-  billingPlan: string;
-  currency: string;
-  taxRate: number;
-  lateFeePercentage: number;
-  gracePeriodDays: number;
-}
-
-interface IntegrationConfig {
-  email: {
-    provider: string;
-    apiKey: string;
-    senderEmail: string;
-    senderName: string;
-    isEnabled: boolean;
-  };
-  sms: {
-    provider: string;
-    apiKey: string;
-    senderId: string;
-    isEnabled: boolean;
-  };
-  whatsapp: {
-    provider: string;
-    apiKey: string;
-    phoneNumber: string;
-    isEnabled: boolean;
-  };
-}
+// Angular Material
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDialogModule } from '@angular/material/dialog';
+import { SpinnerComponent } from '../../shared/spinner/spinner.component';
+import { BillingComponent } from "../landlords/billing/billing.component";
 
 interface CommunicationLog {
   id: string;
@@ -82,7 +60,24 @@ interface CommunicationLog {
     ProfileComponent,
     FeaturesComponent,
     PlansComponent,
-    SubscriptionsComponent
+    SubscriptionsComponent,
+    // Angular Material
+    MatTabsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatSlideToggleModule,
+    MatTableModule,
+    MatTooltipModule,
+    MatSnackBarModule,
+    MatDividerModule,
+    MatDialogModule,
+    SpinnerComponent,
+    BillingComponent
 ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
@@ -92,7 +87,6 @@ export class SettingsComponent implements OnInit {
 
   roles?: Role[];
   role: number = 0;
-
 
   // Email Templates
   emailTemplates: EmailTemplate[] = [];
@@ -144,71 +138,6 @@ export class SettingsComponent implements OnInit {
     ],
   };
 
-  // Notification Templates (old mock data - keeping for backward compatibility)
-  notificationTemplates: NotificationTemplate[] = [
-    {
-      id: '1',
-      name: 'Welcome Email',
-      type: 'email',
-      subject: 'Welcome to RENTORA',
-      content:
-        'Dear {{name}}, Welcome to RENTORA property management system...',
-      isActive: true,
-    },
-    {
-      id: '2',
-      name: 'Payment Reminder',
-      type: 'sms',
-      content:
-        'Hi {{name}}, Your rent payment of {{amount}} is due on {{date}}.',
-      isActive: true,
-    },
-    {
-      id: '3',
-      name: 'Maintenance Update',
-      type: 'whatsapp',
-      content:
-        'Hello {{name}}, Your maintenance request #{{ticketId}} has been updated.',
-      isActive: true,
-    },
-  ];
-
-  selectedTemplate: NotificationTemplate | null = null;
-  isEditingTemplate = false;
-
-  // Global Settings
-  globalSettings: GlobalSetting = {
-    paymentGateway: 'stripe',
-    billingPlan: 'monthly',
-    currency: 'USD',
-    taxRate: 10,
-    lateFeePercentage: 5,
-    gracePeriodDays: 3,
-  };
-
-  // Integration Configs
-  integrationConfig: IntegrationConfig = {
-    email: {
-      provider: 'SendGrid',
-      apiKey: '',
-      senderEmail: 'noreply@rentora.com',
-      senderName: 'RENTORA',
-      isEnabled: false,
-    },
-    sms: {
-      provider: 'Twilio',
-      apiKey: '',
-      senderId: 'RENTORA',
-      isEnabled: false,
-    },
-    whatsapp: {
-      provider: 'Twilio',
-      apiKey: '',
-      phoneNumber: '',
-      isEnabled: false,
-    },
-  };
-
   // Communication Logs
   communicationLogs: CommunicationLog[] = [
     {
@@ -243,13 +172,13 @@ export class SettingsComponent implements OnInit {
   filteredLogs: CommunicationLog[] = [...this.communicationLogs];
   logFilterType: string = 'all';
   logFilterStatus: string = 'all';
+  logsDisplayedColumns = ['recipient', 'type', 'subject', 'status', 'sentAt', 'actions'];
 
   constructor(
     private emailTemplateService: EmailTemplateService,
     private router: Router,
-  ) {}
-
-
+    private snackBar: MatSnackBar,
+  ) { }
 
   ngOnInit(): void {
     const json = sessionStorage.getItem('currentUser');
@@ -261,38 +190,7 @@ export class SettingsComponent implements OnInit {
     const currentUser = JSON.parse(json);
     this.role = Number(currentUser.user?.role) as Role;
 
-    // Set default active tab based on role
-    if (this.role === 1 || this.role === 2) {
-      this.activeTab = 'templates';
-    } else if (this.role === 3) {
-      this.activeTab = 'profiles';
-    }
-
     this.loadEmailTemplates();
-  }
-activeTab:
-    | 'templates'
-    | 'features'
-    | 'plans'
-    | 'integrations'
-    | 'logs'
-    | 'profiles'
-    | 'billingRates'
-    | 'payment'
-    | 'notifications' = 'templates';
-  setActiveTab(
-    tab:
-      | 'templates'
-      | 'features'
-    | 'plans'
-      | 'integrations'
-      | 'logs'
-      | 'profiles'
-      | 'billingRates'
-      | 'payment'
-      | 'notifications',
-  ) {
-    this.activeTab = tab;
   }
 
   // Email Template Methods
@@ -305,7 +203,7 @@ activeTab:
       },
       error: (error) => {
         this.isLoadingTemplates = false;
-        this.error = 'Failed to load email templates. Please try again later.';
+        this.showSnackBar('Failed to load email templates.', 'error');
       },
     });
   }
@@ -337,7 +235,6 @@ activeTab:
   saveEmailTemplate(): void {
     if (!this.selectedEmailTemplate) return;
 
-    // Clear previous messages
     this.error = '';
     this.success = '';
 
@@ -346,12 +243,11 @@ activeTab:
       !this.selectedEmailTemplate.emailSubject ||
       !this.selectedEmailTemplate.emailBody
     ) {
-      this.error = 'Please fill in all required fields';
+      this.showSnackBar('Please fill in all required fields', 'error');
       return;
     }
 
     if (this.isAddingEmailTemplate) {
-      // Create new template
       const createRequest: EmailTemplateCreateRequest = {
         templateName: this.selectedEmailTemplate.templateName,
         emailSubject: this.selectedEmailTemplate.emailSubject,
@@ -362,36 +258,18 @@ activeTab:
 
       this.emailTemplateService.createTemplate(createRequest).subscribe({
         next: (response: any) => {
-          console.log('Create response:', response);
-
-          // Handle response structure - could be direct template or wrapped response
           const template = response.data || response;
-          const message =
-            response.message || 'Email template created successfully!';
-
+          const message = response.message || 'Email template created successfully!';
           this.emailTemplates.unshift(template);
-          this.success = message;
+          this.showSnackBar(message);
           this.cancelEmailTemplateEdit();
-
-          // Auto-clear success message after 5 seconds
-          setTimeout(() => {
-            this.success = '';
-          }, 5000);
         },
         error: (err) => {
-          if (err.error?.message) {
-            this.error = err.error.message;
-          } else if (typeof err.error === 'string') {
-            this.error = err.error;
-          } else if (err.message) {
-            this.error = err.message;
-          } else {
-            this.error = 'Failed to create email template. Please try again.';
-          }
+          const msg = err.error?.message || err.error || err.message || 'Failed to create email template.';
+          this.showSnackBar(typeof msg === 'string' ? msg : 'Failed to create template.', 'error');
         },
       });
     } else if (this.isEditingEmailTemplate && this.selectedEmailTemplate.id) {
-      // Update existing template
       const updateRequest: EmailTemplateUpdateRequest = {
         id: this.selectedEmailTemplate.id,
         templateName: this.selectedEmailTemplate.templateName,
@@ -405,33 +283,15 @@ activeTab:
       this.emailTemplateService.updateTemplate(updateRequest).subscribe({
         next: (response: any) => {
           const template = response.data || response;
-          const message =
-            response.message || 'Email template updated successfully!';
-
-          const index = this.emailTemplates.findIndex(
-            (t) => t.id === template.id,
-          );
-          if (index !== -1) {
-            this.emailTemplates[index] = template;
-          }
-
-          this.success = message;
+          const message = response.message || 'Email template updated successfully!';
+          const index = this.emailTemplates.findIndex((t) => t.id === template.id);
+          if (index !== -1) this.emailTemplates[index] = template;
+          this.showSnackBar(message);
           this.cancelEmailTemplateEdit();
-
-          setTimeout(() => {
-            this.success = '';
-          }, 5000);
         },
         error: (err) => {
-          if (err.error?.message) {
-            this.error = err.error.message;
-          } else if (typeof err.error === 'string') {
-            this.error = err.error;
-          } else if (err.message) {
-            this.error = err.message;
-          } else {
-            this.error = 'Failed to update email template. Please try again.';
-          }
+          const msg = err.error?.message || err.error || err.message || 'Failed to update email template.';
+          this.showSnackBar(typeof msg === 'string' ? msg : 'Failed to update template.', 'error');
         },
       });
     }
@@ -440,19 +300,14 @@ activeTab:
   deleteEmailTemplate(template: EmailTemplate): void {
     if (!template.id) return;
 
-    if (
-      confirm(
-        `Are you sure you want to delete the template "${template.templateName}"?`,
-      )
-    ) {
+    if (confirm(`Are you sure you want to delete the template "${template.templateName}"?`)) {
       this.emailTemplateService.deleteTemplate(template.id).subscribe({
         next: () => {
-          this.emailTemplates = this.emailTemplates.filter(
-            (t) => t.id !== template.id,
-          );
+          this.emailTemplates = this.emailTemplates.filter((t) => t.id !== template.id);
+          this.showSnackBar('Template deleted successfully!');
         },
-        error: (error) => {
-          alert('Failed to delete email template. Please try again.');
+        error: () => {
+          this.showSnackBar('Failed to delete email template.', 'error');
         },
       });
     }
@@ -474,11 +329,9 @@ activeTab:
     this.emailTemplateService.updateTemplate(updatedTemplate).subscribe({
       next: (updated) => {
         const index = this.emailTemplates.findIndex((t) => t.id === updated.id);
-        if (index !== -1) {
-          this.emailTemplates[index] = updated;
-        }
+        if (index !== -1) this.emailTemplates[index] = updated;
       },
-      error: (error) => {},
+      error: () => { },
     });
   }
 
@@ -492,66 +345,39 @@ activeTab:
     return ApplicableForLabels[applicableFor] || 'Unknown';
   }
 
-  editTemplate(template: NotificationTemplate) {
-    this.selectedTemplate = { ...template };
-    this.isEditingTemplate = true;
-  }
-
-  saveTemplate() {
-    if (this.selectedTemplate) {
-      const index = this.notificationTemplates.findIndex(
-        (t) => t.id === this.selectedTemplate!.id,
-      );
-      if (index !== -1) {
-        this.notificationTemplates[index] = { ...this.selectedTemplate };
-      }
-      this.cancelEditTemplate();
-    }
-  }
-
-  cancelEditTemplate() {
-    this.selectedTemplate = null;
-    this.isEditingTemplate = false;
-  }
-
-  toggleTemplateStatus(template: NotificationTemplate) {
-    template.isActive = !template.isActive;
-  }
-
-  saveGlobalSettings() {
-    console.log('Saving global settings:', this.globalSettings);
-  }
-
-  saveIntegrationConfig() {
-    console.log('Saving integration config:', this.integrationConfig);
-    alert('Integration settings saved successfully!');
-  }
-
-  testIntegration(type: 'email' | 'sms' | 'whatsapp') {
-    console.log(`Testing ${type} integration...`);
-    alert(`Testing ${type} integration... Check your console for details.`);
-  }
-
   // Communication Logs Methods
   filterLogs() {
     this.filteredLogs = this.communicationLogs.filter((log) => {
-      const typeMatch =
-        this.logFilterType === 'all' || log.type === this.logFilterType;
-      const statusMatch =
-        this.logFilterStatus === 'all' || log.status === this.logFilterStatus;
+      const typeMatch = this.logFilterType === 'all' || log.type === this.logFilterType;
+      const statusMatch = this.logFilterStatus === 'all' || log.status === this.logFilterStatus;
       return typeMatch && statusMatch;
     });
   }
 
   viewLogDetails(log: CommunicationLog) {
-    alert(
-      `Log Details:\n\nRecipient: ${log.recipient}\nType: ${log.type}\nSubject: ${log.subject}\nStatus: ${log.status}\nSent: ${log.sentAt}\nMessage: ${log.message}`,
-    );
+    this.showSnackBar(`${log.type.toUpperCase()} to ${log.recipient}: ${log.message}`);
   }
 
   retryFailedLog(log: CommunicationLog) {
-    console.log('Retrying failed log:', log);
     log.status = 'pending';
-    alert('Retrying to send message...');
+    this.showSnackBar('Retrying to send message...');
+  }
+
+  getStatusChipColor(status: string): string {
+    switch (status) {
+      case 'sent': return 'accent';
+      case 'failed': return 'warn';
+      case 'pending': return 'primary';
+      default: return 'primary';
+    }
+  }
+
+  private showSnackBar(message: string, type: 'success' | 'error' = 'success'): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: type === 'error' ? ['snack-bar-error'] : ['snack-bar-success'],
+    });
   }
 }

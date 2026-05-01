@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,6 +11,23 @@ import {
   PaymentFormData,
 } from '../../../core/services/subscription.service';
 
+// Angular Material
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { SpinnerComponent } from '../../../shared/spinner/spinner.component';
+
 interface User {
   id: string;
   fullName: string;
@@ -21,7 +38,25 @@ interface User {
 @Component({
   selector: 'app-subscriptions',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatTabsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatSlideToggleModule,
+    MatDividerModule,
+    MatTooltipModule,
+    MatCheckboxModule,
+    MatSnackBarModule,
+    SpinnerComponent,
+  ],
   templateUrl: './subscriptions.component.html',
   styleUrl: './subscriptions.component.css',
 })
@@ -34,7 +69,6 @@ export class SubscriptionsComponent implements OnInit {
 
   isLoading = true;
   isProcessing = false;
-  activeTab: 'overview' | 'plans' | 'payment-methods' | 'history' = 'overview';
 
   // Modal states
   showUpgradeModal = false;
@@ -46,7 +80,6 @@ export class SubscriptionsComponent implements OnInit {
   selectedBillingCycle: 'monthly' | 'yearly' = 'monthly';
   cancellationReason = '';
 
-  // New payment method form
   newCard = {
     cardNumber: '',
     cardHolderName: '',
@@ -56,11 +89,8 @@ export class SubscriptionsComponent implements OnInit {
     setAsDefault: true,
   };
 
-  // Status messages
-  successMessage = '';
-  errorMessage = '';
+  historyColumns = ['date', 'transactionId', 'amount', 'paymentMode', 'status'];
 
-  // Expose Enum to Template
   public SubscriptionStatus = SubscriptionStatus;
   public PaymentMethodType = PaymentMethodType;
 
@@ -68,6 +98,7 @@ export class SubscriptionsComponent implements OnInit {
     private subscriptionService: SubscriptionService,
     private router: Router,
     private route: ActivatedRoute,
+    private snackBar: MatSnackBar,
   ) { }
 
   ngOnInit(): void {
@@ -89,67 +120,37 @@ export class SubscriptionsComponent implements OnInit {
   checkUrlParams(): void {
     this.route.queryParams.subscribe((params) => {
       if (params['status'] === 'success') {
-        this.successMessage =
-          'Payment successful! Your subscription has been activated.';
+        this.showSnackBar('Payment successful! Your subscription has been activated.');
         this.loadSubscriptionData();
       } else if (params['status'] === 'failed') {
-        this.errorMessage =
-          params['error'] || 'Payment failed. Please try again.';
+        this.showSnackBar(params['error'] || 'Payment failed. Please try again.', 'error');
       }
     });
   }
 
   loadSubscriptionData(): void {
     if (!this.currentUser) return;
-
     this.isLoading = true;
 
-    // Load current subscription
-    this.subscriptionService
-      .getCurrentSubscription(this.currentUser.id)
-      .subscribe({
-        next: (data) => {
-          this.subscription = data;
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('Error loading subscription:', err);
-          this.subscription = null;
-          this.isLoading = false;
-        },
-      });
+    this.subscriptionService.getCurrentSubscription(this.currentUser.id).subscribe({
+      next: (data) => { this.subscription = data; this.isLoading = false; },
+      error: () => { this.subscription = null; this.isLoading = false; },
+    });
 
-    // Load plans
     this.subscriptionService.getPlans().subscribe({
-      next: (data) => {
-        this.plans = data;
-      },
-      error: (err) => console.error('Error loading plans:', err),
+      next: (data) => this.plans = data,
+      error: () => { },
     });
 
-    // Load payment methods
     this.subscriptionService.getPaymentMethods(this.currentUser.id).subscribe({
-      next: (data) => {
-        this.paymentMethods = data;
-      },
-      error: (err) => console.error('Error loading payment methods:', err),
+      next: (data) => this.paymentMethods = data,
+      error: () => { },
     });
 
-    // Load payment history
     this.subscriptionService.getPaymentHistory(this.currentUser.id).subscribe({
-      next: (data) => {
-        this.paymentHistory = data;
-        console.log('Payment history loaded:', data);
-      },
-      error: (err) => console.error('Error loading payment history:', err),
+      next: (data) => this.paymentHistory = data,
+      error: () => { },
     });
-  }
-
-  setActiveTab(
-    tab: 'overview' | 'plans' | 'payment-methods' | 'history',
-  ): void {
-    this.activeTab = tab;
-    this.clearMessages();
   }
 
   // Plan selection and upgrade
@@ -167,9 +168,7 @@ export class SubscriptionsComponent implements OnInit {
 
   getTotalPrice(plan: Plan): number {
     const monthlyPrice = this.getDisplayPrice(plan);
-    return this.selectedBillingCycle === 'yearly'
-      ? monthlyPrice * 12
-      : monthlyPrice;
+    return this.selectedBillingCycle === 'yearly' ? monthlyPrice * 12 : monthlyPrice;
   }
 
   getYearlySavings(plan: Plan): number {
@@ -181,39 +180,28 @@ export class SubscriptionsComponent implements OnInit {
 
   proceedToPayment(): void {
     if (!this.selectedPlan || !this.currentUser) return;
-
     this.isProcessing = true;
-    this.clearMessages();
 
     this.subscriptionService
       .initiatePayment(
-        {
-          planId: this.selectedPlan.id,
-          billingCycle: this.selectedBillingCycle,
-        },
-        this.currentUser.id,
-        this.currentUser.email,
-        this.currentUser.fullName,
-        this.currentUser.mobile,
+        { planId: this.selectedPlan.id, billingCycle: this.selectedBillingCycle },
+        this.currentUser.id, this.currentUser.email,
+        this.currentUser.fullName, this.currentUser.mobile,
       )
       .subscribe({
         next: (response: any) => {
           this.isProcessing = false;
           this.showUpgradeModal = false;
-
           if (response.isFree) {
-            // Free plan activated directly
-            this.successMessage = response.message;
+            this.showSnackBar(response.message);
             this.loadSubscriptionData();
           } else {
-            // Submit to PayU
             this.subscriptionService.submitPaymentForm(response);
           }
         },
-        error: (err) => {
+        error: () => {
           this.isProcessing = false;
-          this.errorMessage = 'Failed to initiate payment. Please try again.';
-          console.error('Payment initiation error:', err);
+          this.showSnackBar('Failed to initiate payment.', 'error');
         },
       });
   }
@@ -225,69 +213,37 @@ export class SubscriptionsComponent implements OnInit {
   }
 
   resetCardForm(): void {
-    this.newCard = {
-      cardNumber: '',
-      cardHolderName: '',
-      expiryMonth: '',
-      expiryYear: '',
-      cvv: '',
-      setAsDefault: true,
-    };
+    this.newCard = { cardNumber: '', cardHolderName: '', expiryMonth: '', expiryYear: '', cvv: '', setAsDefault: true };
   }
 
   savePaymentMethod(): void {
     if (!this.currentUser) return;
-
     this.isProcessing = true;
-
-    this.subscriptionService
-      .addPaymentMethod(this.currentUser.id, this.newCard)
-      .subscribe({
-        next: () => {
-          this.isProcessing = false;
-          this.showPaymentMethodModal = false;
-          this.successMessage = 'Payment method added successfully.';
-          this.loadSubscriptionData();
-        },
-        error: (err) => {
-          this.isProcessing = false;
-          this.errorMessage = 'Failed to add payment method.';
-          console.error('Add payment method error:', err);
-        },
-      });
+    this.subscriptionService.addPaymentMethod(this.currentUser.id, this.newCard).subscribe({
+      next: () => {
+        this.isProcessing = false;
+        this.showPaymentMethodModal = false;
+        this.showSnackBar('Payment method added successfully.');
+        this.loadSubscriptionData();
+      },
+      error: () => { this.isProcessing = false; this.showSnackBar('Failed to add payment method.', 'error'); },
+    });
   }
 
   deletePaymentMethod(method: PaymentMethod): void {
-    if (!confirm('Are you sure you want to remove this payment method?'))
-      return;
-
+    if (!confirm('Are you sure you want to remove this payment method?')) return;
     this.subscriptionService.deletePaymentMethod(method.id).subscribe({
-      next: () => {
-        this.successMessage = 'Payment method removed successfully.';
-        this.loadSubscriptionData();
-      },
-      error: (err) => {
-        this.errorMessage = 'Failed to remove payment method.';
-        console.error('Delete payment method error:', err);
-      },
+      next: () => { this.showSnackBar('Payment method removed.'); this.loadSubscriptionData(); },
+      error: () => this.showSnackBar('Failed to remove payment method.', 'error'),
     });
   }
 
   setDefaultMethod(method: PaymentMethod): void {
     if (!this.currentUser) return;
-
-    this.subscriptionService
-      .setDefaultPaymentMethod(this.currentUser.id, method.id)
-      .subscribe({
-        next: () => {
-          this.successMessage = 'Default payment method updated.';
-          this.loadSubscriptionData();
-        },
-        error: (err) => {
-          this.errorMessage = 'Failed to update default payment method.';
-          console.error('Set default method error:', err);
-        },
-      });
+    this.subscriptionService.setDefaultPaymentMethod(this.currentUser.id, method.id).subscribe({
+      next: () => { this.showSnackBar('Default payment method updated.'); this.loadSubscriptionData(); },
+      error: () => this.showSnackBar('Failed to update default method.', 'error'),
+    });
   }
 
   // Subscription management
@@ -298,51 +254,37 @@ export class SubscriptionsComponent implements OnInit {
 
   cancelSubscription(): void {
     if (!this.subscription) return;
-
     this.isProcessing = true;
-
-    this.subscriptionService
-      .cancelSubscription(this.subscription.id, this.cancellationReason)
-      .subscribe({
-        next: () => {
-          this.isProcessing = false;
-          this.showCancelModal = false;
-          this.successMessage = 'Subscription cancelled successfully.';
-          this.loadSubscriptionData();
-        },
-        error: (err) => {
-          this.isProcessing = false;
-          this.errorMessage = 'Failed to cancel subscription.';
-          console.error('Cancel subscription error:', err);
-        },
-      });
+    this.subscriptionService.cancelSubscription(this.subscription.id, this.cancellationReason).subscribe({
+      next: () => {
+        this.isProcessing = false;
+        this.showCancelModal = false;
+        this.showSnackBar('Subscription cancelled successfully.');
+        this.loadSubscriptionData();
+      },
+      error: () => { this.isProcessing = false; this.showSnackBar('Failed to cancel subscription.', 'error'); },
+    });
   }
 
   toggleAutoRenew(): void {
-    // TODO: Implement auto-renew toggle
-    this.successMessage = 'Auto-renew setting updated.';
+    this.showSnackBar('Auto-renew setting updated.');
+  }
+
+  closeModal(): void {
+    this.showUpgradeModal = false;
+    this.showPaymentMethodModal = false;
+    this.showCancelModal = false;
   }
 
   // Utilities
-  clearMessages(): void {
-    this.successMessage = '';
-    this.errorMessage = '';
-  }
-
-  getStatusClass(status: number): string {
+  getStatusChipColor(status: number): string {
     switch (status) {
-      case SubscriptionStatus.Active:
-        return 'status-success';
-      case SubscriptionStatus.Trial:
-        return 'status-trial';
+      case SubscriptionStatus.Active: return 'accent';
+      case SubscriptionStatus.Trial: return 'primary';
       case SubscriptionStatus.Cancelled:
       case SubscriptionStatus.Expired:
-      case SubscriptionStatus.PastDue:
-        return 'status-danger';
-      case SubscriptionStatus.Paused:
-        return 'status-warning'; // Assuming you have a warning class or reuse pending
-      default:
-        return 'status-default';
+      case SubscriptionStatus.PastDue: return 'warn';
+      default: return 'primary';
     }
   }
 
@@ -355,51 +297,36 @@ export class SubscriptionsComponent implements OnInit {
     return PaymentMethodType[type] || 'Unknown';
   }
 
-  getCardIcon(cardType: string | number): string {
-    const label = this.getPaymentMethodLabel(cardType);
-    const type = label.toLowerCase();
-    if (type === 'visa') return 'bi-credit-card-2-front';
-    if (type === 'mastercard') return 'bi-credit-card';
-    if (type === 'rupay') return 'bi-credit-card-fill';
-    if (type === 'amex') return 'bi-credit-card-2-back';
-    return 'bi-credit-card';
+  getCardMatIcon(cardType: string | number): string {
+    const label = this.getPaymentMethodLabel(cardType).toLowerCase();
+    if (label === 'upi') return 'account_balance';
+    if (label === 'netbanking') return 'account_balance';
+    if (label === 'wallet') return 'account_balance_wallet';
+    return 'credit_card';
   }
 
   formatDate(date: Date | string | undefined): string {
     if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return new Date(date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amount);
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
   }
 
-  closeModal(): void {
-    this.showUpgradeModal = false;
-    this.showPaymentMethodModal = false;
-    this.showCancelModal = false;
+  private showSnackBar(message: string, type: 'success' | 'error' = 'success'): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: type === 'error' ? ['snack-bar-error'] : ['snack-bar-success'],
+    });
   }
 }
 
 export enum SubscriptionStatus {
-  Trial = 1,
-  Active = 2,
-  Paused = 3,
-  Cancelled = 4,
-  Expired = 5,
-  PastDue = 6
+  Trial = 1, Active = 2, Paused = 3, Cancelled = 4, Expired = 5, PastDue = 6,
 }
 export enum PaymentMethodType {
-  Card = 1,
-  Upi = 2,
-  NetBanking = 3,
-  Wallet = 4
+  Card = 1, Upi = 2, NetBanking = 3, Wallet = 4,
 }

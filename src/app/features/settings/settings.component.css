@@ -1,0 +1,142 @@
+/* Modern Tabs Design */
+::ng-deep .custom-tabs .mat-mdc-tab-header {
+    background: transparent !important;
+    border-bottom: none !important;
+    margin-bottom: 24px;
+}
+
+::ng-deep .custom-tabs .mat-mdc-tab-label-container {
+    padding: 8px;
+    background: white;
+    border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    display: inline-flex;
+    width: auto;
+}
+
+::ng-deep .custom-tabs .mat-mdc-tab {
+    min-width: 140px;
+    padding: 0 24px !important;
+    height: 48px !important;
+    border-radius: 40px;
+    transition: all 0.3s ease;
+    opacity: 1 !important;
+    margin-right: 8px;
+}
+
+::ng-deep .custom-tabs .mat-mdc-tab:hover {
+    background-color: rgba(63, 81, 181, 0.04);
+}
+
+/* Active tab style */
+::ng-deep .custom-tabs .mat-mdc-tab.mdc-tab--active {
+    background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%);
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+}
+
+::ng-deep .custom-tabs .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+    color: white !important;
+    font-weight: 600;
+}
+
+/* Hide the default ink bar */
+::ng-deep .custom-tabs .mat-mdc-tab-group__ink-bar {
+    display: none !important;
+}
+
+/* Tab Icon */
+.tab-icon {
+    margin-right: 8px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+/* Content Area */
+.tab-content {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f0f0f0;
+    min-height: 400px;
+}
+
+/* Template Cards */
+.template-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 16px !important;
+    border: 1px solid #eee;
+    overflow: hidden;
+}
+
+.template-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-card {
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 20px !important;
+    overflow: hidden;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+}
+
+/* Small Chips in Table */
+.small-chip {
+    font-size: 11px !important;
+    min-height: 24px !important;
+    padding: 0 8px !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

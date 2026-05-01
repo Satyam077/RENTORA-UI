@@ -7,41 +7,77 @@ import {
   UnitModel,
   UnitCreateRequest,
   UnitUpdateRequest,
-  PropertyOption
+  PropertyOption,
 } from '../../../core/models/unit.model';
 import { PropertyModel } from '../../../core/models/property.model';
+
+// Angular Material
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+
+import {
+  UnitFormDialogComponent,
+  UnitFormDialogData,
+} from '../../../popups/unit-form-dialog/unit-form-dialog.component';
+import {
+  UnitViewDialogComponent,
+  UnitViewDialogData,
+} from '../../../popups/unit-view-dialog/unit-view-dialog.component';
+import { ConfirmationDialogComponent } from '../../../popups/confirmation-dialog/confirmation-dialog.component';
+import { SpinnerComponent } from '../../../shared/spinner/spinner.component';
 
 @Component({
   selector: 'app-units',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
+    MatChipsModule,
+    MatDividerModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatPaginatorModule,
+    SpinnerComponent,
+  ],
   templateUrl: './units.component.html',
-  styleUrl: './units.component.css'
+  styleUrl: './units.component.css',
 })
 export class UnitsComponent implements OnInit {
   units: UnitModel[] = [];
   filteredUnits: UnitModel[] = [];
-  selectedUnit: UnitModel | null = null;
-  isEditingUnit = false;
-  isAddingUnit = false;
   isLoadingUnits = false;
-  success = '';
-  error = '';
-  searchTerm: string = '';
   properties: PropertyOption[] = [];
 
   // Pagination
-  currentPage: number = 1;
-  itemsPerPage: number = 12;
-  totalPages: number = 1;
+  pageSize = 12;
+  pageIndex = 0;
 
   // Current user (owner) ID
-  currentOwnerId: string = '';
+  currentOwnerId = '';
 
   constructor(
     private unitService: UnitService,
-    private propertyService: PropertyService
-  ) {}
+    private propertyService: PropertyService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+  ) { }
 
   ngOnInit(): void {
     const currentUser = sessionStorage.getItem('currentUser');
@@ -59,12 +95,11 @@ export class UnitsComponent implements OnInit {
         if (response.success && response.data) {
           this.properties = response.data.map((prop: PropertyModel) => ({
             id: prop.id || '',
-            propertyName: prop.propertyName
+            propertyName: prop.propertyName,
           }));
         }
       },
-      error: (err) => {
-      }
+      error: () => { },
     });
   }
 
@@ -76,31 +111,29 @@ export class UnitsComponent implements OnInit {
         if (response.success && response.data) {
           this.units = response.data;
           this.filteredUnits = [...this.units];
-          this.updatePagination();
         } else {
-          this.error = response.message || 'Failed to load units';
+          this.showSnackBar(response.message || 'Failed to load units', 'error');
         }
       },
-      error: (err) => {
+      error: () => {
         this.isLoadingUnits = false;
-        this.error = 'Error loading units. Please try again.';
-      }
+        this.showSnackBar('Error loading units. Please try again.', 'error');
+      },
     });
   }
 
-  onSearchChange(): void {
-    if (!this.searchTerm.trim()) {
+  applyFilter(event: Event): void {
+    const term = (event.target as HTMLInputElement).value.toLowerCase().trim();
+    if (!term) {
       this.filteredUnits = [...this.units];
     } else {
-      const term = this.searchTerm.toLowerCase();
       this.filteredUnits = this.units.filter(
         (unit) =>
           unit.unitName.toLowerCase().includes(term) ||
-          this.getPropertyName(unit.propertyId)?.toLowerCase().includes(term)
+          this.getPropertyName(unit.propertyId)?.toLowerCase().includes(term),
       );
     }
-    this.currentPage = 1;
-    this.updatePagination();
+    this.pageIndex = 0;
   }
 
   getPropertyName(propertyId: string): string {
@@ -108,8 +141,20 @@ export class UnitsComponent implements OnInit {
     return property ? property.propertyName : 'Unknown Property';
   }
 
-  openAddUnitModal(): void {
-    this.selectedUnit = {
+  getPaginatedUnits(): UnitModel[] {
+    const start = this.pageIndex * this.pageSize;
+    return this.filteredUnits.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageSize = event.pageSize;
+    this.pageIndex = event.pageIndex;
+  }
+
+  // --- Dialog Operations ---
+
+  openAddUnitDialog(): void {
+    const newUnit: UnitModel = {
       ownerId: this.currentOwnerId,
       propertyId: '',
       unitName: '',
@@ -118,180 +163,142 @@ export class UnitsComponent implements OnInit {
       isOccupied: false,
       dueDay: 5,
       notes: '',
-      createdBy: this.currentOwnerId
+      createdBy: this.currentOwnerId,
     };
-    this.isAddingUnit = true;
-    this.isEditingUnit = false;
-    this.error = '';
-    this.success = '';
-  }
 
-  editUnit(unit: UnitModel): void {
-    this.selectedUnit = { ...unit };
-    this.isEditingUnit = true;
-    this.isAddingUnit = false;
-    this.error = '';
-    this.success = '';
-  }
+    const dialogRef = this.dialog.open(UnitFormDialogComponent, {
+      width: '700px',
+      data: {
+        mode: 'add',
+        unit: newUnit,
+        properties: this.properties,
+      } as UnitFormDialogData,
+    });
 
-  cancelUnitEdit(): void {
-    this.selectedUnit = null;
-    this.isEditingUnit = false;
-    this.isAddingUnit = false;
-    this.error = '';
-  }
-
-  saveUnit(): void {
-    if (!this.selectedUnit) return;
-
-    if (!this.selectedUnit.propertyId) {
-      this.error = 'Please select a property';
-      return;
-    }
-
-    if (!this.selectedUnit.unitName?.trim()) {
-      this.error = 'Unit name is required';
-      return;
-    }
-
-    if (this.selectedUnit.rentAmount <= 0) {
-      this.error = 'Rent amount must be greater than 0';
-      return;
-    }
-
-    if (this.isAddingUnit) {
+    dialogRef.afterClosed().subscribe((result: UnitModel | undefined) => {
+      if (!result) return;
       const createRequest: UnitCreateRequest = {
-        ownerId: this.selectedUnit.ownerId,
-        propertyId: this.selectedUnit.propertyId,
-        tenantId: this.selectedUnit.tenantId ?? '',
-        unitName: this.selectedUnit.unitName,
-        rentAmount: this.selectedUnit.rentAmount,
-        securityDeposit: this.selectedUnit.securityDeposit || 0,
-        isOccupied: this.selectedUnit.isOccupied || false,
-        dueDay: this.selectedUnit.dueDay || 5,
-        notes: this.selectedUnit.notes || '',
-        createdBy: this.currentOwnerId
+        ownerId: result.ownerId,
+        propertyId: result.propertyId,
+        tenantId: result.tenantId ?? '',
+        unitName: result.unitName,
+        rentAmount: result.rentAmount,
+        securityDeposit: result.securityDeposit || 0,
+        isOccupied: result.isOccupied || false,
+        dueDay: result.dueDay || 5,
+        notes: result.notes || '',
+        createdBy: this.currentOwnerId,
       };
 
       this.unitService.createUnit(createRequest).subscribe({
         next: (response) => {
           if (response.success) {
-            this.success = 'Unit created successfully';
-            this.cancelUnitEdit();
+            this.showSnackBar(response.message || 'Unit created successfully!');
             this.loadUnits();
-            setTimeout(() => (this.success = ''), 5000);
           } else {
-            this.error = response.message || 'Failed to create unit';
+            this.showSnackBar(response.message || 'Failed to create unit', 'error');
           }
         },
         error: (err) => {
-          this.error = err.error?.message || 'Error creating unit. Please try again.';
-        }
+          this.showSnackBar(err.error?.message || 'Error creating unit.', 'error');
+        },
       });
-    } else {
-      if (!this.selectedUnit.id) return;
+    });
+  }
 
+  editUnit(unit: UnitModel): void {
+    const dialogRef = this.dialog.open(UnitFormDialogComponent, {
+      width: '700px',
+      data: {
+        mode: 'edit',
+        unit: unit,
+        properties: this.properties,
+      } as UnitFormDialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result: UnitModel | undefined) => {
+      if (!result || !result.id) return;
       const updateRequest: UnitUpdateRequest = {
-        id: this.selectedUnit.id,
-        ownerId: this.selectedUnit.ownerId,
-        propertyId: this.selectedUnit.propertyId,
-        tenantId: this.selectedUnit.tenantId,
-        unitName: this.selectedUnit.unitName,
-        rentAmount: this.selectedUnit.rentAmount,
-        securityDeposit: this.selectedUnit.securityDeposit || 0,
-        isOccupied: this.selectedUnit.isOccupied || false,
-        dueDay: this.selectedUnit.dueDay || 5,
-        notes: this.selectedUnit.notes || '',
-        isActive: this.selectedUnit.isActive !== false,
-        updatedBy: this.currentOwnerId
+        id: result.id,
+        ownerId: result.ownerId,
+        propertyId: result.propertyId,
+        tenantId: result.tenantId,
+        unitName: result.unitName,
+        rentAmount: result.rentAmount,
+        securityDeposit: result.securityDeposit || 0,
+        isOccupied: result.isOccupied || false,
+        dueDay: result.dueDay || 5,
+        notes: result.notes || '',
+        isActive: result.isActive !== false,
+        updatedBy: this.currentOwnerId,
       };
 
       this.unitService.updateUnit(updateRequest).subscribe({
         next: (response) => {
           if (response.success) {
-            this.success = 'Unit updated successfully';
-            this.cancelUnitEdit();
+            this.showSnackBar(response.message || 'Unit updated successfully!');
             this.loadUnits();
-            setTimeout(() => (this.success = ''), 5000);
           } else {
-            this.error = response.message || 'Failed to update unit';
+            this.showSnackBar(response.message || 'Failed to update unit', 'error');
           }
         },
         error: (err) => {
-          this.error = err.error?.message || 'Error updating unit. Please try again.';
-        }
+          this.showSnackBar(err.error?.message || 'Error updating unit.', 'error');
+        },
       });
-    }
+    });
+  }
+
+  viewUnit(unit: UnitModel): void {
+    this.dialog.open(UnitViewDialogComponent, {
+      width: '550px',
+      data: {
+        unit: unit,
+        propertyName: this.getPropertyName(unit.propertyId),
+      } as UnitViewDialogData,
+    });
   }
 
   deleteUnit(unit: UnitModel): void {
     if (!unit.id) return;
 
-    if (!confirm(`Are you sure you want to delete unit "${unit.unitName}"?`)) {
-      return;
-    }
-
-    this.unitService.deleteUnit(unit.id).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.success = 'Unit deleted successfully';
-          this.loadUnits();
-          setTimeout(() => (this.success = ''), 5000);
-        } else {
-          this.error = response.message || 'Failed to delete unit';
-        }
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete Unit',
+        message: `Are you sure you want to delete unit "${unit.unitName}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
       },
-      error: (err) => {
-        this.error = err.error?.message || 'Error deleting unit. Please try again.';
-      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.unitService.deleteUnit(unit.id!).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.showSnackBar(response.message || 'Unit deleted successfully!');
+            this.loadUnits();
+          } else {
+            this.showSnackBar(response.message || 'Failed to delete unit', 'error');
+          }
+        },
+        error: (err) => {
+          this.showSnackBar(err.error?.message || 'Error deleting unit.', 'error');
+        },
+      });
     });
   }
 
-  // Pagination methods
-  updatePagination(): void {
-    this.totalPages = Math.ceil(this.filteredUnits.length / this.itemsPerPage);
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    }
+  // --- Helpers ---
+
+  showSnackBar(message: string, type: string = 'success'): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: type === 'error' ? ['snack-error'] : ['snack-success'],
+    });
   }
-
-  getPaginatedUnits(): UnitModel[] {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return this.filteredUnits.slice(start, end);
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-    }
-  }
-
-  goToPage(page: number): void {
-    this.currentPage = page;
-  }
-
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxPages = 5;
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
-
-    if (endPage - startPage < maxPages - 1) {
-      startPage = Math.max(1, endPage - maxPages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    return pages;
-  }
-
-  Math = Math;
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AgreementService } from '../../../core/services/agreement.service';
@@ -18,77 +18,97 @@ import {
 import { PropertyModel } from '../../../core/models/property.model';
 import { UnitModel } from '../../../core/models/unit.model';
 import { TenantModel } from '../../../core/models/tenant.model';
-import { environment } from '../../../../environments/environment.prod';
 
-const baseUrl = `${environment.apiUrl}`;
+// Angular Material
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import {
+  AgreementFormDialogComponent,
+  AgreementFormDialogData,
+} from '../../../popups/agreement-form-dialog/agreement-form-dialog.component';
+import {
+  AgreementViewDialogComponent,
+  AgreementViewDialogData,
+} from '../../../popups/agreement-view-dialog/agreement-view-dialog.component';
+import { ConfirmationDialogComponent } from '../../../popups/confirmation-dialog/confirmation-dialog.component';
+import { SpinnerComponent } from '../../../shared/spinner/spinner.component';
+
+const AgreementTypeLabels: Record<number, string> = {
+  0: 'Residential', 1: 'Commercial', 2: 'PG', 3: 'Office', 4: 'Short Term', 5: 'Other',
+};
+const AgreementStatusLabels: Record<number, string> = {
+  0: 'Draft', 1: 'Active', 2: 'Expired', 3: 'Terminated',
+};
 
 @Component({
   selector: 'app-agreement',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    SpinnerComponent,
+  ],
   templateUrl: './agreement.component.html',
   styleUrl: './agreement.component.css',
 })
-export class AgreementComponent implements OnInit {
+export class AgreementComponent implements OnInit, AfterViewInit {
   agreements: AgreementModel[] = [];
-  filteredAgreements: AgreementModel[] = [];
-  selectedAgreement: AgreementModel | null = null;
-  viewAgreement: AgreementModel | null = null;
-  isEditingAgreement = false;
-  isAddingAgreement = false;
-  isViewingAgreement = false;
   isLoadingAgreements = false;
-  success = '';
-  error = '';
-  searchTerm: string = '';
-  sortColumn: string = 'agreementNumber';
-  sortDirection: 'asc' | 'desc' = 'asc';
+
+  displayedColumns: string[] = [
+    'agreementNumber',
+    'type',
+    'property',
+    'tenant',
+    'startDate',
+    'endDate',
+    'rentAmount',
+    'status',
+    'actions',
+  ];
+  dataSource: MatTableDataSource<AgreementModel>;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   properties: PropertyOption[] = [];
-  units: UnitOption[] = [];
   allUnits: UnitOption[] = [];
-  tenants: TenantOption[] = [];
   allTenants: TenantOption[] = [];
-
-  // Pagination
-  currentPage: number = 1;
-  itemsPerPage: number = 10;
-  totalPages: number = 1;
-
-  // Current user (owner) ID
-  currentOwnerId: string = '';
-
-  // File upload
-  selectedFile: File | null = null;
-  isUploading: boolean = false;
-  uploadedFileName: string = '';
-
-  // Enums for template
-  AgreementType = AgreementType;
-  AgreementStatus = AgreementStatus;
-
-  agreementTypes = [
-    { value: AgreementType.Residential, label: 'Residential' },
-    { value: AgreementType.Commercial, label: 'Commercial' },
-    { value: AgreementType.PG, label: 'PG' },
-    { value: AgreementType.Office, label: 'Office' },
-    { value: AgreementType.ShortTerm, label: 'Short Term' },
-    { value: AgreementType.Other, label: 'Other' },
-  ];
-
-  agreementStatuses = [
-    { value: AgreementStatus.Draft, label: 'Draft' },
-    { value: AgreementStatus.Active, label: 'Active' },
-    { value: AgreementStatus.Expired, label: 'Expired' },
-    { value: AgreementStatus.Terminated, label: 'Terminated' },
-  ];
+  currentOwnerId = '';
 
   constructor(
     private agreementService: AgreementService,
     private propertyService: PropertyService,
     private unitService: UnitService,
-    private tenantService: TenantService
-  ) { }
+    private tenantService: TenantService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+  ) {
+    this.dataSource = new MatTableDataSource(this.agreements);
+  }
 
   ngOnInit(): void {
     const currentUser = sessionStorage.getItem('currentUser');
@@ -96,24 +116,44 @@ export class AgreementComponent implements OnInit {
       const user = JSON.parse(currentUser);
       this.currentOwnerId = user.user?.id || '';
     }
+    this.setUpFilterPredicate();
     this.loadProperties();
     this.loadUnits();
     this.loadTenants();
     this.loadAgreements();
   }
 
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  setUpFilterPredicate() {
+    this.dataSource.filterPredicate = (data: AgreementModel, filter: string) => {
+      const s = filter.trim().toLowerCase();
+      return (
+        data.agreementNumber?.toLowerCase().includes(s) ||
+        (data.propertyName?.toLowerCase().includes(s) ?? false) ||
+        (data.unitName?.toLowerCase().includes(s) ?? false) ||
+        (data.tenantName?.toLowerCase().includes(s) ?? false) ||
+        this.getTypeLabel(data.agreementType)?.toLowerCase().includes(s) ||
+        this.getStatusLabel(data.status)?.toLowerCase().includes(s) ||
+        false
+      );
+    };
+  }
+
   loadProperties(): void {
-    this.propertyService.getPropertyById(this.currentOwnerId).subscribe({
+    this.propertyService.getPropertiesByOwnerId(this.currentOwnerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.properties = response.data.map((prop: PropertyModel) => ({
-            id: prop.id || '',
-            propertyName: prop.propertyName,
+          this.properties = response.data.map((p: PropertyModel) => ({
+            id: p.id || '',
+            propertyName: p.propertyName,
           }));
         }
       },
-      error: (err) => {
-      },
+      error: () => { },
     });
   }
 
@@ -121,16 +161,14 @@ export class AgreementComponent implements OnInit {
     this.unitService.getUnitsByOwnerId(this.currentOwnerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.allUnits = response.data.map((unit: UnitModel) => ({
-            id: unit.id || '',
-            unitName: unit.unitName,
-            propertyId: unit.propertyId,
+          this.allUnits = response.data.map((u: UnitModel) => ({
+            id: u.id || '',
+            unitName: u.unitName,
+            propertyId: u.propertyId,
           }));
-          this.units = [...this.allUnits];
         }
       },
-      error: (err) => {
-      },
+      error: () => { },
     });
   }
 
@@ -138,157 +176,73 @@ export class AgreementComponent implements OnInit {
     this.tenantService.getTenantsByOwnerId(this.currentOwnerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.allTenants = response.data.map((tenant: TenantModel) => ({
-            id: tenant.id || '',
-            fullName: tenant.fullName,
-            propertyId: tenant.propertyId,
-            unitId: tenant.unitId,
+          this.allTenants = response.data.map((t: TenantModel) => ({
+            id: t.id || '',
+            fullName: t.fullName,
+            propertyId: t.propertyId,
+            unitId: t.unitId,
           }));
-          this.tenants = [...this.allTenants];
         }
       },
-      error: (err) => {
-      },
+      error: () => { },
     });
-  }
-
-  onPropertyChange(): void {
-    if (this.selectedAgreement && this.selectedAgreement.propertyId) {
-      this.units = this.allUnits.filter(
-        (u) => u.propertyId === this.selectedAgreement!.propertyId
-      );
-      this.tenants = this.allTenants.filter(
-        (t) => t.propertyId === this.selectedAgreement!.propertyId
-      );
-      this.selectedAgreement.unitId = '';
-      this.selectedAgreement.tenantId = '';
-    } else {
-      this.units = [...this.allUnits];
-      this.tenants = [...this.allTenants];
-    }
-  }
-
-  onUnitChange(): void {
-    if (this.selectedAgreement && this.selectedAgreement.unitId) {
-      this.tenants = this.allTenants.filter(
-        (t) => t.unitId === this.selectedAgreement!.unitId
-      );
-      this.selectedAgreement.tenantId = '';
-    } else if (this.selectedAgreement && this.selectedAgreement.propertyId) {
-      this.tenants = this.allTenants.filter(
-        (t) => t.propertyId === this.selectedAgreement!.propertyId
-      );
-    } else {
-      this.tenants = [...this.allTenants];
-    }
   }
 
   loadAgreements(): void {
     this.isLoadingAgreements = true;
-    this.agreementService
-      .getAgreementsByOwnerId(this.currentOwnerId)
-      .subscribe({
-        next: (response) => {
-          this.isLoadingAgreements = false;
-          if (response.success && response.data) {
-            this.agreements = response.data;
-            this.filteredAgreements = [...this.agreements];
-            this.sortAgreements();
-            this.updatePagination();
-          } else {
-            this.error = response.message || 'Failed to load agreements';
-          }
-        },
-        error: (err) => {
-          this.isLoadingAgreements = false;
-          this.error = 'Error loading agreements. Please try again.';
-        },
-      });
-  }
-
-  onSearchChange(): void {
-    if (!this.searchTerm.trim()) {
-      this.filteredAgreements = [...this.agreements];
-    } else {
-      const term = this.searchTerm.toLowerCase();
-      this.filteredAgreements = this.agreements.filter(
-        (agreement) =>
-          agreement.agreementNumber.toLowerCase().includes(term) ||
-          agreement.tenantName?.toLowerCase().includes(term) ||
-          agreement.propertyName?.toLowerCase().includes(term) ||
-          agreement.unitName?.toLowerCase().includes(term)
-      );
-    }
-    this.currentPage = 1;
-    this.sortAgreements();
-    this.updatePagination();
-  }
-
-  sortBy(column: string): void {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-    this.sortAgreements();
-  }
-
-  sortAgreements(): void {
-    this.filteredAgreements.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (this.sortColumn) {
-        case 'agreementNumber':
-          aValue = a.agreementNumber.toLowerCase();
-          bValue = b.agreementNumber.toLowerCase();
-          break;
-        case 'tenant':
-          aValue = a.tenantName?.toLowerCase() || '';
-          bValue = b.tenantName?.toLowerCase() || '';
-          break;
-        case 'property':
-          aValue = a.propertyName?.toLowerCase() || '';
-          bValue = b.propertyName?.toLowerCase() || '';
-          break;
-        case 'unit':
-          aValue = a.unitName?.toLowerCase() || '';
-          bValue = b.unitName?.toLowerCase() || '';
-          break;
-        case 'startDate':
-          aValue = new Date(a.startDate).getTime();
-          bValue = new Date(b.startDate).getTime();
-          break;
-        case 'endDate':
-          aValue = new Date(a.endDate).getTime();
-          bValue = new Date(b.endDate).getTime();
-          break;
-        case 'rentAmount':
-          aValue = a.rentAmount;
-          bValue = b.rentAmount;
-          break;
-        default:
-          aValue = a.agreementNumber.toLowerCase();
-          bValue = b.agreementNumber.toLowerCase();
-      }
-
-      if (aValue < bValue) {
-        return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return this.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
+    this.agreementService.getAgreementsByOwnerId(this.currentOwnerId).subscribe({
+      next: (response) => {
+        this.isLoadingAgreements = false;
+        if (response.success && response.data) {
+          this.agreements = response.data;
+          this.dataSource.data = this.agreements;
+          if (this.paginator) this.dataSource.paginator = this.paginator;
+          if (this.sort) this.dataSource.sort = this.sort;
+        } else {
+          this.showSnackBar(response.message || 'Failed to load agreements', 'error');
+        }
+      },
+      error: (err) => {
+        this.isLoadingAgreements = false;
+        this.showSnackBar(err.error?.message || 'Failed to load agreements.', 'error');
+      },
     });
   }
 
-  openAddAgreementModal(): void {
-    this.selectedAgreement = {
-      ownerId: this.currentOwnerId,
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
+  }
+
+  getTypeLabel(type: number): string {
+    return AgreementTypeLabels[type] || 'Unknown';
+  }
+
+  getStatusLabel(status: number): string {
+    return AgreementStatusLabels[status] || 'Unknown';
+  }
+
+  getStatusColor(status: number): string {
+    if (status === AgreementStatus.Active) return 'accent';
+    if (status === AgreementStatus.Terminated) return 'warn';
+    return 'primary';
+  }
+
+  formatDate(date: Date | null | undefined): string {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  // --- Dialogs ---
+
+  openAddAgreementDialog(): void {
+    const newAgreement: AgreementModel = {
       propertyId: '',
       unitId: '',
       tenantId: '',
+      ownerId: this.currentOwnerId,
       agreementNumber: '',
       agreementType: AgreementType.Residential,
       startDate: new Date(),
@@ -296,371 +250,150 @@ export class AgreementComponent implements OnInit {
       rentAmount: 0,
       securityDeposit: 0,
       rentDueDay: 5,
-      agreementFileUrl: '',
-      status: AgreementStatus.Active,
+      status: AgreementStatus.Draft,
       notes: '',
+      createdBy: this.currentOwnerId,
     };
-    this.units = [...this.allUnits];
-    this.tenants = [...this.allTenants];
-    this.isAddingAgreement = true;
-    this.isEditingAgreement = false;
-    this.error = '';
-    this.success = '';
+
+    const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
+      width: '800px',
+      data: {
+        mode: 'add',
+        agreement: newAgreement,
+        properties: this.properties,
+        allUnits: this.allUnits,
+        allTenants: this.allTenants,
+      } as AgreementFormDialogData,
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result: AgreementModel | undefined) => {
+      if (!result) return;
+      const req: AgreementCreateRequest = {
+        propertyId: result.propertyId,
+        unitId: result.unitId,
+        tenantId: result.tenantId,
+        ownerId: this.currentOwnerId,
+        agreementNumber: result.agreementNumber,
+        agreementType: result.agreementType,
+        startDate: result.startDate,
+        endDate: result.endDate,
+        rentAmount: result.rentAmount,
+        securityDeposit: result.securityDeposit,
+        rentDueDay: result.rentDueDay,
+        agreementFileUrl: result.agreementFileUrl,
+        status: result.status,
+        notes: result.notes,
+        createdBy: this.currentOwnerId,
+      };
+      this.agreementService.createAgreement(req).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.showSnackBar(response.message || 'Agreement created successfully!');
+            this.loadAgreements();
+          } else {
+            this.showSnackBar(response.message || 'Failed to create agreement', 'error');
+          }
+        },
+        error: (err) => this.showSnackBar(err.error?.message || 'Error creating agreement.', 'error'),
+      });
+    });
   }
 
   editAgreement(agreement: AgreementModel): void {
-    this.selectedAgreement = {
-      ...agreement,
-      startDate: this.formatDateForInput(agreement.startDate) as any,
-      endDate: this.formatDateForInput(agreement.endDate) as any,
-      terminatedOn: this.formatDateForInput(agreement.terminatedOn) as any,
-    };
+    const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
+      width: '800px',
+      data: {
+        mode: 'edit',
+        agreement: agreement,
+        properties: this.properties,
+        allUnits: this.allUnits,
+        allTenants: this.allTenants,
+      } as AgreementFormDialogData,
+      disableClose: true,
+    });
 
-    // Filter units and tenants based on the selected property
-    if (this.selectedAgreement.propertyId) {
-      this.units = this.allUnits.filter(
-        (u) => u.propertyId === this.selectedAgreement!.propertyId
-      );
-
-      // Further filter tenants based on unit if available
-      if (this.selectedAgreement.unitId) {
-        this.tenants = this.allTenants.filter(
-          (t) => t.unitId === this.selectedAgreement!.unitId
-        );
-      } else {
-        this.tenants = this.allTenants.filter(
-          (t) => t.propertyId === this.selectedAgreement!.propertyId
-        );
-      }
-    } else {
-      this.units = [...this.allUnits];
-      this.tenants = [...this.allTenants];
-    }
-
-    this.isEditingAgreement = true;
-    this.isAddingAgreement = false;
-    this.error = '';
-    this.success = '';
-  }
-
-  viewAgreementDetails(agreement: AgreementModel): void {
-    this.viewAgreement = { ...agreement };
-    this.isViewingAgreement = true;
-  }
-
-  closeViewModal(): void {
-    this.viewAgreement = null;
-    this.isViewingAgreement = false;
-  }
-
-  cancelAgreementEdit(): void {
-    this.selectedAgreement = null;
-    this.isEditingAgreement = false;
-    this.isAddingAgreement = false;
-    this.error = '';
-  }
-
-  saveAgreement(): void {
-    if (!this.selectedAgreement) return;
-
-    // Validation
-    if (!this.selectedAgreement.propertyId) {
-      this.error = 'Please select a property';
-      return;
-    }
-
-    if (!this.selectedAgreement.unitId) {
-      this.error = 'Please select a unit';
-      return;
-    }
-
-    if (!this.selectedAgreement.tenantId) {
-      this.error = 'Please select a tenant';
-      return;
-    }
-
-    if (!this.selectedAgreement.agreementNumber?.trim()) {
-      this.error = 'Agreement number is required';
-      return;
-    }
-
-    if (this.selectedAgreement.rentAmount <= 0) {
-      this.error = 'Rent amount must be greater than 0';
-      return;
-    }
-
-    if (this.isAddingAgreement) {
-      const createRequest: AgreementCreateRequest = {
-        ownerId: this.selectedAgreement.ownerId,
-        propertyId: this.selectedAgreement.propertyId,
-        unitId: this.selectedAgreement.unitId,
-        tenantId: this.selectedAgreement.tenantId,
-        agreementNumber: this.selectedAgreement.agreementNumber,
-        agreementType: Number(this.selectedAgreement.agreementType),
-        startDate: this.selectedAgreement.startDate,
-        endDate: this.selectedAgreement.endDate,
-        rentAmount: this.selectedAgreement.rentAmount,
-        securityDeposit: this.selectedAgreement.securityDeposit,
-        rentDueDay: this.selectedAgreement.rentDueDay,
-        agreementFileUrl: this.selectedAgreement.agreementFileUrl,
-        status: Number(this.selectedAgreement.status),
-        notes: this.selectedAgreement.notes || '',
-        createdBy: this.currentOwnerId,
-      };
-
-      this.agreementService.createAgreement(createRequest).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.success = 'Agreement created successfully';
-            this.cancelAgreementEdit();
-            this.loadAgreements();
-            setTimeout(() => (this.success = ''), 5000);
-          } else {
-            this.error = response.message || 'Failed to create agreement';
-          }
-        },
-        error: (err) => {
-          this.error =
-            err.error?.message || 'Error creating agreement. Please try again.';
-        },
-      });
-    } else {
-      if (!this.selectedAgreement.id) return;
-
-      const updateRequest: AgreementUpdateRequest = {
-        id: this.selectedAgreement.id,
-        ownerId: this.selectedAgreement.ownerId,
-        propertyId: this.selectedAgreement.propertyId,
-        unitId: this.selectedAgreement.unitId,
-        tenantId: this.selectedAgreement.tenantId,
-        agreementNumber: this.selectedAgreement.agreementNumber,
-        agreementType: Number(this.selectedAgreement.agreementType),
-        startDate: this.selectedAgreement.startDate,
-        endDate: this.selectedAgreement.endDate,
-        rentAmount: this.selectedAgreement.rentAmount,
-        securityDeposit: this.selectedAgreement.securityDeposit,
-        rentDueDay: this.selectedAgreement.rentDueDay,
-        agreementFileUrl: this.selectedAgreement.agreementFileUrl,
-        status: Number(this.selectedAgreement.status),
-        terminatedOn: this.selectedAgreement.terminatedOn,
-        terminationReason: this.selectedAgreement.terminationReason,
-        isRenewed: this.selectedAgreement.isRenewed,
-        renewedFromAgreementId: this.selectedAgreement.renewedFromAgreementId,
-        notes: this.selectedAgreement.notes || '',
-        isActive: this.selectedAgreement.isActive !== false,
+    dialogRef.afterClosed().subscribe((result: AgreementModel | undefined) => {
+      if (!result || !result.id) return;
+      const req: AgreementUpdateRequest = {
+        id: result.id,
+        propertyId: result.propertyId,
+        unitId: result.unitId,
+        tenantId: result.tenantId,
+        ownerId: this.currentOwnerId,
+        agreementNumber: result.agreementNumber,
+        agreementType: result.agreementType,
+        startDate: result.startDate,
+        endDate: result.endDate,
+        rentAmount: result.rentAmount,
+        securityDeposit: result.securityDeposit,
+        rentDueDay: result.rentDueDay,
+        agreementFileUrl: result.agreementFileUrl,
+        status: result.status,
+        terminatedOn: result.terminatedOn,
+        terminationReason: result.terminationReason,
+        isRenewed: result.isRenewed,
+        renewedFromAgreementId: result.renewedFromAgreementId,
+        notes: result.notes,
+        isActive: result.isActive,
         updatedBy: this.currentOwnerId,
       };
-
-      this.agreementService.updateAgreement(updateRequest).subscribe({
+      this.agreementService.updateAgreement(req).subscribe({
         next: (response) => {
           if (response.success) {
-            this.success = 'Agreement updated successfully';
-            this.cancelAgreementEdit();
+            this.showSnackBar(response.message || 'Agreement updated successfully!');
             this.loadAgreements();
-            setTimeout(() => (this.success = ''), 5000);
           } else {
-            this.error = response.message || 'Failed to update agreement';
+            this.showSnackBar(response.message || 'Failed to update agreement', 'error');
           }
         },
-        error: (err) => {
-          this.error =
-            err.error?.message || 'Error updating agreement. Please try again.';
-        },
+        error: (err) => this.showSnackBar(err.error?.message || 'Error updating agreement.', 'error'),
       });
-    }
+    });
+  }
+
+  viewAgreement(agreement: AgreementModel): void {
+    this.dialog.open(AgreementViewDialogComponent, {
+      width: '700px',
+      data: { agreement: agreement } as AgreementViewDialogData,
+    });
   }
 
   deleteAgreement(agreement: AgreementModel): void {
     if (!agreement.id) return;
-
-    if (
-      !confirm(
-        `Are you sure you want to delete agreement "${agreement.agreementNumber}"?`
-      )
-    ) {
-      return;
-    }
-
-    this.agreementService.deleteAgreement(agreement.id).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.success = 'Agreement deleted successfully';
-          this.loadAgreements();
-          setTimeout(() => (this.success = ''), 5000);
-        } else {
-          this.error = response.message || 'Failed to delete agreement';
-        }
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete Agreement',
+        message: `Are you sure you want to delete agreement "${agreement.agreementNumber}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
       },
-      error: (err) => {
-        this.error =
-          err.error?.message || 'Error deleting agreement. Please try again.';
-      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.agreementService.deleteAgreement(agreement.id!).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.agreements = this.agreements.filter((a) => a.id !== agreement.id);
+            this.dataSource.data = [...this.agreements];
+            this.showSnackBar(response.message || 'Agreement deleted successfully!');
+          } else {
+            this.showSnackBar(response.message || 'Failed to delete agreement', 'error');
+          }
+        },
+        error: (err) => this.showSnackBar(err.error?.message || 'Error deleting agreement.', 'error'),
+      });
     });
   }
 
-  // Pagination methods
-  updatePagination(): void {
-    this.totalPages = Math.ceil(
-      this.filteredAgreements.length / this.itemsPerPage
-    );
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    }
-  }
-
-  getPaginatedAgreements(): AgreementModel[] {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return this.filteredAgreements.slice(start, end);
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-    }
-  }
-
-  goToPage(page: number): void {
-    this.currentPage = page;
-  }
-
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxPages = 5;
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
-
-    if (endPage - startPage < maxPages - 1) {
-      startPage = Math.max(1, endPage - maxPages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    return pages;
-  }
-
-  formatDate(date: Date | null | undefined): string {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  }
-
-  formatDateForInput(date: Date | null | undefined): string | null {
-    if (!date) return null;
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return null;
-
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-  }
-
-  getAgreementTypeLabel(type: AgreementType): string {
-    const found = this.agreementTypes.find((t) => t.value === type);
-    return found ? found.label : 'Unknown';
-  }
-
-  getAgreementStatusLabel(status: AgreementStatus): string {
-    const found = this.agreementStatuses.find((s) => s.value === status);
-    return found ? found.label : 'Unknown';
-  }
-
-  getStatusClass(status: AgreementStatus): string {
-    switch (status) {
-      case AgreementStatus.Active:
-        return 'badge-active';
-      case AgreementStatus.Expired:
-      case AgreementStatus.Terminated:
-        return 'badge-inactive';
-      default:
-        return '';
-    }
-  }
-
-  // File upload methods
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
-      if (!allowedTypes.includes(file.type)) {
-        this.error = 'Invalid file type. Allowed types: PDF, DOC, DOCX, JPG, PNG';
-        event.target.value = '';
-        return;
-      }
-
-      // Validate file size (10MB)
-      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-      if (file.size > maxSize) {
-        this.error = 'File size exceeds 10MB limit';
-        event.target.value = '';
-        return;
-      }
-
-      this.selectedFile = file;
-      this.uploadedFileName = file.name;
-      this.uploadFile();
-    }
-  }
-
-  uploadFile(): void {
-    if (!this.selectedFile || !this.selectedAgreement) return;
-
-    this.isUploading = true;
-    this.error = '';
-
-    this.agreementService.uploadAgreementDocument(this.selectedFile).subscribe({
-      next: (response) => {
-        this.isUploading = false;
-        if (response.success && response.data) {
-          this.selectedAgreement!.agreementFileUrl = response.data.fileUrl;
-          this.success = 'File uploaded successfully';
-          setTimeout(() => (this.success = ''), 3000);
-        } else {
-          this.error = response.message || 'Failed to upload file';
-        }
-      },
-      error: (err) => {
-        this.isUploading = false;
-        this.selectedFile = null;
-        this.uploadedFileName = '';
-        this.error = err.error?.message || 'Error uploading file. Please try again.';
-      },
+  private showSnackBar(message: string, type: 'success' | 'error' = 'success'): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: type === 'error' ? ['snack-bar-error'] : ['snack-bar-success'],
     });
   }
-
-  removeFile(): void {
-    if (this.selectedAgreement) {
-      this.selectedAgreement.agreementFileUrl = '';
-      this.selectedFile = null;
-      this.uploadedFileName = '';
-    }
-  }
-
-  getFullFileUrl(relativeUrl: string): string {
-    if (!relativeUrl) return '';
-    // If it's already a full URL, return as is
-    if (relativeUrl.startsWith('http://') || relativeUrl.startsWith('https://')) {
-      return relativeUrl;
-    }
-    // Prepend the API base URL (remove /api from the end)
-    // environment.apiUrl without /api
-    return `${baseUrl}${relativeUrl}`;
-  }
-
-  getFileName(url: string): string {
-    if (!url) return '';
-    const parts = url.split('/');
-    return parts[parts.length - 1];
-  }
-
-  Math = Math;
 }

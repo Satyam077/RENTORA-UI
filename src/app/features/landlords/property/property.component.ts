@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PropertyService } from '../../../core/services/property.service';
 import {
   PropertyModel,
-  PropertyAddress,
-  UnitModel,
   PropertyCreateRequest,
   PropertyUpdateRequest,
 } from '../../../core/models/property.model';
@@ -15,29 +13,74 @@ import {
 } from '../../../core/models/property-type.enum';
 import { environment } from '../../../../environments/environment';
 
+// Angular Material Imports
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import {
+  PropertyFormDialogComponent,
+  PropertyFormDialogData,
+} from '../../../popups/property-form-dialog/property-form-dialog.component';
+import {
+  PropertyViewDialogComponent,
+  PropertyViewDialogData,
+} from '../../../popups/property-view-dialog/property-view-dialog.component';
+import {
+  ConfirmationDialogComponent,
+} from '../../../popups/confirmation-dialog/confirmation-dialog.component';
+import { SpinnerComponent } from '../../../shared/spinner/spinner.component';
+
 @Component({
   selector: 'app-property',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    SpinnerComponent,
+  ],
   templateUrl: './property.component.html',
   styleUrl: './property.component.css',
 })
-export class PropertyComponent implements OnInit {
+export class PropertyComponent implements OnInit, AfterViewInit {
   properties: PropertyModel[] = [];
-  filteredProperties: PropertyModel[] = [];
-  selectedProperty: PropertyModel | null = null;
-  isEditingProperty = false;
-  isAddingProperty = false;
   isLoadingProperties = false;
-  isViewingProperty = false;
-  success = '';
-  error = '';
-  searchTerm: string = '';
 
-  currentPage: number = 1;
-  itemsPerPage: number = 10;
-  totalPages: number = 1;
-  private apiBaseUrl = `${environment.apiUrl}`;
+  // Angular Material Table
+  displayedColumns: string[] = [
+    'propertyName',
+    'type',
+    'rentAmount',
+    'occupancy',
+    'status',
+    'actions',
+  ];
+  dataSource: MatTableDataSource<PropertyModel>;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
   PropertyType = PropertyType;
   propertyTypeLabels = PropertyTypeLabels;
   propertyTypeOptions = Object.keys(PropertyType)
@@ -49,7 +92,13 @@ export class PropertyComponent implements OnInit {
 
   currentOwnerId: string = '';
 
-  constructor(private propertyService: PropertyService) {}
+  constructor(
+    private propertyService: PropertyService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) {
+    this.dataSource = new MatTableDataSource(this.properties);
+  }
 
   ngOnInit(): void {
     const currentUser = sessionStorage.getItem('currentUser');
@@ -58,12 +107,34 @@ export class PropertyComponent implements OnInit {
       this.currentOwnerId = user.user?.id || '';
     }
 
+    this.setUpFilterPredicate();
     this.loadProperties();
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  setUpFilterPredicate() {
+    this.dataSource.filterPredicate = (
+      data: PropertyModel,
+      filter: string
+    ) => {
+      const search = filter.trim().toLowerCase();
+      return (
+        data.propertyName?.toLowerCase().includes(search) ||
+        data.description?.toLowerCase().includes(search) ||
+        this.getPropertyTypeLabel(data.type)?.toLowerCase().includes(search) ||
+        data.address?.city?.toLowerCase().includes(search) ||
+        data.address?.state?.toLowerCase().includes(search) ||
+        false
+      );
+    };
   }
 
   loadProperties(): void {
     this.isLoadingProperties = true;
-    this.error = '';
 
     if (this.currentOwnerId) {
       this.propertyService
@@ -72,59 +143,45 @@ export class PropertyComponent implements OnInit {
           next: (response) => {
             if (response.success) {
               this.properties = response.data;
-              this.applyFilters();
+              this.dataSource.data = this.properties;
+              if (this.paginator)
+                this.dataSource.paginator = this.paginator;
+              if (this.sort) this.dataSource.sort = this.sort;
             } else {
-              this.error = response.message || 'Failed to load properties';
+              this.showSnackBar(
+                response.message || 'Failed to load properties',
+                'error'
+              );
             }
             this.isLoadingProperties = false;
           },
           error: (err) => {
-            this.error =
+            this.showSnackBar(
               err.error?.message ||
-              'Failed to load properties. Please try again.';
+              'Failed to load properties. Please try again.',
+              'error'
+            );
             this.isLoadingProperties = false;
           },
         });
     } else {
       this.isLoadingProperties = false;
-      this.error = 'Owner ID not found. Please log in again.';
+      this.showSnackBar('Owner ID not found. Please log in again.', 'error');
     }
   }
 
-  applyFilters(): void {
-    let filtered = [...this.properties];
-
-    // Apply search filter
-    if (this.searchTerm.trim()) {
-      const search = this.searchTerm.toLowerCase().trim();
-      filtered = filtered.filter(
-        (property) =>
-          property.propertyName?.toLowerCase().includes(search) ||
-          property.description?.toLowerCase().includes(search) ||
-          this.getPropertyTypeLabel(property.type)
-            ?.toLowerCase()
-            .includes(search) ||
-          property.address?.city?.toLowerCase().includes(search) ||
-          property.address?.state?.toLowerCase().includes(search),
-      );
-    }
-
-    this.filteredProperties = filtered;
-    this.totalPages = Math.ceil(
-      this.filteredProperties.length / this.itemsPerPage,
-    );
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
 
-  onSearchChange(): void {
-    this.currentPage = 1;
-    this.applyFilters();
-  }
+  // --- Dialog Methods ---
 
   openAddPropertyModal(): void {
-    this.selectedProperty = {
+    const newProperty: PropertyModel = {
       ownerId: this.currentOwnerId,
       propertyName: '',
       description: '',
@@ -150,177 +207,196 @@ export class PropertyComponent implements OnInit {
       notes: '',
       createdBy: this.currentOwnerId,
     };
-    this.isAddingProperty = true;
+
+    const dialogData: PropertyFormDialogData = {
+      mode: 'add',
+      property: newProperty,
+      propertyTypeOptions: this.propertyTypeOptions,
+    };
+
+    const dialogRef = this.dialog.open(PropertyFormDialogComponent, {
+      width: '750px',
+      maxHeight: '90vh',
+      data: dialogData,
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result: PropertyModel | undefined) => {
+      if (result) {
+        this.createProperty(result);
+      }
+    });
   }
 
   editProperty(property: PropertyModel): void {
-    this.selectedProperty = JSON.parse(JSON.stringify(property));
-    this.isEditingProperty = true;
+    const dialogData: PropertyFormDialogData = {
+      mode: 'edit',
+      property: property,
+      propertyTypeOptions: this.propertyTypeOptions,
+    };
+
+    const dialogRef = this.dialog.open(PropertyFormDialogComponent, {
+      width: '750px',
+      maxHeight: '90vh',
+      data: dialogData,
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result: PropertyModel | undefined) => {
+      if (result) {
+        this.updateProperty(result);
+      }
+    });
   }
-  saveProperty(): void {
-    if (!this.selectedProperty) return;
 
-    this.error = '';
-    this.success = '';
+  viewProperty(property: PropertyModel): void {
+    const dialogData: PropertyViewDialogData = {
+      property: property,
+    };
 
-    if (
-      !this.selectedProperty.propertyName ||
-      !this.selectedProperty.description
-    ) {
-      this.error = 'Please fill in all required fields';
-      return;
-    }
+    this.dialog.open(PropertyViewDialogComponent, {
+      width: '700px',
+      maxHeight: '90vh',
+      data: dialogData,
+    });
+  }
 
-    if (this.isAddingProperty) {
-      const createRequest: PropertyCreateRequest = {
-        ownerId: this.selectedProperty.ownerId,
-        propertyName: this.selectedProperty.propertyName,
-        description: this.selectedProperty.description,
-        type: this.selectedProperty.type,
-        address: this.selectedProperty.address,
-        // units: this.selectedProperty.units,
-        images: this.selectedProperty.images,
-        documents: this.selectedProperty.documents,
-        defaultRentAmount: this.selectedProperty.defaultRentAmount,
-        defaultDueDay: this.selectedProperty.defaultDueDay,
-        notes: this.selectedProperty.notes,
-        createdBy: this.currentOwnerId,
-      };
+  // --- CRUD Operations ---
 
-      this.propertyService.createProperty(createRequest).subscribe({
-        next: (response: any) => {
-          if (response.success) {
-            const property = response.data;
-            this.properties.unshift(property);
-            this.success = response.message || 'Property created successfully!';
-            this.loadProperties();
-            this.cancelPropertyEdit();
+  private createProperty(property: PropertyModel): void {
+    const createRequest: PropertyCreateRequest = {
+      ownerId: property.ownerId,
+      propertyName: property.propertyName,
+      description: property.description,
+      type: property.type,
+      address: property.address,
+      images: property.images,
+      documents: property.documents,
+      defaultRentAmount: property.defaultRentAmount,
+      defaultDueDay: property.defaultDueDay,
+      notes: property.notes,
+      createdBy: this.currentOwnerId,
+    };
 
-            // Auto-clear success message after 5 seconds
-            setTimeout(() => {
-              this.success = '';
-            }, 5000);
-          } else {
-            this.error = response.message || 'Failed to create property';
+    this.propertyService.createProperty(createRequest).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.properties.unshift(response.data);
+          this.dataSource.data = [...this.properties];
+          this.showSnackBar(
+            response.message || 'Property created successfully!'
+          );
+        } else {
+          this.showSnackBar(
+            response.message || 'Failed to create property',
+            'error'
+          );
+        }
+      },
+      error: (err) => {
+        this.showSnackBar(
+          err.error?.message || 'Failed to create property. Please try again.',
+          'error'
+        );
+      },
+    });
+  }
+
+  private updateProperty(property: PropertyModel): void {
+    if (!property.id) return;
+
+    const updateRequest: PropertyUpdateRequest = {
+      id: property.id,
+      ownerId: property.ownerId,
+      propertyName: property.propertyName,
+      description: property.description,
+      type: property.type,
+      address: property.address,
+      images: property.images,
+      documents: property.documents,
+      defaultRentAmount: property.defaultRentAmount,
+      defaultDueDay: property.defaultDueDay,
+      notes: property.notes,
+      isActive: property.isActive ?? true,
+      updatedBy: this.currentOwnerId,
+    };
+
+    this.propertyService.updateProperty(updateRequest).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          const updated = response.data;
+          const index = this.properties.findIndex((p) => p.id === updated.id);
+          if (index !== -1) {
+            this.properties[index] = updated;
+            this.dataSource.data = [...this.properties];
           }
-        },
-        error: (err) => {
-          if (err.error?.message) {
-            this.error = err.error.message;
-          } else if (typeof err.error === 'string') {
-            this.error = err.error;
-          } else if (err.message) {
-            this.error = err.message;
-          } else {
-            this.error = 'Failed to create property. Please try again.';
-          }
-        },
-      });
-    } else if (this.isEditingProperty && this.selectedProperty.id) {
-      const updateRequest: PropertyUpdateRequest = {
-        id: this.selectedProperty.id,
-        ownerId: this.selectedProperty.ownerId,
-        propertyName: this.selectedProperty.propertyName,
-        description: this.selectedProperty.description,
-        type: this.selectedProperty.type,
-        address: this.selectedProperty.address,
-        //units: this.selectedProperty.units,
-        images: this.selectedProperty.images,
-        documents: this.selectedProperty.documents,
-        defaultRentAmount: this.selectedProperty.defaultRentAmount,
-        defaultDueDay: this.selectedProperty.defaultDueDay,
-        notes: this.selectedProperty.notes,
-        isActive: this.selectedProperty.isActive ?? true,
-        updatedBy: this.currentOwnerId,
-      };
-
-      this.propertyService.updateProperty(updateRequest).subscribe({
-        next: (response: any) => {
-          if (response.success) {
-            const property = response.data;
-            const index = this.properties.findIndex(
-              (p) => p.id === property.id,
-            );
-            if (index !== -1) {
-              this.properties[index] = property;
-            }
-            this.success = response.message || 'Property updated successfully!';
-            this.loadProperties();
-            this.cancelPropertyEdit();
-
-            setTimeout(() => {
-              this.success = '';
-            }, 5000);
-          } else {
-            this.error = response.message || 'Failed to update property';
-          }
-        },
-        error: (err) => {
-          if (err.error?.message) {
-            this.error = err.error.message;
-          } else if (typeof err.error === 'string') {
-            this.error = err.error;
-          } else if (err.message) {
-            this.error = err.message;
-          } else {
-            this.error = 'Failed to update property. Please try again.';
-          }
-        },
-      });
-    }
+          this.showSnackBar(
+            response.message || 'Property updated successfully!'
+          );
+        } else {
+          this.showSnackBar(
+            response.message || 'Failed to update property',
+            'error'
+          );
+        }
+      },
+      error: (err) => {
+        this.showSnackBar(
+          err.error?.message || 'Failed to update property. Please try again.',
+          'error'
+        );
+      },
+    });
   }
 
   deleteProperty(property: PropertyModel): void {
     if (!property.id) return;
 
-    if (
-      confirm(
-        `Are you sure you want to delete the property "${property.propertyName}"?`,
-      )
-    ) {
-      this.propertyService.deleteProperty(property.id).subscribe({
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete Property',
+        message: `Are you sure you want to delete the property "${property.propertyName}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.propertyService.deleteProperty(property.id!).subscribe({
         next: (response) => {
           if (response.success) {
             this.properties = this.properties.filter(
-              (p) => p.id !== property.id,
+              (p) => p.id !== property.id
             );
-            this.success = response.message || 'Property deleted successfully!';
-            this.loadProperties();
-            setTimeout(() => {
-              this.success = '';
-            }, 5000);
+            this.dataSource.data = [...this.properties];
+            this.showSnackBar(
+              response.message || 'Property deleted successfully!'
+            );
           } else {
-            this.error = response.message || 'Failed to delete property';
+            this.showSnackBar(
+              response.message || 'Failed to delete property',
+              'error'
+            );
           }
         },
         error: (err) => {
-          this.error =
+          this.showSnackBar(
             err.error?.message ||
-            'Failed to delete property. Please try again.';
+            'Failed to delete property. Please try again.',
+            'error'
+          );
         },
       });
-    }
+    });
   }
 
-  cancelPropertyEdit(): void {
-    this.selectedProperty = null;
-    this.isEditingProperty = false;
-    this.isAddingProperty = false;
-  }
+  // --- Helpers ---
 
   getPropertyTypeLabel(type: number): string {
     return PropertyTypeLabels[type as PropertyType] || 'Unknown';
-  }
-
-  getAddressString(property: PropertyModel): string {
-    if (!property.address) return '-';
-    const parts = [
-      property.address.houseNo,
-      property.address.street,
-      property.address.city,
-      property.address.state,
-    ].filter((p) => p);
-    return parts.length > 0 ? parts.join(', ') : '-';
   }
 
   getOccupancyString(property: PropertyModel): string {
@@ -336,240 +412,12 @@ export class PropertyComponent implements OnInit {
     return Math.round((occupied / total) * 100);
   }
 
-  viewProperty(property: PropertyModel): void {
-    this.selectedProperty = { ...property };
-    this.isViewingProperty = true;
-  }
-
-  closeViewModal(): void {
-    this.selectedProperty = null;
-    this.isViewingProperty = false;
-  }
-
-  getPaginatedProperties(): PropertyModel[] {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return this.filteredProperties.slice(start, end);
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-    }
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-    }
-  }
-
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxPages = 5;
-    let start = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let end = Math.min(this.totalPages, start + maxPages - 1);
-
-    if (end - start < maxPages - 1) {
-      start = Math.max(1, end - maxPages + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
-  }
-
-  Math = Math;
-
-  addUnit(): void {
-    if (!this.selectedProperty) return;
-
-    const newUnit: UnitModel = {
-      unitName: '',
-      rentAmount: this.selectedProperty.defaultRentAmount,
-      securityDeposit: 0,
-      isOccupied: false,
-      notes: '',
-    };
-
-    this.selectedProperty.units.push(newUnit);
-  }
-
-  removeUnit(index: number): void {
-    if (!this.selectedProperty) return;
-    this.selectedProperty.units.splice(index, 1);
-  }
-
-  selectedImageFile: File | null = null;
-  selectedDocumentFile: File | null = null;
-  isUploadingImage: boolean = false;
-  isUploadingDocument: boolean = false;
-
-  onImageFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      const allowedTypes = [
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/webp',
-      ];
-      if (!allowedTypes.includes(file.type)) {
-        this.error = 'Invalid file type. Allowed types: JPG, JPEG, PNG, WEBP';
-        event.target.value = '';
-        return;
-      }
-
-      const maxSize = 5 * 1024 * 1024;
-      if (file.size > maxSize) {
-        this.error = 'File size exceeds 5MB limit';
-        event.target.value = '';
-        return;
-      }
-
-      this.selectedImageFile = file;
-      this.uploadImage();
-    }
-  }
-
-  uploadImage(): void {
-    if (!this.selectedImageFile || !this.selectedProperty) return;
-
-    this.isUploadingImage = true;
-    this.error = '';
-
-    this.propertyService.uploadPropertyImage(this.selectedImageFile).subscribe({
-      next: (response) => {
-        this.isUploadingImage = false;
-        if (response.success && response.data) {
-          this.selectedProperty!.images.push(response.data.fileUrl);
-          this.success = 'Image uploaded successfully';
-          this.selectedImageFile = null;
-          setTimeout(() => (this.success = ''), 3000);
-        } else {
-          this.error = response.message || 'Failed to upload image';
-        }
-      },
-      error: (err) => {
-        this.isUploadingImage = false;
-        this.selectedImageFile = null;
-        this.error =
-          err.error?.message || 'Error uploading image. Please try again.';
-      },
+  private showSnackBar(message: string, type: 'success' | 'error' = 'success'): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: type === 'error' ? ['snack-bar-error'] : ['snack-bar-success'],
     });
-  }
-
-  removeImage(index: number): void {
-    if (!this.selectedProperty) return;
-    if (confirm('Are you sure you want to remove this image?')) {
-      this.selectedProperty.images.splice(index, 1);
-    }
-  }
-
-  getFullImageUrl(relativeUrl: string): string {
-    if (!relativeUrl) return '';
-    if (
-      relativeUrl.startsWith('http://') ||
-      relativeUrl.startsWith('https://')
-    ) {
-      return relativeUrl;
-    }
-    return `${this.apiBaseUrl}${relativeUrl}`;
-  }
-
-  getImageFileName(url: string): string {
-    if (!url) return '';
-    const parts = url.split('/');
-    return parts[parts.length - 1];
-  }
-
-  onDocumentFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-      ];
-      if (!allowedTypes.includes(file.type)) {
-        this.error =
-          'Invalid file type. Allowed types: PDF, DOC, DOCX, JPG, PNG';
-        event.target.value = '';
-        return;
-      }
-
-      const maxSize = 10 * 1024 * 1024;
-      if (file.size > maxSize) {
-        this.error = 'File size exceeds 10MB limit';
-        event.target.value = '';
-        return;
-      }
-
-      this.selectedDocumentFile = file;
-      this.uploadDocument();
-    }
-  }
-
-  uploadDocument(): void {
-    if (!this.selectedDocumentFile || !this.selectedProperty) return;
-
-    this.isUploadingDocument = true;
-    this.error = '';
-
-    this.propertyService
-      .uploadPropertyDocument(this.selectedDocumentFile)
-      .subscribe({
-        next: (response) => {
-          this.isUploadingDocument = false;
-          if (response.success && response.data) {
-            this.selectedProperty!.documents.push(response.data.fileUrl);
-            this.success = 'Document uploaded successfully';
-            this.selectedDocumentFile = null;
-            setTimeout(() => (this.success = ''), 3000);
-          } else {
-            this.error = response.message || 'Failed to upload document';
-          }
-        },
-        error: (err) => {
-          this.isUploadingDocument = false;
-          this.selectedDocumentFile = null;
-          this.error =
-            err.error?.message || 'Error uploading document. Please try again.';
-        },
-      });
-  }
-
-  removeDocument(index: number): void {
-    if (!this.selectedProperty) return;
-    if (confirm('Are you sure you want to remove this document?')) {
-      this.selectedProperty.documents.splice(index, 1);
-    }
-  }
-
-  getFullDocumentUrl(relativeUrl: string): string {
-    if (!relativeUrl) return '';
-    if (
-      relativeUrl.startsWith('http://') ||
-      relativeUrl.startsWith('https://')
-    ) {
-      return relativeUrl;
-    }
-    return `${this.apiBaseUrl}${relativeUrl}`;
-  }
-
-  getDocumentFileName(url: string): string {
-    if (!url) return '';
-    const parts = url.split('/');
-    return parts[parts.length - 1];
   }
 }

@@ -1,423 +1,455 @@
-<div class="subscription-container">
-  <!-- Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">Plans & Billing</h1>
-      <p class="page-subtitle">Manage your subscription, billing, and payment methods</p>
+<div style="padding: 16px;">
+  <!-- Page Header -->
+  <div style="margin-bottom: 16px;">
+    <h1 class="header-title" style="margin: 0;">Plans & Billing</h1>
+    <p class="header-title" style="margin: 4px 0 0;">Manage your subscription, billing, and payment methods</p>
+  </div>
+
+  <!-- Loading -->
+  <app-spinner [isLoading]="isLoading" message="Loading subscription details..."></app-spinner>
+
+  <!-- Mat Tabs -->
+  <mat-tab-group *ngIf="!isLoading" animationDuration="200ms"
+    style="background: #fff; border-radius: 8px; border: 1px solid #e0e0e0;">
+
+    <!-- ==================== OVERVIEW TAB ==================== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon style="margin-right: 6px;">dashboard</mat-icon> Overview
+      </ng-template>
+      <div style="padding: 20px;">
+
+        <!-- Trial Banner -->
+        <mat-card *ngIf="subscription?.isTrialActive" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: 1px solid #a5d6a7;
+            border-radius: 12px; margin-bottom: 20px;">
+          <mat-card-content style="padding: 20px; display: flex; align-items: center; gap: 16px;">
+            <mat-icon style="font-size: 36px; width: 36px; height: 36px; color: #2e7d32;">celebration</mat-icon>
+            <div style="flex: 1;">
+              <div style="font-size: 16px; font-weight: 700; color: #1b5e20;">🎉 You're on a Free Trial!</div>
+              <div style="font-size: 13px; color: #2e7d32;">
+                {{ subscription?.trialDaysRemaining }} days remaining. Upgrade now to keep all features.
+              </div>
+            </div>
+            <button mat-flat-button color="primary">Upgrade Now</button>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Current Plan Card -->
+        <mat-card *ngIf="subscription" style="border-radius: 12px; border: 1px solid #e0e0e0;">
+          <mat-card-header
+            style="display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 20px 0;">
+            <div>
+              <mat-chip-set>
+                <mat-chip [highlighted]="true" [color]="getStatusChipColor(subscription!.status)"
+                  style="font-size: 11px; min-height: 22px; padding: 0 10px; margin-bottom: 8px;">
+                  {{ getStatusLabel(subscription!.status) }}
+                </mat-chip>
+              </mat-chip-set>
+              <mat-card-title style="font-size: 22px; font-weight: 700; margin-top: 4px;">
+                {{ subscription!.planName }}
+              </mat-card-title>
+              <mat-card-subtitle>
+                {{ subscription!.billingCycle === 'yearly' ? 'Annual' : 'Monthly' }} billing
+              </mat-card-subtitle>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 28px; font-weight: 700; color: #c2185b;">
+                {{ formatCurrency(subscription!.price) }}
+              </span>
+              <span style="font-size: 13px; color: #888;">/{{ subscription!.billingCycle === 'yearly' ? 'year' : 'month'
+                }}</span>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content style="padding: 16px 20px;">
+            <mat-divider style="margin-bottom: 16px;"></mat-divider>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div>
+                <div style="font-size: 12px; color: #888; margin-bottom: 2px;">Start Date</div>
+                <div style="font-size: 14px; font-weight: 500;">{{ formatDate(subscription!.startDate) }}</div>
+              </div>
+              <div>
+                <div style="font-size: 12px; color: #888; margin-bottom: 2px;">
+                  {{ subscription!.isTrialActive ? 'Trial Ends' : 'Renewal Date' }}
+                </div>
+                <div style="font-size: 14px; font-weight: 500;">{{ formatDate(subscription!.endDate) }}</div>
+              </div>
+              <div *ngIf="!subscription!.isTrialActive">
+                <div style="font-size: 12px; color: #888; margin-bottom: 2px;">Auto Renew</div>
+                <mat-slide-toggle [checked]="subscription!.autoRenew" (change)="toggleAutoRenew()"></mat-slide-toggle>
+              </div>
+            </div>
+
+            <!-- Features -->
+            <div *ngIf="subscription!.features && subscription!.features.length > 0">
+              <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Included Features</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px;">
+                <div *ngFor="let feature of subscription!.features"
+                  style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; padding: 4px 0;">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px; color: #4caf50;">check_circle</mat-icon>
+                  {{ feature }}
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-divider></mat-divider>
+          <mat-card-actions align="end" style="padding: 12px 16px;">
+            <button mat-stroked-button color="primary">
+              <mat-icon>swap_horiz</mat-icon>
+              {{ subscription!.isTrialActive ? 'Choose a Plan' : 'Change Plan' }}
+            </button>
+            <button mat-stroked-button color="warn"
+              *ngIf="!subscription!.isTrialActive && subscription!.status !== SubscriptionStatus.Cancelled"
+              (click)="openCancelModal()">
+              Cancel Subscription
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- No Subscription -->
+        <div *ngIf="!subscription" style="text-align: center; padding: 60px 20px; color: #888;">
+          <mat-icon style="font-size: 56px; width: 56px; height: 56px; color: #ccc;">credit_card_off</mat-icon>
+          <h3 style="margin: 12px 0 8px; color: #555;">No Active Subscription</h3>
+          <p>Choose a plan to unlock all features and manage your properties efficiently.</p>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ==================== PLANS TAB ==================== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon style="margin-right: 6px;">star</mat-icon> Plans
+      </ng-template>
+      <div style="padding: 20px;">
+        <!-- Billing Cycle Toggle -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px;">
+          <span [style.font-weight]="selectedBillingCycle === 'monthly' ? '700' : '400'"
+            [style.color]="selectedBillingCycle === 'monthly' ? '#c2185b' : '#888'"
+            style="font-size: 14px;">Monthly</span>
+          <mat-slide-toggle [checked]="selectedBillingCycle === 'yearly'"
+            (change)="selectedBillingCycle = selectedBillingCycle === 'monthly' ? 'yearly' : 'monthly'">
+          </mat-slide-toggle>
+          <span [style.font-weight]="selectedBillingCycle === 'yearly' ? '700' : '400'"
+            [style.color]="selectedBillingCycle === 'yearly' ? '#c2185b' : '#888'" style="font-size: 14px;">
+            Yearly
+            <mat-chip [highlighted]="true" color="accent"
+              style="font-size: 10px; min-height: 18px; padding: 0 6px; margin-left: 4px;">
+              Save up to 20%
+            </mat-chip>
+          </span>
+        </div>
+
+        <!-- Plans Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+          <mat-card *ngFor="let plan of plans"
+            [style.border]="plan.isMarkedAsPopular ? '2px solid #c2185b' : '1px solid #e0e0e0'"
+            style="border-radius: 12px; position: relative; overflow: visible;">
+
+            <!-- Popular badge -->
+            <mat-chip *ngIf="plan.isMarkedAsPopular" [highlighted]="true" style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+                background: #c2185b; color: #fff; font-size: 11px; min-height: 24px; padding: 0 12px; z-index: 1;">
+              Most Popular
+            </mat-chip>
+
+            <!-- Current Plan badge -->
+            <mat-chip *ngIf="subscription?.planId === plan.id" [highlighted]="true" color="accent" style="position: absolute; top: -12px; right: 12px;
+                font-size: 11px; min-height: 24px; padding: 0 12px; z-index: 1;">
+              Current Plan
+            </mat-chip>
+
+            <mat-card-content style="padding: 24px; text-align: center;">
+              <div style="font-size: 18px; font-weight: 700; color: #333; margin-bottom: 4px;">
+                {{ plan.planName }}
+              </div>
+              <div style="font-size: 12px; color: #888; margin-bottom: 16px;">{{ plan.description }}</div>
+
+              <div style="margin-bottom: 16px;">
+                <span style="font-size: 32px; font-weight: 800; color: #c2185b;">
+                  {{ formatCurrency(getDisplayPrice(plan)) }}
+                </span>
+                <span style="font-size: 13px; color: #888;">/month</span>
+                <div *ngIf="selectedBillingCycle === 'yearly' && plan.yearlyDiscount > 0"
+                  style="font-size: 12px; color: #888; margin-top: 4px;">
+                  <s>{{ formatCurrency(plan.price) }}</s>
+                  <mat-chip [highlighted]="true" color="accent"
+                    style="font-size: 10px; min-height: 18px; padding: 0 6px; margin-left: 4px;">
+                    {{ plan.yearlyDiscount }}% off
+                  </mat-chip>
+                </div>
+              </div>
+
+              <div *ngIf="selectedBillingCycle === 'yearly' && getYearlySavings(plan) > 0"
+                style="font-size: 12px; color: #4caf50; font-weight: 500; margin-bottom: 12px;">
+                Save {{ formatCurrency(getYearlySavings(plan)) }} per year
+              </div>
+
+              <mat-divider style="margin-bottom: 12px;"></mat-divider>
+
+              <div style="text-align: left; margin-bottom: 16px;">
+                <div *ngFor="let feature of plan.features?.slice(0, 6)"
+                  style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; padding: 4px 0;">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px; color: #4caf50;">check</mat-icon>
+                  {{ feature.name }}
+                </div>
+              </div>
+
+              <button mat-flat-button style="width: 100%;"
+                [style.background-color]="plan.isMarkedAsPopular ? '#c2185b' : '#333'"
+                style="color: #fff; border-radius: 8px;"
+                [disabled]="subscription?.planId === plan.id && !subscription!.isTrialActive"
+                (click)="selectPlan(plan)">
+                {{ subscription?.planId === plan.id && !subscription!.isTrialActive ? 'Current Plan' :
+                subscription?.isTrialActive ? 'Select Plan' : 'Upgrade' }}
+              </button>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ==================== PAYMENT METHODS TAB ==================== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon style="margin-right: 6px;">credit_card</mat-icon> Payment Methods
+      </ng-template>
+      <div style="padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 class="header-title" style="margin: 0;">Payment Methods</h2>
+          <button mat-flat-button color="primary" (click)="openAddPaymentMethodModal()">
+            <mat-icon>add</mat-icon> Add Payment Method
+          </button>
+        </div>
+
+        <!-- Payment method cards -->
+        <div *ngIf="paymentMethods.length > 0"
+          style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+          <mat-card *ngFor="let method of paymentMethods"
+            [style.border]="method.isDefault ? '2px solid #c2185b' : '1px solid #e0e0e0'" style="border-radius: 10px;">
+            <mat-card-content style="padding: 16px; display: flex; align-items: center; gap: 16px;">
+              <mat-icon style="font-size: 32px; width: 32px; height: 32px; color: #555;">
+                {{ getCardMatIcon(method.cardType) }}
+              </mat-icon>
+              <div style="flex: 1;">
+                <div style="font-size: 14px; font-weight: 600;">{{ getPaymentMethodLabel(method.cardType) }}</div>
+                <div style="font-size: 13px; color: #888;">•••• •••• •••• {{ method.lastFourDigits }}</div>
+                <div style="font-size: 12px; color: #aaa;">Expires {{ method.expiryDate }}</div>
+              </div>
+              <mat-chip-set *ngIf="method.isDefault">
+                <mat-chip [highlighted]="true" color="primary"
+                  style="font-size: 10px; min-height: 20px; padding: 0 8px;">Default</mat-chip>
+              </mat-chip-set>
+              <div style="display: flex; gap: 4px;">
+                <button mat-icon-button color="primary" *ngIf="!method.isDefault" matTooltip="Set as default"
+                  (click)="setDefaultMethod(method)">
+                  <mat-icon>star_border</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Remove" (click)="deletePaymentMethod(method)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="paymentMethods.length === 0" style="text-align: center; padding: 48px 20px; color: #888;">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ccc;">credit_card</mat-icon>
+          <h3 style="margin: 12px 0 8px; color: #555;">No Payment Methods</h3>
+          <p>Add a payment method to manage your subscription easily.</p>
+          <button mat-flat-button color="primary" (click)="openAddPaymentMethodModal()">
+            <mat-icon>add</mat-icon> Add Payment Method
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ==================== PAYMENT HISTORY TAB ==================== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon style="margin-right: 6px;">history</mat-icon> Payment History
+      </ng-template>
+      <div style="padding: 20px;">
+        <h2 class="header-title" style="margin: 0 0 16px;">Payment History</h2>
+
+        <div *ngIf="paymentHistory.length > 0" style="border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
+          <table mat-table [dataSource]="paymentHistory" style="width: 100%;">
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef> Date </th>
+              <td mat-cell *matCellDef="let txn"> {{ formatDate(txn.paymentDate || txn.createdAt) }} </td>
+            </ng-container>
+            <ng-container matColumnDef="transactionId">
+              <th mat-header-cell *matHeaderCellDef> Transaction ID </th>
+              <td mat-cell *matCellDef="let txn" style="font-family: monospace; font-size: 12px;">
+                {{ txn.transactionId }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef> Amount </th>
+              <td mat-cell *matCellDef="let txn" style="font-weight: 600; color: #c2185b;">
+                {{ formatCurrency(txn.amount) }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="paymentMode">
+              <th mat-header-cell *matHeaderCellDef> Payment Mode </th>
+              <td mat-cell *matCellDef="let txn"> {{ txn.paymentMode || 'N/A' }} </td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef> Status </th>
+              <td mat-cell *matCellDef="let txn">
+                <mat-chip-set>
+                  <mat-chip [highlighted]="true" [color]="getStatusChipColor(txn.status)"
+                    style="font-size: 10px; min-height: 20px; padding: 0 8px;">
+                    {{ getStatusLabel(txn.status) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: historyColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="paymentHistory.length === 0" style="text-align: center; padding: 48px 20px; color: #888;">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ccc;">receipt_long</mat-icon>
+          <h3 style="margin: 12px 0 8px; color: #555;">No Payment History</h3>
+          <p>Your payment transactions will appear here.</p>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<!-- ==================== UPGRADE MODAL ==================== -->
+<div *ngIf="showUpgradeModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;" (click)="closeModal()">
+  <mat-card style="width: 480px; border-radius: 12px;" (click)="$event.stopPropagation()">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0;">
+      <h2 class="header-title" style="margin: 0;">Confirm Upgrade</h2>
+      <button mat-icon-button (click)="closeModal()"><mat-icon>close</mat-icon></button>
     </div>
-  </div>
-
-  <!-- Alert Messages -->
-  <div class="alert alert-success" *ngIf="successMessage">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-      <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-    </svg>
-    <span>{{ successMessage }}</span>
-    <button class="close-btn" (click)="clearMessages()">&times;</button>
-  </div>
-
-  <div class="alert alert-error" *ngIf="errorMessage">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-    </svg>
-    <span>{{ errorMessage }}</span>
-    <button class="close-btn" (click)="clearMessages()">&times;</button>
-  </div>
-
-  <!-- Tab Navigation -->
-  <div class="tabs-nav">
-    <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="setActiveTab('overview')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" />
-      </svg>
-      Overview
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'plans'" (click)="setActiveTab('plans')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-      Plans
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'payment-methods'" (click)="setActiveTab('payment-methods')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
-      </svg>
-      Payment Methods
-    </button>
-    <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="setActiveTab('history')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z" />
-      </svg>
-      Payment History
-    </button>
-  </div>
-
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading">
-    <div class="spinner"></div>
-    <p>Loading subscription details...</p>
-  </div>
-
-  <!-- Overview Tab -->
-  <div class="tab-content" *ngIf="!isLoading && activeTab === 'overview'">
-    <!-- Trial Banner -->
-    <div class="trial-banner" *ngIf="subscription?.isTrialActive">
-      <div class="trial-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-        </svg>
-      </div>
-      <div class="trial-content">
-        <h3>🎉 You're on a Free Trial!</h3>
-        <p>{{ subscription?.trialDaysRemaining }} days remaining. Upgrade now to keep all features.</p>
-      </div>
-      <button class="btn-upgrade" (click)="setActiveTab('plans')">Upgrade Now</button>
-    </div>
-
-    <!-- Current Plan Card -->
-    <div class="current-plan-card" *ngIf="subscription">
-      <div class="plan-header">
-        <div class="plan-info">
-          <span class="plan-badge" [class]="getStatusClass(subscription.status)">{{ getStatusLabel(subscription.status)
-            }}</span>
-          <h2 class="plan-name">{{ subscription.planName }}</h2>
-          <p class="plan-cycle">{{ subscription.billingCycle === 'yearly' ? 'Annual' : 'Monthly' }} billing</p>
-        </div>
-        <div class="plan-price">
-          <span class="amount">{{ formatCurrency(subscription.price) }}</span>
-          <span class="period">/{{ subscription.billingCycle === 'yearly' ? 'year' : 'month' }}</span>
+    <mat-card-content style="padding: 16px 20px;" *ngIf="selectedPlan">
+      <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+        <div style="font-size: 16px; font-weight: 700;">{{ selectedPlan.planName }}</div>
+        <div style="font-size: 13px; color: #888;">
+          {{ selectedBillingCycle === 'yearly' ? 'Annual' : 'Monthly' }} billing
         </div>
       </div>
-
-      <div class="plan-details">
-        <div class="detail-item">
-          <span class="label">Start Date</span>
-          <span class="value">{{ formatDate(subscription.startDate) }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">{{ subscription.isTrialActive ? 'Trial Ends' : 'Renewal Date' }}</span>
-          <span class="value">{{ formatDate(subscription.endDate) }}</span>
-        </div>
-        <div class="detail-item" *ngIf="!subscription.isTrialActive">
-          <span class="label">Auto Renew</span>
-          <label class="toggle-switch">
-            <input type="checkbox" [checked]="subscription.autoRenew" (change)="toggleAutoRenew()">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
+      <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px;">
+        <span>Subtotal</span>
+        <span>{{ formatCurrency(getTotalPrice(selectedPlan)) }}</span>
       </div>
-
-      <div class="plan-features" *ngIf="subscription.features.length > 0">
-        <h4>Included Features</h4>
-        <ul class="feature-list">
-          <li *ngFor="let feature of subscription.features">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-            </svg>
-            {{ feature }}
-          </li>
-        </ul>
+      <mat-divider></mat-divider>
+      <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 16px; font-weight: 700;">
+        <span>Total</span>
+        <span style="color: #c2185b;">{{ formatCurrency(getTotalPrice(selectedPlan)) }}</span>
       </div>
-
-      <div class="plan-actions">
-        <button class="btn-secondary" (click)="setActiveTab('plans')">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14l-6-6z" />
-          </svg>
-          {{ subscription.isTrialActive ? 'Choose a Plan' : 'Change Plan' }}
-        </button>
-        <button class="btn-danger-outline"
-          *ngIf="!subscription.isTrialActive && subscription.status !== SubscriptionStatus.Cancelled"
-          (click)="openCancelModal()">
-          Cancel Subscription
-        </button>
-      </div>
-    </div>
-
-    <!-- No Subscription State -->
-    <div class="no-subscription" *ngIf="!subscription">
-      <div class="empty-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-        </svg>
-      </div>
-      <h3>No Active Subscription</h3>
-      <p>Choose a plan to unlock all features and manage your properties efficiently.</p>
-      <button class="btn-primary" (click)="setActiveTab('plans')">View Plans</button>
-    </div>
-  </div>
-
-  <!-- Plans Tab -->
-  <div class="tab-content" *ngIf="!isLoading && activeTab === 'plans'">
-    <!-- Billing Cycle Toggle -->
-    <div class="billing-toggle">
-      <span [class.active]="selectedBillingCycle === 'monthly'">Monthly</span>
-      <label class="toggle-switch large">
-        <input type="checkbox" [checked]="selectedBillingCycle === 'yearly'"
-          (change)="selectedBillingCycle = selectedBillingCycle === 'monthly' ? 'yearly' : 'monthly'">
-        <span class="toggle-slider"></span>
-      </label>
-      <span [class.active]="selectedBillingCycle === 'yearly'">
-        Yearly
-        <span class="save-badge">Save up to 20%</span>
-      </span>
-    </div>
-
-    <!-- Plans Grid -->
-    <div class="plans-grid">
-      <div class="plan-card" *ngFor="let plan of plans" [class.popular]="plan.isMarkedAsPopular"
-        [class.current]="subscription?.planId === plan.id">
-
-        <div class="popular-badge" *ngIf="plan.isMarkedAsPopular">Most Popular</div>
-        <div class="current-badge" *ngIf="subscription?.planId === plan.id">Current Plan</div>
-
-        <h3 class="plan-title">{{ plan.planName }}</h3>
-        <p class="plan-description">{{ plan.description }}</p>
-
-        <div class="plan-pricing">
-          <span class="price">{{ formatCurrency(getDisplayPrice(plan)) }}</span>
-          <span class="period">/month</span>
-          <div class="original-price" *ngIf="selectedBillingCycle === 'yearly' && plan.yearlyDiscount > 0">
-            <s>{{ formatCurrency(plan.price) }}</s>
-            <span class="discount">{{ plan.yearlyDiscount }}% off</span>
-          </div>
-        </div>
-
-        <div class="yearly-savings" *ngIf="selectedBillingCycle === 'yearly' && getYearlySavings(plan) > 0">
-          Save {{ formatCurrency(getYearlySavings(plan)) }} per year
-        </div>
-
-        <ul class="plan-features-list">
-          <li *ngFor="let feature of plan.features?.slice(0, 6)">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-            </svg>
-            {{ feature.name }}
-          </li>
-        </ul>
-
-        <button class="btn-select" [disabled]="subscription?.planId === plan.id && !subscription?.isTrialActive"
-          (click)="selectPlan(plan)">
-          {{ subscription?.planId === plan.id && !subscription?.isTrialActive ? 'Current Plan' :
-          subscription?.isTrialActive ? 'Select Plan' : 'Upgrade' }}
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Payment Methods Tab -->
-  <div class="tab-content" *ngIf="!isLoading && activeTab === 'payment-methods'">
-    <div class="section-header">
-      <h2>Payment Methods</h2>
-      <button class="btn-primary" (click)="openAddPaymentMethodModal()">
-        + Add Payment Method
+      <p style="font-size: 12px; color: #888; margin-top: 8px;">
+        You will be redirected to PayU for secure payment.
+      </p>
+    </mat-card-content>
+    <div style="display: flex; justify-content: flex-end; gap: 8px; padding: 0 20px 16px;">
+      <button mat-flat-button (click)="closeModal()" [disabled]="isProcessing"
+        style="background-color: #9e9e9e; color: #fff;">Cancel</button>
+      <button mat-flat-button (click)="proceedToPayment()" [disabled]="isProcessing"
+        style="background-color: #e91e63; color: #fff;">
+        {{ isProcessing ? 'Processing...' : 'Proceed to Payment' }}
       </button>
     </div>
+  </mat-card>
+</div>
 
-    <div class="payment-methods-list" *ngIf="paymentMethods.length > 0">
-      <div class="payment-method-card" *ngFor="let method of paymentMethods" [class.default]="method.isDefault">
-        <div class="card-icon">
-          <i [class]="'bi ' + getCardIcon(method.cardType)"></i>
-        </div>
-        <div class="card-details">
-          <div class="card-type">{{ getPaymentMethodLabel(method.cardType) }}</div>
-          <div class="card-number">•••• •••• •••• {{ method.lastFourDigits }}</div>
-          <div class="card-expiry">Expires {{ method.expiryDate }}</div>
-        </div>
-        <div class="card-badges">
-          <span class="default-badge" *ngIf="method.isDefault">Default</span>
-        </div>
-        <div class="card-actions">
-          <button class="btn-icon" *ngIf="!method.isDefault" (click)="setDefaultMethod(method)" title="Set as default">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" />
-            </svg>
-          </button>
-          <button class="btn-icon danger" (click)="deletePaymentMethod(method)" title="Remove">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-            </svg>
-          </button>
-        </div>
-      </div>
+<!-- ==================== ADD PAYMENT METHOD MODAL ==================== -->
+<div *ngIf="showPaymentMethodModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;" (click)="closeModal()">
+  <mat-card style="width: 500px; border-radius: 12px;" (click)="$event.stopPropagation()">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0;">
+      <h2 class="header-title" style="margin: 0;">Add Payment Method</h2>
+      <button mat-icon-button (click)="closeModal()"><mat-icon>close</mat-icon></button>
     </div>
+    <mat-card-content style="padding: 16px 20px;">
+      <mat-form-field appearance="fill" style="width: 100%;">
+        <mat-label>Card Number</mat-label>
+        <input matInput [(ngModel)]="newCard.cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+        <mat-icon matPrefix>credit_card</mat-icon>
+      </mat-form-field>
 
-    <div class="empty-state" *ngIf="paymentMethods.length === 0">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
-      </svg>
-      <h3>No Payment Methods</h3>
-      <p>Add a payment method to manage your subscription easily.</p>
-      <button class="btn-primary" (click)="openAddPaymentMethodModal()">Add Payment Method</button>
-    </div>
-  </div>
+      <mat-form-field appearance="fill" style="width: 100%;">
+        <mat-label>Cardholder Name</mat-label>
+        <input matInput [(ngModel)]="newCard.cardHolderName" placeholder="Name on card">
+      </mat-form-field>
 
-  <!-- Payment History Tab -->
-  <div class="tab-content" *ngIf="!isLoading && activeTab === 'history'">
-    <div class="section-header">
-      <h2>Payment History</h2>
-    </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 12px;">
+        <mat-form-field appearance="fill">
+          <mat-label>Month</mat-label>
+          <mat-select [(ngModel)]="newCard.expiryMonth">
+            <mat-option value="">MM</mat-option>
+            <mat-option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="m < 10 ? '0'+m : ''+m">{{ m < 10 ? '0'
+                +m : m }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Year</mat-label>
+          <mat-select [(ngModel)]="newCard.expiryYear">
+            <mat-option value="">YY</mat-option>
+            <mat-option *ngFor="let y of [2024,2025,2026,2027,2028,2029,2030]" [value]="(''+y).slice(-2)">{{
+              (''+y).slice(-2) }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>CVV</mat-label>
+          <input matInput type="password" [(ngModel)]="newCard.cvv" placeholder="•••" maxlength="4">
+        </mat-form-field>
+      </div>
 
-    <div class="history-table-wrapper" *ngIf="paymentHistory.length > 0">
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Transaction ID</th>
-            <th>Amount</th>
-            <th>Payment Mode</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let txn of paymentHistory">
-            <td>{{ formatDate(txn.paymentDate || txn.createdAt) }}</td>
-            <td class="txn-id">{{ txn.transactionId }}</td>
-            <td class="amount">{{ formatCurrency(txn.amount) }}</td>
-            <td>{{ txn.paymentMode || 'None' }}</td>
-            <td>
-              <span class="status-badge" [class]="getStatusClass(txn.status)">{{ getStatusLabel(txn.status) }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <mat-checkbox [(ngModel)]="newCard.setAsDefault" style="margin-bottom: 8px;">
+        Set as default payment method
+      </mat-checkbox>
+    </mat-card-content>
+    <div style="display: flex; justify-content: flex-end; gap: 8px; padding: 0 20px 16px;">
+      <button mat-flat-button (click)="closeModal()" [disabled]="isProcessing"
+        style="background-color: #9e9e9e; color: #fff;">Cancel</button>
+      <button mat-flat-button (click)="savePaymentMethod()" [disabled]="isProcessing"
+        style="background-color: #e91e63; color: #fff;">
+        {{ isProcessing ? 'Saving...' : 'Save Card' }}
+      </button>
     </div>
+  </mat-card>
+</div>
 
-    <div class="empty-state" *ngIf="paymentHistory.length === 0">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z" />
-      </svg>
-      <h3>No Payment History</h3>
-      <p>Your payment transactions will appear here.</p>
+<!-- ==================== CANCEL SUBSCRIPTION MODAL ==================== -->
+<div *ngIf="showCancelModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;" (click)="closeModal()">
+  <mat-card style="width: 480px; border-radius: 12px;" (click)="$event.stopPropagation()">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0;">
+      <h2 class="header-title" style="margin: 0; color: #f44336;">Cancel Subscription</h2>
+      <button mat-icon-button (click)="closeModal()"><mat-icon>close</mat-icon></button>
     </div>
-  </div>
-
-  <!-- Upgrade Modal -->
-  <div class="modal-overlay" *ngIf="showUpgradeModal" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Confirm Upgrade</h3>
-        <button class="modal-close" (click)="closeModal()">&times;</button>
+    <mat-card-content style="padding: 16px 20px;">
+      <div style="text-align: center; margin-bottom: 12px;">
+        <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ff9800;">warning</mat-icon>
       </div>
-      <div class="modal-body" *ngIf="selectedPlan">
-        <div class="upgrade-summary">
-          <div class="plan-summary">
-            <h4>{{ selectedPlan.planName }}</h4>
-            <p>{{ selectedBillingCycle === 'yearly' ? 'Annual' : 'Monthly' }} billing</p>
-          </div>
-          <div class="price-summary">
-            <div class="price-row">
-              <span>Subtotal</span>
-              <span>{{ formatCurrency(getTotalPrice(selectedPlan)) }}</span>
-            </div>
-            <div class="price-row total">
-              <span>Total</span>
-              <span>{{ formatCurrency(getTotalPrice(selectedPlan)) }}</span>
-            </div>
-          </div>
-        </div>
-        <p class="payment-note">You will be redirected to PayU for secure payment.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeModal()" [disabled]="isProcessing">Cancel</button>
-        <button class="btn-primary" (click)="proceedToPayment()" [disabled]="isProcessing">
-          <span *ngIf="!isProcessing">Proceed to Payment</span>
-          <span *ngIf="isProcessing">Processing...</span>
-        </button>
-      </div>
+      <p style="text-align: center; font-size: 14px; margin-bottom: 4px;">
+        Are you sure you want to cancel your subscription?
+      </p>
+      <p style="text-align: center; font-size: 13px; color: #f44336; margin-bottom: 16px;">
+        You will lose access to premium features at the end of your billing period.
+      </p>
+      <mat-form-field appearance="fill" style="width: 100%;">
+        <mat-label>Reason for cancellation (optional)</mat-label>
+        <textarea matInput [(ngModel)]="cancellationReason" rows="3"
+          placeholder="Tell us why you're leaving..."></textarea>
+      </mat-form-field>
+    </mat-card-content>
+    <div style="display: flex; justify-content: flex-end; gap: 8px; padding: 0 20px 16px;">
+      <button mat-flat-button (click)="closeModal()" [disabled]="isProcessing"
+        style="background-color: #9e9e9e; color: #fff;">Keep Subscription</button>
+      <button mat-flat-button (click)="cancelSubscription()" [disabled]="isProcessing"
+        style="background-color: #f44336; color: #fff;">
+        {{ isProcessing ? 'Processing...' : 'Cancel Subscription' }}
+      </button>
     </div>
-  </div>
-
-  <!-- Add Payment Method Modal -->
-  <div class="modal-overlay" *ngIf="showPaymentMethodModal" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Add Payment Method</h3>
-        <button class="modal-close" (click)="closeModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Card Number</label>
-          <input type="text" [(ngModel)]="newCard.cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
-        </div>
-        <div class="form-group">
-          <label>Cardholder Name</label>
-          <input type="text" [(ngModel)]="newCard.cardHolderName" placeholder="Name on card">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Expiry Month</label>
-            <select [(ngModel)]="newCard.expiryMonth">
-              <option value="">MM</option>
-              <option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="m < 10 ? '0'+m : m">{{ m < 10 ? '0' +m : m
-                  }}</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Expiry Year</label>
-            <select [(ngModel)]="newCard.expiryYear">
-              <option value="">YY</option>
-              <option *ngFor="let y of [2024,2025,2026,2027,2028,2029,2030]" [value]="y.toString().slice(-2)">{{
-                y.toString().slice(-2) }}</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>CVV</label>
-            <input type="password" [(ngModel)]="newCard.cvv" placeholder="•••" maxlength="4">
-          </div>
-        </div>
-        <div class="form-group checkbox">
-          <label>
-            <input type="checkbox" [(ngModel)]="newCard.setAsDefault">
-            Set as default payment method
-          </label>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeModal()" [disabled]="isProcessing">Cancel</button>
-        <button class="btn-primary" (click)="savePaymentMethod()" [disabled]="isProcessing">
-          <span *ngIf="!isProcessing">Save Card</span>
-          <span *ngIf="isProcessing">Saving...</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Cancel Subscription Modal -->
-  <div class="modal-overlay" *ngIf="showCancelModal" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header warning">
-        <h3>Cancel Subscription</h3>
-        <button class="modal-close" (click)="closeModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="warning-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
-          </svg>
-        </div>
-        <p>Are you sure you want to cancel your subscription?</p>
-        <p class="warning-text">You will lose access to premium features at the end of your billing period.</p>
-        <div class="form-group">
-          <label>Reason for cancellation (optional)</label>
-          <textarea [(ngModel)]="cancellationReason" placeholder="Tell us why you're leaving..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeModal()" [disabled]="isProcessing">Keep Subscription</button>
-        <button class="btn-danger" (click)="cancelSubscription()" [disabled]="isProcessing">
-          <span *ngIf="!isProcessing">Cancel Subscription</span>
-          <span *ngIf="isProcessing">Processing...</span>
-        </button>
-      </div>
-    </div>
-  </div>
+  </mat-card>
 </div>

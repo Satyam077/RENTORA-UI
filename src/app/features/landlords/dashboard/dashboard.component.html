@@ -1,70 +1,82 @@
-<!-- Dashboard Content -->
-<div class="dashboard-content">
+<div class="dashboard-container">
   <!-- Page Header -->
   <div class="page-header">
-    <div class="header-left">
-      <h1 class="page-title">Dashboard</h1>
-      <p class="page-subtitle">Welcome back! Here's your property overview.</p>
-    </div>
+    <h1 class="mat-headline-4 page-title">Dashboard</h1>
+    <p class="mat-subtitle-1 page-subtitle">Welcome back! Here's your property overview.</p>
   </div>
 
-  <!-- Stats Cards -->
+  <!-- Stats Grid -->
   <div class="stats-grid">
-    <div class="stat-card" *ngFor="let stat of stats">
-      <div class="stat-content">
+    <mat-card class="stat-card" *ngFor="let stat of stats">
+      <mat-card-content>
         <div class="stat-header">
-          <h3 class="stat-title">{{ stat.title }}</h3>
-          <div class="stat-icon" [style.background-color]="stat.iconBg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path [attr.d]="getIconPath(stat.icon)"></path>
-            </svg>
+          <div class="stat-info">
+            <span class="stat-title">{{ stat.title }}</span>
+            <div class="stat-value-container">
+              <h2 class="stat-value">{{ stat.value }}</h2>
+            </div>
+          </div>
+          <div class="stat-icon-container" [style.background-color]="stat.iconBg" [style.color]="stat.iconColor">
+            <mat-icon>{{ stat.icon }}</mat-icon>
           </div>
         </div>
-        <div class="stat-value">{{ stat.value }}</div>
+
+        <mat-divider></mat-divider>
+
         <div class="stat-footer">
           <span class="stat-change" [class.positive]="stat.changePositive" [class.negative]="!stat.changePositive">
+            <mat-icon class="change-icon">{{ stat.changePositive ? 'trending_up' : 'trending_down' }}</mat-icon>
             {{ stat.change }}
           </span>
           <span class="stat-subtitle" *ngIf="stat.subtitle">{{ stat.subtitle }}</span>
+          <span class="stat-subtitle" *ngIf="!stat.subtitle">Since last month</span>
         </div>
-      </div>
-    </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
-  <!-- Recent Activity & Quick Actions -->
+  <!-- Main Content Grid -->
   <div class="content-grid">
     <!-- Recent Activity -->
-    <div class="content-card">
-      <h2 class="card-title">Recent Activity</h2>
-      <div class="activity-list">
-        <div class="activity-item" *ngFor="let activity of recentActivities">
-          <div class="activity-left">
-            <div class="activity-type">{{ activity.type }}</div>
-            <div class="activity-description">{{ activity.description }}</div>
-          </div>
-          <div class="activity-right">
-            <div class="activity-amount" *ngIf="activity.amount">{{ activity.amount }}</div>
-            <div class="activity-status" *ngIf="activity.status"
-              [class]="'status-' + activity.status.toLowerCase().replace(' ', '-')">
-              {{ activity.status }}
+    <!-- <mat-card class="activity-card">
+      <mat-card-header>
+        <mat-card-title>Recent Activity</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let activity of recentActivities">
+            <mat-icon matListItemIcon [style.color]="activity.iconColor" [style.background-color]="activity.iconBg"
+              class="activity-icon-bg">{{ activity.icon }}</mat-icon>
+            <div matListItemTitle class="activity-title-row">
+              <span class="activity-label">{{ activity.label }}</span>
+              <span class="activity-amount" *ngIf="activity.amount">{{ activity.amount }}</span>
             </div>
-            <div class="activity-time">{{ activity.time }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+            <div matListItemLine class="activity-desc-row">
+              <span class="activity-description">{{ activity.description }}</span>
+              <span class="activity-time">{{ activity.time }}</span>
+            </div>
+            <span matListItemMeta *ngIf="activity.status"
+              [class]="'status-badge ' + activity.status.toLowerCase().replace(' ', '-')">
+              {{ activity.status }}
+            </span>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card> -->
 
     <!-- Quick Actions -->
-    <div class="content-card">
-      <h2 class="card-title">Quick Actions</h2>
-      <div class="quick-actions-list">
-        <button class="quick-action-btn" *ngFor="let action of quickActions">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path [attr.d]="getIconPath(action.icon)"></path>
-          </svg>
-          <span>{{ action.label }}</span>
-        </button>
-      </div>
-    </div>
+    <!-- <mat-card class="actions-card">
+      <mat-card-header>
+        <mat-card-title>Quick Actions</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="quick-actions-list">
+          <button mat-flat-button color="primary" class="action-btn" *ngFor="let action of quickActions">
+            <mat-icon style="color: white;">{{ action.icon }}</mat-icon>
+            {{ action.label }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card> -->
   </div>
 </div>

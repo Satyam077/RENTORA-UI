@@ -15,11 +15,16 @@ import { GoogleAuthService } from '../../../core/services/google-auth.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, AfterViewInit {
+  logoPath: string = 'assets/Images/home.png';
   loginForm!: FormGroup;
   loading = false;
   submitted = false;
@@ -263,3 +268,4 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/']);
   }
 }
+

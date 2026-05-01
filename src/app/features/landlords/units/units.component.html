@@ -1,175 +1,99 @@
-<div class="units-container">
+<div style="padding: 16px;">
   <!-- Page Header -->
-  <div class="page-header">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
     <div>
-      <h1 class="page-title">My Units</h1>
-      <p class="page-subtitle">Manage all your rental units in one place</p>
+      <h1 class="header-title" style="margin: 0;">My Units</h1>
+      <p class="header-title" style="margin: 4px 0 0;">Manage all your rental units in one place</p>
     </div>
-    <button class="btn btn-primary btn-add" (click)="openAddUnitModal()">
-      <span class="btn-icon">+</span>
+    <button mat-flat-button color="primary" (click)="openAddUnitDialog()">
+      <mat-icon>add</mat-icon>
       Add Unit
     </button>
   </div>
 
-  <!-- Success/Error Messages -->
-  <div class="alert alert-success" *ngIf="success" (click)="success = ''">
-    {{ success }}
+  <!-- Search -->
+  <div style="width: 50%; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px; margin-bottom: 16px;">
+    <mat-form-field appearance="fill" style="width: 100%;">
+      <mat-label>Search units</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Room 101, Apartment..." #input>
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
   </div>
-  <div class="alert alert-error" *ngIf="error" (click)="error = ''">
-    {{ error }}
+
+  <!-- Loading State -->
+  <app-spinner [isLoading]="isLoadingUnits" message="Loading units..."></app-spinner>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoadingUnits && filteredUnits.length === 0" style="text-align: center; padding: 48px; color: #888;">
+    <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ccc;">apartment</mat-icon>
+    <p style="margin-top: 8px;">No units found</p>
   </div>
 
-  <!-- Main Content Card -->
-  <div class="content-card">
-    <!-- Search and Filter Bar -->
-    <div class="search-filter-bar">
-      <div class="search-input-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" placeholder="Search units..." [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchChange()">
-      </div>
-    </div>
+  <!-- Units Card Grid -->
+  <div *ngIf="!isLoadingUnits && filteredUnits.length > 0"
+    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px;">
 
-    <!-- Loading State -->
-    <div *ngIf="isLoadingUnits" class="loading-state">
-      <p>Loading units...</p>
-    </div>
+    <mat-card *ngFor="let unit of getPaginatedUnits()" style="border: 1px solid #e0e0e0; border-radius: 12px;">
+      <!-- Card Header: Unit Name + Status Badge -->
+      <mat-card-header
+        style="display: flex; justify-content: space-between; align-items: flex-start; padding: 16px 16px 0;">
+        <div>
+          <mat-card-title style="font-size: 16px; font-weight: 500; color: #333; margin-bottom: 4px;">
+            {{ unit.unitName }}
+          </mat-card-title>
+          <mat-card-subtitle style="font-size: 13px; color: #888;">
+            {{ getPropertyName(unit.propertyId) }}
+          </mat-card-subtitle>
+        </div>
+        <mat-chip-set>
+          <mat-chip [highlighted]="true" [style.background-color]="unit.isOccupied ? '#1565c0' : '#c8e6c9'"
+            [style.color]="unit.isOccupied ? '#fff' : '#2e7d32'"
+            style="font-size: 11px; font-weight: 600; text-transform: uppercase;">
+            {{ unit.isOccupied ? 'OCCUPIED' : 'VACANT' }}
+          </mat-chip>
+        </mat-chip-set>
+      </mat-card-header>
 
-    <!-- Units Grid -->
-    <div *ngIf="!isLoadingUnits" class="units-grid">
-      <div *ngIf="getPaginatedUnits().length === 0" class="empty-state">
-        <p>No units found</p>
-      </div>
-      <div *ngFor="let unit of getPaginatedUnits()" class="unit-card">
-        <div class="unit-card-header">
-          <div class="unit-name-section">
-            <h3 class="unit-name">{{ unit.unitName }}</h3>
-            <span class="unit-property">{{ getPropertyName(unit.propertyId) }}</span>
-          </div>
-          <span class="badge" [class.badge-active]="unit.isOccupied" [class.badge-inactive]="!unit.isOccupied">
-            {{ unit.isOccupied ? 'Occupied' : 'Vacant' }}
-          </span>
-        </div>
-        <div class="unit-card-body">
-          <div class="unit-info-row">
-            <span class="unit-info-label">Rent Amount:</span>
-            <span class="unit-info-value">₹{{ unit.rentAmount | number }}</span>
-          </div>
-          <div class="unit-info-row">
-            <span class="unit-info-label">Security Deposit:</span>
-            <span class="unit-info-value">₹{{ unit.securityDeposit | number }}</span>
-          </div>
-          <div class="unit-info-row">
-            <span class="unit-info-label">Due Day:</span>
-            <span class="unit-info-value">{{ unit.dueDay }}<sup>th</sup> of month</span>
-          </div>
-          <div class="unit-info-row" *ngIf="unit.notes">
-            <span class="unit-info-label">Notes:</span>
-            <span class="unit-info-value unit-notes">{{ unit.notes }}</span>
-          </div>
-        </div>
-        <div class="unit-card-footer">
-          <div class="action-buttons">
-            <button class="action-link" (click)="editUnit(unit)">Edit</button>
-            <button class="action-link delete-link" (click)="deleteUnit(unit)">Delete</button>
-          </div>
-        </div>
-      </div>
-    </div>
+      <mat-divider style="margin: 12px 16px 0;"></mat-divider>
 
-    <!-- Pagination -->
-    <div *ngIf="!isLoadingUnits && filteredUnits.length > 0" class="pagination">
-      <div class="pagination-info">
-        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage,
-        filteredUnits.length) }} of {{ filteredUnits.length }} units
-      </div>
-      <div class="pagination-controls">
-        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
-          Previous
+      <!-- Card Body: Details -->
+      <mat-card-content style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="color: #555; font-weight: 500;">Rent Amount:</span>
+          <span style="font-weight: 600; color: #222;">₹{{ unit.rentAmount | number }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="color: #555; font-weight: 500;">Security Deposit:</span>
+          <span style="font-weight: 600; color: #222;">₹{{ unit.securityDeposit | number }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="color: #555; font-weight: 500;">Due Day:</span>
+          <span style="font-weight: 600; color: #222;">{{ unit.dueDay }}<sup>th</sup> of month</span>
+        </div>
+        <div *ngIf="unit.notes" style="margin-top: 8px;">
+          <span style="color: #555; font-weight: 500;">Notes: &nbsp;</span>
+          <span style="color: #666; font-style: italic;">{{ unit.notes }}</span>
+        </div>
+      </mat-card-content>
+
+      <!-- Card Footer: Action Buttons -->
+      <mat-card-actions style="padding: 8px 16px; display: flex; gap: 4px;">
+        <button mat-button color="primary" (click)="viewUnit(unit)">
+          View
         </button>
-        <div class="pagination-numbers">
-          <button *ngFor="let page of getPageNumbers()" class="pagination-number" [class.active]="page === currentPage"
-            (click)="goToPage(page)">
-            {{ page }}
-          </button>
-        </div>
-        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
-          Next
+        <button mat-button color="primary" (click)="editUnit(unit)">
+          Edit
         </button>
-      </div>
-    </div>
+        <button mat-button color="warn" (click)="deleteUnit(unit)">
+          Delete
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </div>
-</div>
 
-<!-- Add/Edit Unit Modal -->
-<div *ngIf="(isEditingUnit || isAddingUnit) && selectedUnit" class="modal-overlay" (click)="cancelUnitEdit()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>{{ isAddingUnit ? 'Add Unit' : 'Edit Unit' }}</h3>
-      <button class="modal-close" (click)="cancelUnitEdit()">&times;</button>
-    </div>
-
-    <div class="modal-body">
-      <div class="user-form">
-        <div class="form-section">
-          <h2 class="section-title">Unit Information</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Property Name <span class="required">*</span></label>
-              <select [(ngModel)]="selectedUnit.propertyId" class="form-input">
-                <option value="">Select Property</option>
-                <option *ngFor="let property of properties" [value]="property.id">
-                  {{ property.propertyName }}
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Unit Name <span class="required">*</span></label>
-              <input type="text" [(ngModel)]="selectedUnit.unitName" class="form-input"
-                placeholder="e.g., Flat 101, Unit A">
-            </div>
-
-            <div class="form-group">
-              <label>Rent Amount <span class="required">*</span></label>
-              <input type="number" [(ngModel)]="selectedUnit.rentAmount" class="form-input"
-                placeholder="Enter rent amount" min="0" step="0.01">
-            </div>
-
-            <div class="form-group">
-              <label>Security Deposit</label>
-              <input type="number" [(ngModel)]="selectedUnit.securityDeposit" class="form-input"
-                placeholder="Enter security deposit" min="0" step="0.01">
-            </div>
-
-            <div class="form-group">
-              <label>Due Day</label>
-              <input type="number" [(ngModel)]="selectedUnit.dueDay" class="form-input" min="1" max="31"
-                placeholder="Day of month">
-            </div>
-
-            <div class="form-group">
-              <div class="checkbox-label">
-                <input type="checkbox" [(ngModel)]="selectedUnit.isOccupied">
-                <span>Is Occupied</span>
-              </div>
-            </div>
-
-            <div class="form-group full-width">
-              <label>Notes</label>
-              <textarea [(ngModel)]="selectedUnit.notes" class="form-input" rows="3"
-                placeholder="Additional notes about the unit"></textarea>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="cancelUnitEdit()">Cancel</button>
-      <button class="btn-primary" (click)="saveUnit()">
-        {{ isAddingUnit ? 'Create Unit' : 'Save Changes' }}
-      </button>
-    </div>
-  </div>
+  <!-- Paginator -->
+  <mat-paginator *ngIf="!isLoadingUnits && filteredUnits.length > 0" [length]="filteredUnits.length"
+    [pageSize]="pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[6, 12, 24, 48]" (page)="onPageChange($event)"
+    showFirstLastButtons aria-label="Select page of units" style="margin-top: 16px;">
+  </mat-paginator>
 </div>

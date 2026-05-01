@@ -1,0 +1,15 @@
+<div style="display: flex; justify-content: space-between; align-items: center;">
+  <h2 mat-dialog-title class="header-title" style="margin: 0;">{{ data.title }}</h2>
+  <button mat-icon-button mat-dialog-close style="margin-right: -8px;">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<mat-dialog-content>
+  <p>{{ data.message }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close style="background-color: #9e9e9e; color: #fff;">{{ data.cancelText ||
+    'Cancel' }}</button>
+  <button mat-flat-button (click)="confirm()" style="background-color: #e91e63; color: #fff;">{{ data.confirmText ||
+    'Confirm' }}</button>
+</mat-dialog-actions>

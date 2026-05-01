@@ -1,4 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { UsersService } from '../../../core/services/users.service';
 import {
   User,
@@ -7,33 +21,44 @@ import {
 } from '../../../core/models/user.model';
 import { Role } from '../../../core/models/role.enum';
 import { environment } from '../../../../environments/environment';
-import { UserDialogComponent } from "../admins/user-dialog.component";
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { SpinnerComponent } from '../../../shared/spinner/spinner.component';
+import { UserFormDialogComponent, UserFormDialogData } from '../../../popups/user-form-dialog/user-form-dialog.component';
 
 @Component({
   selector: 'app-landlords',
-  imports: [UserDialogComponent,FormsModule,CommonModule],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    SpinnerComponent
+  ],
   templateUrl: './landlords.component.html',
   styleUrl: './landlords.component.css'
 })
-export class LandlordsComponent implements OnInit {
-  Role = Role;
+export class LandlordsComponent implements OnInit, AfterViewInit {
   users: User[] = [];
-  filteredUsers: User[] = [];
-  searchTerm: string = '';
-  showDialog: boolean = false;
-  dialogUser: User | null = null;
-  pendingImageFile: File | null = null;
-  loading = false;
-  errorMessage = '';
-  successMessage = '';
+  isLoading = false;
+  currentUserId: string = '';
 
-  // Pagination
-  currentPage: number = 1;
-  itemsPerPage: number = 10;
-  totalPages: number = 1;
+  // Table
+  displayedColumns: string[] = ['fullName', 'email', 'mobile', 'role', 'status', 'actions'];
+  dataSource: MatTableDataSource<User>;
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  Role = Role;
   roleLabels: { [key: number]: string } = {
     [Role.SuperAdmin]: 'Super Admin',
     [Role.Admin]: 'Admin',
@@ -41,84 +66,177 @@ export class LandlordsComponent implements OnInit {
     [Role.Tenants]: 'Tenant',
     [Role.Agents]: 'Agent',
   };
+
   private apiBaseUrl = `${environment.apiUrl}`;
 
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) {
+    this.dataSource = new MatTableDataSource(this.users);
+  }
 
   ngOnInit(): void {
+    const currentUser = sessionStorage.getItem('currentUser');
+    if (currentUser) {
+      const user = JSON.parse(currentUser);
+      this.currentUserId = user.user?.id || '';
+    }
+    this.setUpFilterPredicate();
     this.loadUsers();
   }
 
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  setUpFilterPredicate() {
+    this.dataSource.filterPredicate = (data: User, filter: string) => {
+      const search = filter.trim().toLowerCase();
+      return (
+        data.fullName?.toLowerCase().includes(search) ||
+        data.email?.toLowerCase().includes(search) ||
+        data.mobile?.toLowerCase().includes(search) ||
+        this.getRoleLabel(data.role)?.toLowerCase().includes(search) ||
+        false
+      );
+    };
+  }
+
   loadUsers(): void {
-    this.loading = true;
+    this.isLoading = true;
     this.usersService.getAllUsers().subscribe({
-      next: (res) => {
-        const payload: any = res;
-        this.users = Array.isArray(payload) ?
-        payload : payload?.users.filter((user: User) => user.role === Role.Landlords) || [];
-        this.applyFilters();
-        this.loading = false;
+      next: (res: any) => {
+        let allUsers: User[] = [];
+        if (Array.isArray(res)) {
+          allUsers = res;
+        } else if (res.users && Array.isArray(res.users)) {
+          allUsers = res.users;
+        } else if (res.data && Array.isArray(res.data)) {
+          allUsers = res.data;
+        }
+
+        // Filter for Landlords
+        this.users = allUsers.filter(u => u.role === Role.Landlords);
+        this.dataSource.data = this.users;
+        this.isLoading = false;
+
+        if (this.paginator) this.dataSource.paginator = this.paginator;
+        if (this.sort) this.dataSource.sort = this.sort;
       },
-      error: (error) => {
-        this.errorMessage =
-          error.error?.message || error.message || 'Failed to load users';
-        this.loading = false;
-      },
+      error: (err) => {
+        this.showSnackBar('Failed to load users: ' + (err.error?.message || err.message), 'error');
+        this.isLoading = false;
+      }
     });
   }
 
-  applyFilters(): void {
-    let filtered = [...this.users];
-
-    // Apply search filter
-    if (this.searchTerm.trim()) {
-      const search = this.searchTerm.toLowerCase().trim();
-      filtered = filtered.filter(
-        (user) =>
-          user.fullName?.toLowerCase().includes(search) ||
-          user.email?.toLowerCase().includes(search) ||
-          user.mobile?.toLowerCase().includes(search) ||
-          this.getRoleLabel(user.role)?.toLowerCase().includes(search) ||
-          user.address?.city?.toLowerCase().includes(search) ||
-          user.address?.state?.toLowerCase().includes(search),
-      );
-    }
-
-    this.filteredUsers = filtered;
-    this.totalPages = Math.ceil(this.filteredUsers.length / this.itemsPerPage);
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
 
-  onSearchChange(): void {
-    this.currentPage = 1;
-    this.applyFilters();
+  openAddDialog(): void {
+    const dialogData: UserFormDialogData = {
+      mode: 'add',
+      role: Role.Landlords, // Default to Landlord
+      roles: [Role.Landlords] // Only Landlords
+    };
+
+    const dialogRef = this.dialog.open(UserFormDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: dialogData,
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.handleCreateUser(result.request, result.file);
+      }
+    });
   }
+
+  openEditDialog(user: User): void {
+    const dialogData: UserFormDialogData = {
+      mode: 'edit',
+      user: user,
+      roles: [Role.Landlords]
+    };
+
+    const dialogRef = this.dialog.open(UserFormDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: dialogData,
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.handleUpdateUser(result.request, result.file);
+      }
+    });
+  }
+
+  // --- API Calls ---
+
+  handleCreateUser(request: UserCreateRequest, file?: File) {
+    this.isLoading = true;
+    this.usersService.createUser(request).subscribe({
+      next: async (res: any) => {
+        if (res.success) {
+          const newUserId = res.user?.id || res.id;
+          let message = 'User created successfully!';
+
+          if (file && newUserId) {
+            try {
+              await this.usersService.uploadProfilePicture(newUserId, file).toPromise();
+            } catch (e) {
+              message += ' (Image upload failed)';
+            }
+          }
+          this.showSnackBar(message);
+          this.loadUsers();
+        } else {
+          this.showSnackBar(res.message || 'Failed to create user', 'error');
+          this.isLoading = false;
+        }
+      },
+      error: (err) => {
+        this.showSnackBar(err.error?.message || 'Error creating user', 'error');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  handleUpdateUser(request: UserUpdateRequest, file?: File) {
+    this.isLoading = true;
+    this.usersService.updateUser(request).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.showSnackBar('User updated successfully!');
+          this.loadUsers();
+        } else {
+          this.showSnackBar(res.message || 'Failed to update user', 'error');
+          this.isLoading = false;
+        }
+      },
+      error: (err) => {
+        this.showSnackBar(err.error?.message || 'Error updating user', 'error');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // --- Helpers ---
 
   getRoleLabel(role: number): string {
     return this.roleLabels[role] || 'Unknown';
-  }
-
-  getAddressString(user: User): string {
-    if (!user.address) return '-';
-    const parts = [
-      user.address.addressLine1,
-      user.address.city,
-      user.address.state,
-      user.address.country,
-    ].filter((p) => p);
-    return parts.length > 0 ? parts.join(', ') : '-';
-  }
-
-  getProfileImageUrl(user: User): string {
-    if (!user.profileImageUrl) {
-      return '';
-    }
-    if (user.profileImageUrl.startsWith('http')) {
-      return user.profileImageUrl;
-    }
-    return `${this.apiBaseUrl}${user.profileImageUrl}`;
   }
 
   getInitials(user: User): string {
@@ -130,135 +248,13 @@ export class LandlordsComponent implements OnInit {
     return user.fullName.substring(0, 2).toUpperCase();
   }
 
-  openAddDialog(): void {
-    this.dialogUser = null;
-    this.showDialog = true;
+  showSnackBar(message: string, type: 'success' | 'error' = 'success') {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: type === 'error' ? 'snack-bar-error' : 'snack-bar-success',
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
+    });
   }
-
-  openEditDialog(user: User): void {
-    this.dialogUser = user;
-    this.showDialog = true;
-  }
-
-  closeDialog(): void {
-    this.showDialog = false;
-    this.dialogUser = null;
-  }
-
-  handleDialogSave(userRequest: UserCreateRequest | UserUpdateRequest): void {
-    this.loading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    if ('id' in userRequest) {
-      // Update user
-      this.usersService.updateUser(userRequest as UserUpdateRequest).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.successMessage =
-              response.message || 'User updated successfully!';
-            this.loadUsers();
-            setTimeout(() => this.closeDialog(), 1000);
-          } else {
-            this.errorMessage = response.message || 'Failed to update user';
-          }
-          this.loading = false;
-        },
-        error: (error) => {
-          this.errorMessage =
-            error.error?.message || error.message || 'Failed to update user';
-          this.loading = false;
-        },
-      });
-    } else {
-      // Create user
-      this.usersService.createUser(userRequest as UserCreateRequest).subscribe({
-        next: async (response) => {
-          if (response.success) {
-            // If user was created and there's a pending image file, upload it
-            const createdUserId = response.user?.id || (response as any).id;
-            if (this.pendingImageFile && createdUserId) {
-              try {
-                const uploadResponse = await this.usersService
-                  .uploadProfilePicture(createdUserId, this.pendingImageFile)
-                  .toPromise();
-                if (uploadResponse && uploadResponse.success) {
-                  this.successMessage =
-                    'User created and profile picture uploaded successfully!';
-                } else {
-                  this.successMessage =
-                    response.message ||
-                    'User created successfully! (Image upload failed)';
-                }
-              } catch (error: any) {
-                this.successMessage =
-                  response.message ||
-                  'User created successfully! (Image upload failed)';
-              }
-              this.pendingImageFile = null;
-            } else {
-              this.successMessage =
-                response.message || 'User created successfully!';
-            }
-            this.loadUsers();
-            setTimeout(() => this.closeDialog(), 1000);
-          } else {
-            this.errorMessage = response.message || 'Failed to create user';
-          }
-          this.loading = false;
-        },
-        error: (error) => {
-          this.errorMessage =
-            error.error?.message || error.message || 'Failed to create user';
-          this.loading = false;
-        },
-      });
-    }
-  }
-
-  handleFileSelected(event: { file: File; userId?: string }): void {
-    this.pendingImageFile = event.file;
-  }
-
-  getpaginatedUsers(): User[] {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return this.filteredUsers.slice(start, end);
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-    }
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-    }
-  }
-
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxPages = 5;
-    let start = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let end = Math.min(this.totalPages, start + maxPages - 1);
-
-    if (end - start < maxPages - 1) {
-      start = Math.max(1, end - maxPages + 1);
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    return pages;
-  }
-
-  Math = Math;
 }
+

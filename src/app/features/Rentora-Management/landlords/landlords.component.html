@@ -1,109 +1,105 @@
-<div class="admins-container">
-  <div class="page-header">
+<div style="padding: 16px;">
+  <!-- Page Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
     <div>
-      <h1 class="page-title">Manage Landlords</h1>
-      <p class="page-subtitle">Manage all your landlords in one place</p>
+      <h1 class="header-title" style="margin: 0;">Manage Landlords</h1>
+      <p class="header-title" style="margin: 4px 0 0; color: #666; font-size: 14px;">Manage all your landlords in one
+        place</p>
     </div>
-    <button class="btn btn-primary btn-add" (click)="openAddDialog()">
-      <span class="btn-icon">+</span>
+    <button mat-flat-button color="primary" (click)="openAddDialog()">
+      <mat-icon>add</mat-icon>
       Add Landlord
     </button>
   </div>
 
-  <!-- Success/Error Messages -->
-  <div class="alert alert-success" *ngIf="successMessage" (click)="successMessage = ''">
-    {{ successMessage }}
+  <!-- Search -->
+  <div style="width: 50%; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px;">
+    <mat-form-field appearance="fill" style="width: 100%;">
+      <mat-label>Search users</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ex. John Doe, Email..." #input>
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
   </div>
-  <div class="alert alert-error" *ngIf="errorMessage" (click)="errorMessage = ''">
-    {{ errorMessage }}
-  </div>
 
-  <!-- Main Content Card -->
-  <div class="content-card">
-    <!-- Search and Filter Bar -->
-    <div class="search-filter-bar">
-      <div class="search-input-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" placeholder="Search users..." [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchChange()">
-      </div>
-    </div>
+  <!-- Loading State -->
+  <app-spinner [isLoading]="isLoading" message="Loading users..."></app-spinner>
 
-    <!-- Loading State -->
-    <div *ngIf="loading" class="loading-state">
-      <p>Loading users...</p>
-    </div>
+  <!-- Users Table -->
+  <div style="border: 1px solid #ccc; border-radius: 4px; overflow: hidden;" [hidden]="isLoading">
+    <table mat-table [dataSource]="dataSource" matSort style="width: 100%;">
 
-    <!-- Users Table -->
-    <div *ngIf="!loading" class="table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Mobile</th>
-            <th>Role</th>
-            <!-- <th>Address</th> -->
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngIf="getpaginatedUsers().length === 0">
-            <td colspan="7" class="no-data">No users found</td>
-          </tr>
-          <tr *ngFor="let user of getpaginatedUsers()">
-            <td>
-              <div class="user-name-cell">
-                <span class="user-name">{{ user.fullName }}</span>
-              </div>
-            </td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.mobile }}</td>
-            <td>
-              <span class="badge badge-role">{{ getRoleLabel(user.role) }}</span>
-            </td>
-            <td>
-              <span class="badge" [class.badge-active]="user.isActive" [class.badge-inactive]="!user.isActive">
-                {{ user.isActive ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="action-link" (click)="openEditDialog(user)">View</button>
-                <button class="action-link" (click)="openEditDialog(user)">Edit</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <!-- Name Column -->
+      <ng-container matColumnDef="fullName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+        <td mat-cell *matCellDef="let user">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div
+              style="width: 32px; height: 32px; border-radius: 50%; background-color: #eee; display: flex; justify-content: center; align-items: center; font-size: 12px; overflow: hidden;">
+              <img *ngIf="user.profileImageUrl" [src]="user.profileImageUrl"
+                style="width: 100%; height: 100%; object-fit: cover;">
+              <span *ngIf="!user.profileImageUrl">{{ getInitials(user) }}</span>
+            </div>
+            <span style="font-weight: 500;">{{ user.fullName }}</span>
+          </div>
+        </td>
+      </ng-container>
 
-    <!-- Pagination -->
-    <div *ngIf="!loading && filteredUsers.length > 0" class="pagination">
-      <div class="pagination-info">
-        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage,
-        filteredUsers.length) }} of {{ filteredUsers.length }} users
-      </div>
-      <div class="pagination-controls">
-        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
-          Previous
-        </button>
-        <div class="pagination-numbers">
-          <button *ngFor="let page of getPageNumbers()" class="pagination-number" [class.active]="page === currentPage"
-            (click)="goToPage(page)">
-            {{ page }}
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+        <td mat-cell *matCellDef="let user"> {{ user.email }} </td>
+      </ng-container>
+
+      <!-- Mobile Column -->
+      <ng-container matColumnDef="mobile">
+        <th mat-header-cell *matHeaderCellDef> Mobile </th>
+        <td mat-cell *matCellDef="let user"> {{ user.mobile }} </td>
+      </ng-container>
+
+      <!-- Role Column -->
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Role </th>
+        <td mat-cell *matCellDef="let user">
+          <mat-chip-set>
+            <mat-chip highlighted color="accent">{{ getRoleLabel(user.role) }}</mat-chip>
+          </mat-chip-set>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+        <td mat-cell *matCellDef="let user">
+          <mat-chip-set>
+            <mat-chip highlighted [color]="user.isActive ? 'primary' : 'warn'">
+              {{ user.isActive ? 'ACTIVE' : 'INACTIVE' }}
+            </mat-chip>
+          </mat-chip-set>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let user">
+          <button mat-icon-button color="primary" matTooltip="Edit" (click)="openEditDialog(user)">
+            <mat-icon>edit</mat-icon>
           </button>
-        </div>
-        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
-          Next
-        </button>
-      </div>
-    </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- No Data Row -->
+      <tr class="mat-row" *ngIf="dataSource.data.length === 0">
+        <td class="mat-cell" colspan="6" style="padding: 24px; text-align: center; color: #888;">
+          No users found matching "{{input.value}}"
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons
+      aria-label="Select page of users"></mat-paginator>
   </div>
 </div>
-
-<!-- User Dialog -->
-<app-user-dialog *ngIf="showDialog" [user]="dialogUser" (onClose)="closeDialog()" (onSave)="handleDialogSave($event)"
-  (onFileSelectedEvent)="handleFileSelected({ file: $event.file, userId: $event.userId })">
-</app-user-dialog>

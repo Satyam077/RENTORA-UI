@@ -10,18 +10,22 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { Role } from '../../../core/models/role.enum';
 import { GoogleAuthService } from '../../../core/services/google-auth.service';
+import { PhoneMaskDirective } from '../../../core/helpers/phone-mask.directive';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    PhoneMaskDirective
+  ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent implements OnInit, AfterViewInit {
-
-
-  logoPath: string = 'assets/Images/appicon.png';
+  logoPath: string = 'assets/Images/home.png';
   registerForm!: FormGroup;
   loading = false;
   submitted = false;
@@ -29,7 +33,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   success = '';
   role: Role = Role.Landlords;
   showPassword = false;
-  showConfirmPassword = false;
   roleParam: string | null = null;
   googleLoading = false;
   isGoogleUser = false;
@@ -54,7 +57,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
           (key) => key.toLowerCase() === normalized
         );
 
-        // Convert key → number
+        // Convert key to enum numeric value
         this.role = enumKey ? Role[enumKey as keyof typeof Role] : Role.Landlords;
       } else {
         this.role = Role.Landlords;
@@ -67,18 +70,14 @@ export class RegisterComponent implements OnInit, AfterViewInit {
       {
         fullName: ['', [Validators.required, Validators.minLength(2)]],
         lastName: ['', ],
-        email: ['', [Validators.required, Validators.email]],
+        email: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,10}$')]],
         mobile: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s()]+$/)]],
         password: ['', [Validators.required, Validators.minLength(6)]],
-        confirmPassword: ['', Validators.required],
         gender: ['', Validators.required],
         dateOfBirth: ['', Validators.required],
         role: [this.role],
         tenantId: [null],
         ownerId: [null],
-      },
-      {
-        validators: this.passwordMatchValidator,
       }
     );
     console.log('Role set in form:', this.registerForm.value);
@@ -166,21 +165,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     });
   }
 
-  passwordMatchValidator(form: FormGroup) {
-    const password = form.get('password');
-    const confirmPassword = form.get('confirmPassword');
-
-    if (
-      password &&
-      confirmPassword &&
-      password.value !== confirmPassword.value
-    ) {
-      confirmPassword.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
-    }
-    return null;
-  }
-
   get f() {
     return this.registerForm.controls;
   }
@@ -188,8 +172,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   togglePasswordVisibility(field: string): void {
     if (field === 'password') {
       this.showPassword = !this.showPassword;
-    } else {
-      this.showConfirmPassword = !this.showConfirmPassword;
     }
   }
 
@@ -206,6 +188,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
 
     const registrationData = {
       ...this.registerForm.value,
+      confirmPassword: this.registerForm.value.password,
       role: this.role,
     };
 

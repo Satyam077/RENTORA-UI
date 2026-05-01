@@ -1,339 +1,328 @@
-<div class="settings-container">
+<div style="padding: 16px;">
   <!-- Page Header -->
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Settings</h1>
-      <p class="page-subtitle">Manage your system configurations and integrations</p>
-    </div>
+  <div style="margin-bottom: 24px;">
+    <h1 style="color: #1a1a1a; margin: 0; font-size: 24px; font-weight: 700;">Settings</h1>
+    <p style="color: #666; margin: 4px 0 0; font-size: 14px;">Manage your system configurations and preferences</p>
   </div>
 
-  <!-- Tabs Navigation -->
-  <div class="tabs-container">
-    <div class="tabs-nav">
-      @if(role == 1 || role == 2)
-      {
-      <button class="tab-button" [class.active]="activeTab === 'templates'" (click)="setActiveTab('templates')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
-          <path
-            d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
-        </svg>
-        Email Templates
-      </button>
-
-      <button class="tab-button" [class.active]="activeTab === 'features'" (click)="setActiveTab('features')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path fill-rule="evenodd"
-            d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813a3.75 3.75 0 002.576-2.576L8.279 5.044A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z"
-            clip-rule="evenodd" />
-        </svg>
-        Features
-      </button>
-      <button class="tab-button" [class.active]="activeTab === 'plans'" (click)="setActiveTab('plans')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path fill-rule="evenodd"
-            d="M11.828 2.25c-.916 0-1.699.663-1.85 1.567l-.091.549a.798.798 0 01-.517.608 7.45 7.45 0 00-.478.198.798.798 0 01-.796-.064l-.453-.324a1.875 1.875 0 00-2.416.2l-.243.243a1.875 1.875 0 00-.2 2.416l.324.453a.798.798 0 01.064.796 7.448 7.448 0 00-.198.478.798.798 0 01-.608.517l-.55.092a1.875 1.875 0 00-1.566 1.849v.344c0 .916.663 1.699 1.567 1.85l.549.091c.281.047.508.25.608.517.06.162.127.321.198.478a.798.798 0 01-.064.796l-.324.453a1.875 1.875 0 00.2 2.416l.243.243c.648.648 1.67.733 2.416.2l.453-.324a.798.798 0 01.796-.064c.157.071.316.137.478.198.267.1.47.327.517.608l.092.55c.15.903.932 1.566 1.849 1.566h.344c.916 0 1.699-.663 1.85-1.567l.091-.549a.798.798 0 01.517-.608 7.52 7.52 0 00.478-.198.798.798 0 01.796.064l.453.324a1.875 1.875 0 002.416-.2l.243-.243c.648-.648.733-1.67.2-2.416l-.324-.453a.798.798 0 01-.064-.796c.071-.157.137-.316.198-.478.1-.267.327-.47.608-.517l.55-.091a1.875 1.875 0 001.566-1.85v-.344c0-.916-.663-1.699-1.567-1.85l-.549-.091a.798.798 0 01-.608-.517 7.507 7.507 0 00-.198-.478.798.798 0 01.064-.796l.324-.453a1.875 1.875 0 00-.2-2.416l-.243-.243a1.875 1.875 0 00-2.416-.2l-.453.324a.798.798 0 01-.796.064 7.462 7.462 0 00-.478-.198.798.798 0 01-.517-.608l-.091-.55a1.875 1.875 0 00-1.85-1.566h-.344zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z"
-            clip-rule="evenodd" />
-        </svg>
-        Plans & Pricing
-      </button>
-
-      <button class="tab-button" [class.active]="activeTab === 'integrations'" (click)="setActiveTab('integrations')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
-          <path
-            d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" />
-        </svg>
-        Integrations
-      </button>
-
-      <button class="tab-button" [class.active]="activeTab === 'logs'" (click)="setActiveTab('logs')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path fill-rule="evenodd"
-            d="M2.625 6.75a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875 0A.75.75 0 018.25 6h12a.75.75 0 010 1.5h-12a.75.75 0 01-.75-.75zM2.625 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zM7.5 12a.75.75 0 01.75-.75h12a.75.75 0 010 1.5h-12A.75.75 0 017.5 12zm-4.875 5.25a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875 0a.75.75 0 01.75-.75h12a.75.75 0 010 1.5h-12a.75.75 0 01-.75-.75z"
-            clip-rule="evenodd" />
-        </svg>
-        Communication Logs
-      </button>
-      }
-
-      @if(role == 3){
-      <button class="tab-button" [class.active]="activeTab === 'profiles'" (click)="setActiveTab('profiles')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
-          <path
-            d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
-        </svg>
-        Profiles
-      </button>
-      <button class="tab-button" [class.active]="activeTab === 'billingRates'" (click)="setActiveTab('billingRates')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
-          <path
-            d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
-        </svg>
-        Billing Rates
-      </button>
-      <button class="tab-button" [class.active]="activeTab === 'payment'" (click)="setActiveTab('payment')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
-          <path
-            d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75-.75-.75-.75-.75-.75-.75-.75-.75-.75-.75-.75H9z" />
-        </svg>
-        Plans & Subscriptions
-      </button>
-      <button class="tab-button" [class.active]="activeTab === 'notifications'" (click)="setActiveTab('notifications')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
-          <path
-            d="M5.25 5.25a3 3 0 00-3 3v10.5a3 3 0 003 3h10.5a3 3 0 003-3V13.5a.75.75 0 00-1.5 0v5.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5h5.25a.75.75 0 000-1.5H5.25z" />
-        </svg>
-        Notifications
-      </button>
-      }
-
-    </div>
-    <!-- Error Message -->
-    <div class="error-message-banner" *ngIf="error">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-      </svg>
-      {{ error }}
-    </div>
-    <!-- Success Message -->
-    <div class="success-message" *ngIf="success">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-      </svg>
-      {{ success }}
-    </div>
-    <!-- Tab Content -->
-    <div class="tab-content">
-      @if(role == 1 || role == 2){
-      <div *ngIf="activeTab === 'templates'" class="tab-panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Email Templates</h2>
-          <button class="btn-add" (click)="openAddEmailTemplateModal()">
-            <span class="btn-icon">+</span>
-            Add Template
+  <!-- ===================== ADMIN TABS (Role 1 & 2) ===================== -->
+  <mat-tab-group *ngIf="role === 1 || role === 2" animationDuration="200ms" class="custom-tabs">
+    <!-- Email Templates Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">email</mat-icon> Email Templates
+      </ng-template>
+      <div class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">Manage Templates</h2>
+          <button mat-flat-button color="primary" (click)="openAddEmailTemplateModal()">
+            <mat-icon>add</mat-icon> Add Template
           </button>
         </div>
 
-        <!-- Loading State -->
-        <div *ngIf="isLoadingTemplates" class="loading-state">
-          <p>Loading email templates...</p>
-        </div>
+        <!-- Loading -->
+        <app-spinner [isLoading]="isLoadingTemplates" message="Loading email templates..."></app-spinner>
 
-        <!-- Email Templates Grid -->
-        <div *ngIf="!isLoadingTemplates" class="templates-grid">
-          <div *ngFor="let template of emailTemplates" class="template-card">
-            <div class="template-header">
-              <div class="template-info">
-                <h3 class="template-name">{{ template.templateName }}</h3>
-                <span class="template-type-badge type-email">
-                  {{ template.applicableFor }}
-                </span>
+        <!-- Templates Grid -->
+        <div *ngIf="!isLoadingTemplates"
+          style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
+          <mat-card *ngFor="let template of emailTemplates" class="template-card">
+            <mat-card-header style="padding: 16px;">
+              <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <div style="font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px;">
+                    {{ template.templateName }}
+                  </div>
+                  <mat-chip-set>
+                    <mat-chip [highlighted]="true" color="primary"
+                      style="font-size: 11px; min-height: 24px; padding: 0 8px;">
+                      {{ template.applicableFor }}
+                    </mat-chip>
+                  </mat-chip-set>
+                </div>
+                <mat-slide-toggle [checked]="template.isActive" (change)="toggleEmailTemplateStatus(template)"
+                  matTooltip="Toggle active status" color="primary">
+                </mat-slide-toggle>
               </div>
-              <div class="template-actions">
-                <label class="toggle-switch">
-                  <input type="checkbox" [checked]="template.isActive" (change)="toggleEmailTemplateStatus(template)">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-            <div class="template-body">
-              <p class="template-subject">
+            </mat-card-header>
+
+            <mat-divider></mat-divider>
+
+            <mat-card-content style="padding: 16px; flex: 1;">
+              <p style="font-size: 13px; color: #444; margin: 0 0 8px;">
                 <strong>Subject:</strong> {{ template.emailSubject }}
               </p>
-              <p class="template-content">{{ template.emailBody | slice:0:150 }}{{
-                template.emailBody.length > 150 ? '...' : '' }}</p>
-              <p class="template-tokens" *ngIf="template.tokens">
-                <strong>Tokens:</strong> {{ template.tokens }}
+              <p style="font-size: 13px; color: #666; margin: 0; line-height: 1.5;">
+                {{ template.emailBody | slice:0:140 }}{{ template.emailBody.length > 140 ? '...' : '' }}
               </p>
-            </div>
-            <div class="template-footer">
-              <button class="btn-edit" (click)="editEmailTemplate(template)">Edit</button>
-              <button class="btn-delete" (click)="deleteEmailTemplate(template)">Delete</button>
-            </div>
-          </div>
+            </mat-card-content>
+
+            <mat-divider></mat-divider>
+
+            <mat-card-actions align="end" style="padding: 8px 16px; background: #fafafa;">
+              <button mat-button color="primary" (click)="editEmailTemplate(template)">
+                <mat-icon style="margin-right: 4px;">edit</mat-icon> Edit
+              </button>
+              <button mat-button color="warn" (click)="deleteEmailTemplate(template)">
+                <mat-icon style="margin-right: 4px;">delete</mat-icon> Delete
+              </button>
+            </mat-card-actions>
+          </mat-card>
 
           <!-- Empty State -->
-          <div *ngIf="emailTemplates.length === 0" class="empty-state">
-            <p>No email templates found. Click "Add Template" to create one.</p>
-          </div>
-        </div>
-
-        <!-- Add/Edit Email Template Modal -->
-        <div *ngIf="(isEditingEmailTemplate || isAddingEmailTemplate) && selectedEmailTemplate" class="modal-overlay"
-          (click)="cancelEmailTemplateEdit()">
-          <div class="modal-content" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-              <h3>{{ isAddingEmailTemplate ? 'Add Email Template' : 'Edit Email Template' }}</h3>
-              <button class="modal-close" (click)="cancelEmailTemplateEdit()">&times;</button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label>Template Name <span class="required">*</span></label>
-                <select [(ngModel)]="selectedEmailTemplate.templateName" class="form-input">
-
-                  <option *ngFor="let option of emailTemplateNameOptions" [ngValue]="option.label">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Applicable For <span class="required">*</span></label>
-                <select [(ngModel)]="selectedEmailTemplate.applicableFor" class="form-input">
-                  <option *ngFor="let option of applicableForOptions" [ngValue]="option.label">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Email Subject <span class="required">*</span></label>
-                <input type="text" [(ngModel)]="selectedEmailTemplate.emailSubject" class="form-input"
-                  placeholder="Enter email subject">
-              </div>
-              <div class="form-group">
-                <label>Email Body <span class="required">*</span></label>
-                <quill-editor #quill [(ngModel)]="selectedEmailTemplate.emailBody" [modules]="quillModules"
-                  placeholder="Enter email body content..." class="quill-editor">
-                </quill-editor>
-                <small class="form-hint">You can use tokens like {{'{{'}}name{{'}}'}},
-                  {{'{{'}}email{{'}}'}}, etc. for dynamic values</small>
-              </div>
-              <div class="form-group">
-                <label>Available Tokens (Optional)</label>
-                <input type="text" [(ngModel)]="selectedEmailTemplate.tokens" class="form-input"
-                  placeholder="e.g., {{'{{'}}name{{'}}'}}, {{'{{'}}email{{'}}'}}, {{'{{'}}date{{'}}'}}">
-                <small class="form-hint">Comma-separated list of available tokens for this
-                  template</small>
-              </div>
-              <div class="form-group" *ngIf="isEditingEmailTemplate">
-                <label class="checkbox-label">
-                  <input type="checkbox" [(ngModel)]="selectedEmailTemplate.isActive">
-                  <span>Active</span>
-                </label>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn-secondary" (click)="cancelEmailTemplateEdit()">Cancel</button>
-              <button class="btn-primary" (click)="saveEmailTemplate()">
-                {{ isAddingEmailTemplate ? 'Create Template' : 'Save Changes' }}
-              </button>
-            </div>
+          <div *ngIf="emailTemplates.length === 0"
+            style="grid-column: 1 / -1; text-align: center; padding: 60px; color: #888;">
+            <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #ccc;">mark_email_unread</mat-icon>
+            <p>No email templates found.</p>
+            <button mat-button color="primary" (click)="openAddEmailTemplateModal()">Create Your First Template</button>
           </div>
         </div>
       </div>
+    </mat-tab>
 
-      <!-- Features Tab -->
-      <div *ngIf="activeTab === 'features'" class="tab-panel">
+    <!-- Features Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">auto_awesome</mat-icon> Features
+      </ng-template>
+      <div class="tab-content">
         <app-features></app-features>
       </div>
+    </mat-tab>
 
-      <!-- Features Tab -->
-      <div *ngIf="activeTab === 'plans'" class="tab-panel">
+    <!-- Plans Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">payments</mat-icon> Plans & Pricing
+      </ng-template>
+      <div class="tab-content">
         <app-plans></app-plans>
       </div>
+    </mat-tab>
 
-      <!-- Integrations Tab -->
-      <div *ngIf="activeTab === 'integrations'" class="tab-panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Communication Integrations</h2>
-        </div>
-      </div>
-
-      <!-- Communication Logs Tab -->
-      <div *ngIf="activeTab === 'logs'" class="tab-panel">
-        <div class="panel-header">
-          <h2 class="panel-title">Communication Logs</h2>
-        </div>
-
-        <!-- Filters -->
-        <div class="logs-filters">
-          <div class="filter-group">
-            <label>Type</label>
-            <select [(ngModel)]="logFilterType" (change)="filterLogs()" class="form-input">
-              <option value="all">All Types</option>
-              <option value="email">Email</option>
-              <option value="sms">SMS</option>
-              <option value="whatsapp">WhatsApp</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>Status</label>
-            <select [(ngModel)]="logFilterStatus" (change)="filterLogs()" class="form-input">
-              <option value="all">All Status</option>
-              <option value="sent">Sent</option>
-              <option value="failed">Failed</option>
-              <option value="pending">Pending</option>
-            </select>
+    <!-- Communication Logs Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">list_alt</mat-icon> Communication Logs
+      </ng-template>
+      <div class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">System Logs</h2>
+          <div style="display: flex; gap: 16px;">
+            <mat-form-field appearance="outline" style="width: 160px; font-size: 13px;">
+              <mat-label>Type</mat-label>
+              <mat-select [(ngModel)]="logFilterType" (selectionChange)="filterLogs()">
+                <mat-option value="all">All Types</mat-option>
+                <mat-option value="email">Email</mat-option>
+                <mat-option value="sms">SMS</mat-option>
+                <mat-option value="whatsapp">WhatsApp</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 160px; font-size: 13px;">
+              <mat-label>Status</mat-label>
+              <mat-select [(ngModel)]="logFilterStatus" (selectionChange)="filterLogs()">
+                <mat-option value="all">All Status</mat-option>
+                <mat-option value="sent">Sent</mat-option>
+                <mat-option value="failed">Failed</mat-option>
+                <mat-option value="pending">Pending</mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
         </div>
 
         <!-- Logs Table -->
-        <div class="content-card">
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Recipient</th>
-                  <th>Type</th>
-                  <th>Subject</th>
-                  <th>Status</th>
-                  <th>Sent At</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let log of filteredLogs">
-                  <td>{{ log.recipient }}</td>
-                  <td>
-                    <span class="template-type-badge" [class]="'type-' + log.type">
-                      {{ log.type | uppercase }}
-                    </span>
-                  </td>
-                  <td>{{ log.subject }}</td>
-                  <td>
-                    <span class="badge" [class]="'badge-' + log.status">
-                      {{ log.status | uppercase }}
-                    </span>
-                  </td>
-                  <td>{{ log.sentAt | date: 'short' }}</td>
-                  <td>
-                    <div class="action-buttons">
-                      <button class="action-link" (click)="viewLogDetails(log)">View</button>
-                      <button *ngIf="log.status === 'failed'" class="action-link"
-                        (click)="retryFailedLog(log)">Retry</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr *ngIf="filteredLogs.length === 0">
-                  <td colspan="6" class="no-data">No communication logs found</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="logs-table-container">
+          <table mat-table [dataSource]="filteredLogs" style="width: 100%;">
+            <ng-container matColumnDef="recipient">
+              <th mat-header-cell *matHeaderCellDef> Recipient </th>
+              <td mat-cell *matCellDef="let log" style="font-weight: 500;"> {{ log.recipient }} </td>
+            </ng-container>
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef> Type </th>
+              <td mat-cell *matCellDef="let log">
+                <mat-chip-set>
+                  <mat-chip [highlighted]="true" class="small-chip" style="background: #e3f2fd; color: #1565c0;">
+                    {{ log.type | uppercase }}
+                  </mat-chip>
+                </mat-chip-set>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="subject">
+              <th mat-header-cell *matHeaderCellDef> Subject </th>
+              <td mat-cell *matCellDef="let log"> {{ log.subject }} </td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef> Status </th>
+              <td mat-cell *matCellDef="let log">
+                <mat-chip-set>
+                  <mat-chip [highlighted]="true" [color]="getStatusChipColor(log.status)" class="small-chip">
+                    {{ log.status | uppercase }}
+                  </mat-chip>
+                </mat-chip-set>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="sentAt">
+              <th mat-header-cell *matHeaderCellDef> Sent At </th>
+              <td mat-cell *matCellDef="let log" style="color: #666;"> {{ log.sentAt | date: 'short' }} </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef> Actions </th>
+              <td mat-cell *matCellDef="let log">
+                <button mat-icon-button color="primary" matTooltip="View Details" (click)="viewLogDetails(log)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button *ngIf="log.status === 'failed'" mat-icon-button color="warn" matTooltip="Retry"
+                  (click)="retryFailedLog(log)">
+                  <mat-icon>refresh</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="logsDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: logsDisplayedColumns;"></tr>
+            <tr class="mat-row" *ngIf="filteredLogs.length === 0">
+              <td class="mat-cell" colspan="6" style="padding: 40px; text-align: center; color: #888;">
+                No communication logs found matching your filters.
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
-      }
-      @if(role == 3){
-      <div *ngIf="activeTab === 'profiles'" class="tab-panel">
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- ===================== LANDLORD TABS (Role 3) ===================== -->
+  <mat-tab-group *ngIf="role === 3" animationDuration="300ms" class="custom-tabs">
+    <!-- Profile Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">person</mat-icon> Profile
+      </ng-template>
+      <div class="tab-content">
         <app-profile></app-profile>
       </div>
-      <div *ngIf="activeTab === 'billingRates'" class="tab-panel"> </div>
-      <div *ngIf="activeTab === 'payment'" class="tab-panel">
+    </mat-tab>
+
+    <!-- Plans & Subscriptions Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">card_membership</mat-icon> Plans & Billing
+      </ng-template>
+      <div class="tab-content">
         <app-subscriptions></app-subscriptions>
       </div>
-      <div *ngIf="activeTab === 'notifications'" class="tab-panel"> </div>
-      }
+    </mat-tab>
+
+    <!-- Billing Rates Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">receipt_long</mat-icon> Billing Rates
+      </ng-template>
+      <div class="tab-content">
+        <app-billing></app-billing>
+      </div>
+    </mat-tab>
+
+    <!-- Notifications Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">notifications</mat-icon> Notifications
+      </ng-template>
+      <div class="tab-content">
+        <div
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: #888;">
+          <mat-icon
+            style="font-size: 48px; width: 48px; height: 48px; color: #e0e0e0; margin-bottom: 16px;">notifications_off</mat-icon>
+          <h3 style="margin: 0; font-weight: 500;">Notification Settings</h3>
+          <p style="margin: 8px 0 0; font-size: 14px;">This section is coming soon.</p>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<!-- ===================== EMAIL TEMPLATE ADD/EDIT MODAL ===================== -->
+<div *ngIf="(isEditingEmailTemplate || isAddingEmailTemplate) && selectedEmailTemplate" class="modal-overlay"
+  (click)="cancelEmailTemplateEdit()">
+  <mat-card class="modal-card" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 style="margin: 0; font-size: 20px; font-weight: 600; color: #1a1a1a;">
+        {{ isAddingEmailTemplate ? 'Create New Template' : 'Edit Template' }}
+      </h2>
+      <button mat-icon-button (click)="cancelEmailTemplateEdit()">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
-  </div>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content style="padding: 24px; max-height: 70vh; overflow-y: auto;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <!-- Template Name -->
+        <mat-form-field appearance="outline">
+          <mat-label>Template Name</mat-label>
+          <mat-select [(ngModel)]="selectedEmailTemplate.templateName">
+            <mat-option *ngFor="let option of emailTemplateNameOptions" [value]="option.label">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Applicable For -->
+        <mat-form-field appearance="outline">
+          <mat-label>Applicable For</mat-label>
+          <mat-select [(ngModel)]="selectedEmailTemplate.applicableFor">
+            <mat-option *ngFor="let option of applicableForOptions" [value]="option.label">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Subject -->
+      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 20px;">
+        <mat-label>Email Subject</mat-label>
+        <input matInput [(ngModel)]="selectedEmailTemplate.emailSubject" placeholder="Enter email subject">
+      </mat-form-field>
+
+      <!-- Body (Quill) -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: #666; font-weight: 500; display: block; margin-bottom: 8px;">
+          Email Body Content
+        </label>
+        <quill-editor #quill [(ngModel)]="selectedEmailTemplate.emailBody" [modules]="quillModules"
+          placeholder="Compose email template..." style="display: block; height: 250px; margin-bottom: 50px;">
+        </quill-editor>
+      </div>
+
+      <!-- Tokens -->
+      <mat-form-field appearance="outline" style="width: 100%; margin-top: 16px;">
+        <mat-label>Available Tokens</mat-label>
+        <input matInput [(ngModel)]="selectedEmailTemplate.tokens"
+          placeholder="e.g., {{'{{'}}name{{'}}'}}, {{'{{'}}email{{'}}'}}">
+        <mat-hint>Dynamic values available for this template</mat-hint>
+      </mat-form-field>
+
+      <!-- Active toggle (edit mode) -->
+      <div *ngIf="isEditingEmailTemplate"
+        style="margin-top: 24px; display: flex; align-items: center; background: #f5f5f5; padding: 12px; border-radius: 8px;">
+        <mat-slide-toggle [(ngModel)]="selectedEmailTemplate.isActive" color="primary">
+          Active Status
+        </mat-slide-toggle>
+        <span style="margin-left: 12px; font-size: 13px; color: #666;">
+          {{ selectedEmailTemplate.isActive ? 'Template is currently active' : 'Template is currently inactive' }}
+        </span>
+      </div>
+    </mat-card-content>
+
+    <mat-divider></mat-divider>
+
+    <!-- Footer -->
+    <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; background: #fafafa;">
+      <button mat-stroked-button (click)="cancelEmailTemplateEdit()" color="warn">Cancel</button>
+      <button mat-flat-button (click)="saveEmailTemplate()" color="primary">
+        {{ isAddingEmailTemplate ? 'Create Template' : 'Save Changes' }}
+      </button>
+    </div>
+  </mat-card>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TenantService } from '../../../core/services/tenant.service';
@@ -14,79 +14,87 @@ import {
 import { PropertyModel } from '../../../core/models/property.model';
 import { UnitModel } from '../../../core/models/unit.model';
 
-// Form model for Add/Edit - uses firstName/lastName for form inputs
-interface TenantFormModel {
-  id?: string;
-  userId?: string;
-  ownerId: string;
-  propertyId: string;
-  unitId: string;
-  firstName: string;
-  lastName: string;
-  mobile: string;
-  email: string;
-  gender?: string;
-  dateOfBirth?: Date | null;
-  permanentAddress?: string;
-  currentAddress?: string;
-  rentAmount: number;
-  securityDeposit?: number;
-  rentDueDay?: number;
-  agreementStartDate: Date;
-  agreementEndDate: Date;
-  isAgreementExpired?: boolean;
-  documents?: string[];
-  idProofType?: string;
-  idProofNumber?: string;
-  isActiveTenant?: boolean;
-  isRentPending?: boolean;
-  isMovedOut?: boolean;
-  moveInDate?: Date | null;
-  moveOutDate?: Date | null;
-  notes?: string;
-  isActive?: boolean;
-  createdBy?: string;
-  updatedBy?: string;
-}
+// Angular Material
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import {
+  TenantFormDialogComponent,
+  TenantFormDialogData,
+  TenantFormModel,
+} from '../../../popups/tenant-form-dialog/tenant-form-dialog.component';
+import {
+  TenantViewDialogComponent,
+  TenantViewDialogData,
+} from '../../../popups/tenant-view-dialog/tenant-view-dialog.component';
+import { ConfirmationDialogComponent } from '../../../popups/confirmation-dialog/confirmation-dialog.component';
+import { SpinnerComponent } from '../../../shared/spinner/spinner.component';
 
 @Component({
   selector: 'app-tenants',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    SpinnerComponent,
+  ],
   templateUrl: './tenants.component.html',
   styleUrl: './tenants.component.css',
 })
-export class TenantsComponent implements OnInit {
+export class TenantsComponent implements OnInit, AfterViewInit {
   tenants: TenantModel[] = [];
-  filteredTenants: TenantModel[] = [];
-  selectedTenant: TenantFormModel | null = null;
-  viewTenant: TenantModel | null = null;
-  isEditingTenant = false;
-  isAddingTenant = false;
-  isViewingTenant = false;
   isLoadingTenants = false;
-  success = '';
-  error = '';
-  searchTerm: string = '';
-  sortColumn: string = 'firstName';
-  sortDirection: 'asc' | 'desc' = 'asc';
+
+  displayedColumns: string[] = [
+    'fullName',
+    'email',
+    'mobile',
+    'property',
+    'unit',
+    'rentAmount',
+    'status',
+    'actions',
+  ];
+  dataSource: MatTableDataSource<TenantModel>;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
   properties: PropertyOption[] = [];
-  units: UnitOption[] = [];
   allUnits: UnitOption[] = [];
-
-  // Pagination
-  currentPage: number = 1;
-  itemsPerPage: number = 10;
-  totalPages: number = 1;
-
-  // Current user (owner) ID
-  currentOwnerId: string = '';
+  currentOwnerId = '';
 
   constructor(
     private tenantService: TenantService,
     private propertyService: PropertyService,
-    private unitService: UnitService
-  ) { }
+    private unitService: UnitService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+  ) {
+    this.dataSource = new MatTableDataSource(this.tenants);
+  }
 
   ngOnInit(): void {
     const currentUser = sessionStorage.getItem('currentUser');
@@ -94,23 +102,42 @@ export class TenantsComponent implements OnInit {
       const user = JSON.parse(currentUser);
       this.currentOwnerId = user.user?.id || '';
     }
+    this.setUpFilterPredicate();
     this.loadProperties();
     this.loadUnits();
     this.loadTenants();
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  setUpFilterPredicate() {
+    this.dataSource.filterPredicate = (data: TenantModel, filter: string) => {
+      const s = filter.trim().toLowerCase();
+      return (
+        data.fullName?.toLowerCase().includes(s) ||
+        data.email?.toLowerCase().includes(s) ||
+        data.mobile?.toLowerCase().includes(s) ||
+        this.getPropertyName(data.propertyId)?.toLowerCase().includes(s) ||
+        this.getUnitName(data.unitId)?.toLowerCase().includes(s) ||
+        false
+      );
+    };
   }
 
   loadProperties(): void {
     this.propertyService.getPropertiesByOwnerId(this.currentOwnerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.properties = response.data.map((prop: PropertyModel) => ({
-            id: prop.id || '',
-            propertyName: prop.propertyName,
+          this.properties = response.data.map((p: PropertyModel) => ({
+            id: p.id || '',
+            propertyName: p.propertyName,
           }));
         }
       },
-      error: (err) => {
-      },
+      error: () => { },
     });
   }
 
@@ -118,29 +145,15 @@ export class TenantsComponent implements OnInit {
     this.unitService.getUnitsByOwnerId(this.currentOwnerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          this.allUnits = response.data.map((unit: UnitModel) => ({
-            id: unit.id || '',
-            unitName: unit.unitName,
-            propertyId: unit.propertyId,
+          this.allUnits = response.data.map((u: UnitModel) => ({
+            id: u.id || '',
+            unitName: u.unitName,
+            propertyId: u.propertyId,
           }));
-          this.units = [...this.allUnits];
         }
       },
-      error: (err) => {
-        console.error('Error loading units:', err);
-      },
+      error: () => { },
     });
-  }
-
-  onPropertyChange(): void {
-    if (this.selectedTenant && this.selectedTenant.propertyId) {
-      this.units = this.allUnits.filter(
-        (u) => u.propertyId === this.selectedTenant!.propertyId
-      );
-      this.selectedTenant.unitId = '';
-    } else {
-      this.units = [...this.allUnits];
-    }
   }
 
   loadTenants(): void {
@@ -150,108 +163,38 @@ export class TenantsComponent implements OnInit {
         this.isLoadingTenants = false;
         if (response.success && response.data) {
           this.tenants = response.data;
-          this.filteredTenants = [...this.tenants];
-          this.sortTenants();
-          this.updatePagination();
+          this.dataSource.data = this.tenants;
+          if (this.paginator) this.dataSource.paginator = this.paginator;
+          if (this.sort) this.dataSource.sort = this.sort;
         } else {
-          this.error = response.message || 'Failed to load tenants';
+          this.showSnackBar(response.message || 'Failed to load tenants', 'error');
         }
       },
       error: (err) => {
         this.isLoadingTenants = false;
-        this.error = 'Error loading tenants. Please try again.';
+        this.showSnackBar(err.error?.message || 'Failed to load tenants.', 'error');
       },
     });
   }
 
-  onSearchChange(): void {
-    if (!this.searchTerm.trim()) {
-      this.filteredTenants = [...this.tenants];
-    } else {
-      const term = this.searchTerm.toLowerCase();
-      this.filteredTenants = this.tenants.filter(
-        (tenant) =>
-          tenant.fullName.toLowerCase().includes(term) ||
-          tenant.email.toLowerCase().includes(term) ||
-          tenant.mobile.includes(term) ||
-          this.getPropertyName(tenant.propertyId)
-            ?.toLowerCase()
-            .includes(term) ||
-          this.getUnitName(tenant.unitId)?.toLowerCase().includes(term)
-      );
-    }
-    this.currentPage = 1;
-    this.sortTenants();
-    this.updatePagination();
-  }
-
-  sortBy(column: string): void {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-    this.sortTenants();
-  }
-
-  sortTenants(): void {
-    this.filteredTenants.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (this.sortColumn) {
-        case 'firstName':
-          aValue = a.fullName.toLowerCase();
-          bValue = b.fullName.toLowerCase();
-          break;
-        case 'email':
-          aValue = a.email.toLowerCase();
-          bValue = b.email.toLowerCase();
-          break;
-        case 'mobile':
-          aValue = a.mobile;
-          bValue = b.mobile;
-          break;
-        case 'property':
-          aValue = this.getPropertyName(a.propertyId)?.toLowerCase() || '';
-          bValue = this.getPropertyName(b.propertyId)?.toLowerCase() || '';
-          break;
-        case 'unit':
-          aValue = this.getUnitName(a.unitId)?.toLowerCase() || '';
-          bValue = this.getUnitName(b.unitId)?.toLowerCase() || '';
-          break;
-        case 'rentAmount':
-          aValue = a.rentAmount;
-          bValue = b.rentAmount;
-          break;
-        default:
-          aValue = a.fullName.toLowerCase();
-          bValue = b.fullName.toLowerCase();
-      }
-
-      if (aValue < bValue) {
-        return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return this.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
   }
 
   getPropertyName(propertyId: string): string {
-    const property = this.properties.find((p) => p.id === propertyId);
-    return property ? property.propertyName : 'Unknown Property';
+    return this.properties.find((p) => p.id === propertyId)?.propertyName || 'Unknown';
   }
 
   getUnitName(unitId: string): string {
-    const unit = this.allUnits.find((u) => u.id === unitId);
-    return unit ? unit.unitName : 'Unknown Unit';
+    return this.allUnits.find((u) => u.id === unitId)?.unitName || 'Unknown';
   }
 
-  openAddTenantModal(): void {
-    this.selectedTenant = {
+  // --- Dialog Methods ---
+
+  openAddTenantDialog(): void {
+    const newTenant: TenantFormModel = {
       ownerId: this.currentOwnerId,
       propertyId: '',
       unitId: '',
@@ -268,309 +211,200 @@ export class TenantsComponent implements OnInit {
       rentDueDay: 5,
       agreementStartDate: new Date(),
       agreementEndDate: new Date(),
-      documents: [],
-      idProofType: '',
-      idProofNumber: '',
       moveInDate: null,
       notes: '',
       createdBy: this.currentOwnerId,
     };
-    this.units = [...this.allUnits];
-    this.isAddingTenant = true;
-    this.isEditingTenant = false;
-    this.error = '';
-    this.success = '';
+
+    const dialogRef = this.dialog.open(TenantFormDialogComponent, {
+      width: '800px',
+      data: {
+        mode: 'add',
+        tenant: newTenant,
+        properties: this.properties,
+        allUnits: this.allUnits,
+      } as TenantFormDialogData,
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result: TenantFormModel | undefined) => {
+      if (!result) return;
+      const req: TenantCreateRequest = {
+        ownerId: result.ownerId,
+        propertyId: result.propertyId,
+        unitId: result.unitId,
+        firstName: result.firstName,
+        lastName: result.lastName,
+        mobile: result.mobile,
+        email: result.email,
+        gender: result.gender,
+        dateOfBirth: result.dateOfBirth,
+        permanentAddress: result.permanentAddress,
+        currentAddress: result.currentAddress,
+        rentAmount: result.rentAmount,
+        securityDeposit: result.securityDeposit,
+        rentDueDay: result.rentDueDay,
+        agreementStartDate: result.agreementStartDate,
+        agreementEndDate: result.agreementEndDate,
+        moveInDate: result.moveInDate,
+        idProofType: result.idProofType,
+        idProofNumber: result.idProofNumber,
+        notes: result.notes,
+        createdBy: this.currentOwnerId,
+      };
+      this.tenantService.createTenant(req).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.showSnackBar(response.message || 'Tenant created successfully!');
+            this.loadTenants();
+          } else {
+            this.showSnackBar(response.message || 'Failed to create tenant', 'error');
+          }
+        },
+        error: (err) => this.showSnackBar(err.error?.message || 'Error creating tenant.', 'error'),
+      });
+    });
   }
 
   editTenant(tenant: TenantModel): void {
-    // Convert TenantModel (fullName) to TenantFormModel (firstName/lastName)
-    const nameParts = tenant.fullName.split(' ');
-    const firstName = nameParts[0] || '';
-    const lastName = nameParts.slice(1).join(' ') || '';
-
-    this.selectedTenant = {
+    const nameParts = tenant.fullName?.split(' ') || ['', ''];
+    const formModel: TenantFormModel = {
       id: tenant.id,
       userId: tenant.userId,
       ownerId: tenant.ownerId,
       propertyId: tenant.propertyId,
       unitId: tenant.unitId,
-      firstName: firstName,
-      lastName: lastName,
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || '',
       mobile: tenant.mobile,
       email: tenant.email,
       gender: tenant.gender,
-      dateOfBirth: this.formatDateForInput(tenant.dateOfBirth) as any,
+      dateOfBirth: tenant.dateOfBirth,
       permanentAddress: tenant.permanentAddress,
       currentAddress: tenant.currentAddress,
       rentAmount: tenant.rentAmount,
       securityDeposit: tenant.securityDeposit,
       rentDueDay: tenant.rentDueDay,
-      agreementStartDate: this.formatDateForInput(tenant.agreementStartDate) as any,
-      agreementEndDate: this.formatDateForInput(tenant.agreementEndDate) as any,
-      isAgreementExpired: tenant.isAgreementExpired,
-      documents: tenant.documents,
+      agreementStartDate: tenant.agreementStartDate,
+      agreementEndDate: tenant.agreementEndDate,
       idProofType: tenant.idProofType,
       idProofNumber: tenant.idProofNumber,
       isActiveTenant: tenant.isActiveTenant,
-      isRentPending: tenant.isRentPending,
       isMovedOut: tenant.isMovedOut,
-      moveInDate: this.formatDateForInput(tenant.moveInDate) as any,
-      moveOutDate: this.formatDateForInput(tenant.moveOutDate) as any,
+      moveInDate: tenant.moveInDate,
+      moveOutDate: tenant.moveOutDate,
       notes: tenant.notes,
       isActive: tenant.isActive,
+      updatedBy: this.currentOwnerId,
     };
-    this.onPropertyChange();
-    this.isEditingTenant = true;
-    this.isAddingTenant = false;
-    this.error = '';
-    this.success = '';
-  }
 
-  viewTenantDetails(tenant: TenantModel): void {
-    this.viewTenant = { ...tenant };
-    this.isViewingTenant = true;
-  }
+    const dialogRef = this.dialog.open(TenantFormDialogComponent, {
+      width: '800px',
+      data: {
+        mode: 'edit',
+        tenant: formModel,
+        properties: this.properties,
+        allUnits: this.allUnits,
+      } as TenantFormDialogData,
+      disableClose: true,
+    });
 
-  closeViewModal(): void {
-    this.viewTenant = null;
-    this.isViewingTenant = false;
-  }
-
-  cancelTenantEdit(): void {
-    this.selectedTenant = null;
-    this.isEditingTenant = false;
-    this.isAddingTenant = false;
-    this.error = '';
-  }
-
-  saveTenant(): void {
-    if (!this.selectedTenant) return;
-
-    // Validation
-    if (!this.selectedTenant.propertyId) {
-      this.error = 'Please select a property';
-      return;
-    }
-
-    if (!this.selectedTenant.unitId) {
-      this.error = 'Please select a unit';
-      return;
-    }
-
-    if (!this.selectedTenant.firstName?.trim()) {
-      this.error = 'First name is required';
-      return;
-    }
-
-    if (!this.selectedTenant.lastName?.trim()) {
-      this.error = 'Last name is required';
-      return;
-    }
-
-    if (!this.selectedTenant.email?.trim()) {
-      this.error = 'Email is required';
-      return;
-    }
-
-    if (!this.selectedTenant.mobile?.trim()) {
-      this.error = 'Mobile number is required';
-      return;
-    }
-
-    if (this.selectedTenant.rentAmount <= 0) {
-      this.error = 'Rent amount must be greater than 0';
-      return;
-    }
-
-    if (this.isAddingTenant) {
-      const createRequest: TenantCreateRequest = {
-        ownerId: this.selectedTenant.ownerId,
-        propertyId: this.selectedTenant.propertyId,
-        unitId: this.selectedTenant.unitId,
-        firstName: this.selectedTenant.firstName,
-        lastName: this.selectedTenant.lastName,
-        mobile: this.selectedTenant.mobile,
-        email: this.selectedTenant.email,
-        gender: this.selectedTenant.gender || '',
-        dateOfBirth: this.selectedTenant.dateOfBirth || null,
-        permanentAddress: this.selectedTenant.permanentAddress || '',
-        currentAddress: this.selectedTenant.currentAddress || '',
-        rentAmount: this.selectedTenant.rentAmount,
-        securityDeposit: this.selectedTenant.securityDeposit || 0,
-        rentDueDay: this.selectedTenant.rentDueDay || 5,
-        agreementStartDate: this.selectedTenant.agreementStartDate,
-        agreementEndDate: this.selectedTenant.agreementEndDate,
-        documents: this.selectedTenant.documents || [],
-        idProofType: this.selectedTenant.idProofType || '',
-        idProofNumber: this.selectedTenant.idProofNumber || '',
-        moveInDate: this.selectedTenant.moveInDate || null,
-        notes: this.selectedTenant.notes || '',
-        createdBy: this.currentOwnerId,
-      };
-
-      this.tenantService.createTenant(createRequest).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.success = 'Tenant created successfully';
-            this.cancelTenantEdit();
-            this.loadTenants();
-            setTimeout(() => (this.success = ''), 5000);
-          } else {
-            this.error = response.message || 'Failed to create tenant';
-          }
-        },
-        error: (err) => {
-          this.error =
-            err.error?.message || 'Error creating tenant. Please try again.';
-        },
-      });
-    } else {
-      if (!this.selectedTenant.id) return;
-
-      const updateRequest: TenantUpdateRequest = {
-        id: this.selectedTenant.id,
-        ownerId: this.selectedTenant.ownerId,
-        propertyId: this.selectedTenant.propertyId,
-        unitId: this.selectedTenant.unitId,
-        firstName: this.selectedTenant.firstName,
-        lastName: this.selectedTenant.lastName,
-        mobile: this.selectedTenant.mobile,
-        email: this.selectedTenant.email,
-        gender: this.selectedTenant.gender || '',
-        dateOfBirth: this.selectedTenant.dateOfBirth || null,
-        permanentAddress: this.selectedTenant.permanentAddress || '',
-        currentAddress: this.selectedTenant.currentAddress || '',
-        rentAmount: this.selectedTenant.rentAmount,
-        securityDeposit: this.selectedTenant.securityDeposit || 0,
-        rentDueDay: this.selectedTenant.rentDueDay || 5,
-        agreementStartDate: this.selectedTenant.agreementStartDate,
-        agreementEndDate: this.selectedTenant.agreementEndDate,
-        isAgreementExpired: this.selectedTenant.isAgreementExpired || false,
-        documents: this.selectedTenant.documents || [],
-        idProofType: this.selectedTenant.idProofType || '',
-        idProofNumber: this.selectedTenant.idProofNumber || '',
-        isActiveTenant: this.selectedTenant.isActiveTenant !== false,
-        isRentPending: this.selectedTenant.isRentPending || false,
-        isMovedOut: this.selectedTenant.isMovedOut || false,
-        moveInDate: this.selectedTenant.moveInDate || null,
-        moveOutDate: this.selectedTenant.moveOutDate || null,
-        notes: this.selectedTenant.notes || '',
-        isActive: this.selectedTenant.isActive !== false,
+    dialogRef.afterClosed().subscribe((result: TenantFormModel | undefined) => {
+      if (!result || !result.id) return;
+      const req: TenantUpdateRequest = {
+        id: result.id,
+        ownerId: result.ownerId,
+        propertyId: result.propertyId,
+        unitId: result.unitId,
+        firstName: result.firstName,
+        lastName: result.lastName,
+        mobile: result.mobile,
+        email: result.email,
+        gender: result.gender,
+        dateOfBirth: result.dateOfBirth,
+        permanentAddress: result.permanentAddress,
+        currentAddress: result.currentAddress,
+        rentAmount: result.rentAmount,
+        securityDeposit: result.securityDeposit,
+        rentDueDay: result.rentDueDay,
+        agreementStartDate: result.agreementStartDate,
+        agreementEndDate: result.agreementEndDate,
+        idProofType: result.idProofType,
+        idProofNumber: result.idProofNumber,
+        isActiveTenant: result.isActiveTenant,
+        isMovedOut: result.isMovedOut,
+        moveInDate: result.moveInDate,
+        moveOutDate: result.moveOutDate,
+        notes: result.notes,
+        isActive: result.isActive,
         updatedBy: this.currentOwnerId,
       };
-
-      this.tenantService.updateTenant(updateRequest).subscribe({
+      this.tenantService.updateTenant(req).subscribe({
         next: (response) => {
           if (response.success) {
-            this.success = 'Tenant updated successfully';
-            this.cancelTenantEdit();
+            this.showSnackBar(response.message || 'Tenant updated successfully!');
             this.loadTenants();
-            setTimeout(() => (this.success = ''), 5000);
           } else {
-            this.error = response.message || 'Failed to update tenant';
+            this.showSnackBar(response.message || 'Failed to update tenant', 'error');
           }
         },
-        error: (err) => {
-          this.error =
-            err.error?.message || 'Error updating tenant. Please try again.';
-        },
+        error: (err) => this.showSnackBar(err.error?.message || 'Error updating tenant.', 'error'),
       });
-    }
+    });
+  }
+
+  viewTenant(tenant: TenantModel): void {
+    this.dialog.open(TenantViewDialogComponent, {
+      width: '700px',
+      data: {
+        tenant: tenant,
+        propertyName: this.getPropertyName(tenant.propertyId),
+        unitName: this.getUnitName(tenant.unitId),
+      } as TenantViewDialogData,
+    });
   }
 
   deleteTenant(tenant: TenantModel): void {
     if (!tenant.id) return;
-
-    if (
-      !confirm(`Are you sure you want to delete tenant "${tenant.fullName}"?`)
-    ) {
-      return;
-    }
-
-    this.tenantService.deleteTenant(tenant.id).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.success = 'Tenant deleted successfully';
-          this.loadTenants();
-          setTimeout(() => (this.success = ''), 5000);
-        } else {
-          this.error = response.message || 'Failed to delete tenant';
-        }
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Delete Tenant',
+        message: `Are you sure you want to delete tenant "${tenant.fullName}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
       },
-      error: (err) => {
-        this.error =
-          err.error?.message || 'Error deleting tenant. Please try again.';
-      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.tenantService.deleteTenant(tenant.id!).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.tenants = this.tenants.filter((t) => t.id !== tenant.id);
+            this.dataSource.data = [...this.tenants];
+            this.showSnackBar(response.message || 'Tenant deleted successfully!');
+          } else {
+            this.showSnackBar(response.message || 'Failed to delete tenant', 'error');
+          }
+        },
+        error: (err) => this.showSnackBar(err.error?.message || 'Error deleting tenant.', 'error'),
+      });
     });
   }
 
-  // Pagination methods
-  updatePagination(): void {
-    this.totalPages = Math.ceil(
-      this.filteredTenants.length / this.itemsPerPage
-    );
-    if (this.currentPage > this.totalPages && this.totalPages > 0) {
-      this.currentPage = this.totalPages;
-    }
-  }
-
-  getPaginatedTenants(): TenantModel[] {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return this.filteredTenants.slice(start, end);
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-    }
-  }
-
-  goToPage(page: number): void {
-    this.currentPage = page;
-  }
-
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxPages = 5;
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxPages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxPages - 1);
-
-    if (endPage - startPage < maxPages - 1) {
-      startPage = Math.max(1, endPage - maxPages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    return pages;
-  }
-
   formatDate(date: Date | null | undefined): string {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  }
-
-  /**
-   * Converts Date object to YYYY-MM-DD format required by HTML date inputs
-   */
-  formatDateForInput(date: Date | null | undefined): string | null {
-    if (!date) return null;
+    if (!date) return '-';
     const d = new Date(date);
-    if (isNaN(d.getTime())) return null;
-
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
-  Math = Math;
+  private showSnackBar(message: string, type: 'success' | 'error' = 'success'): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: type === 'error' ? ['snack-bar-error'] : ['snack-bar-success'],
+    });
+  }
 }

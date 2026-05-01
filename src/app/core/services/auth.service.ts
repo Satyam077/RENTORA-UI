@@ -66,6 +66,15 @@ export class AuthService {
     this.currentUserSubject.next(null);
   }
 
+  updateCurrentUser(userUpdate: any): void {
+    const current = this.currentUserValue;
+    if (current && current.user) {
+      current.user = { ...current.user, ...userUpdate };
+      sessionStorage.setItem('currentUser', JSON.stringify(current));
+      this.currentUserSubject.next(current);
+    }
+  }
+
   sendOtp(emailOrMobile: string): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/send-otp`,

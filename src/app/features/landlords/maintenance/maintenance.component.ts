@@ -2,12 +2,28 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MaintenanceService } from '../../../core/services/maintenance.service';
-import { PropertyService } from '../../../core/services/property.service';
 import {
   Maintenance,
   StatusEnum,
   PriorityEnum,
 } from '../../../core/models/maintenance.model';
+
+// Angular Material
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { SpinnerComponent } from '../../../shared/spinner/spinner.component';
 
 interface MaintenanceWithDetails extends Maintenance {
   propertyName?: string;
@@ -17,130 +33,104 @@ interface MaintenanceWithDetails extends Maintenance {
 @Component({
   selector: 'app-maintenance',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatChipsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatBadgeModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    SpinnerComponent,
+  ],
   templateUrl: './maintenance.component.html',
   styleUrl: './maintenance.component.css',
 })
 export class MaintenanceComponent implements OnInit {
   maintenanceRequests: MaintenanceWithDetails[] = [];
   filteredRequests: MaintenanceWithDetails[] = [];
-  properties: any[] = [];
+  isLoading = false;
+  searchQuery = '';
+  landlordId = '';
 
-  searchQuery: string = '';
-  selectedStatus: number | null = null;
-  isLoading: boolean = false;
-
-  // Status enum for template
   StatusEnum = StatusEnum;
   PriorityEnum = PriorityEnum;
 
-  // Status counts
-  statusCounts = {
-    open: 0,
-    assigned: 0,
-    inProgress: 0,
-    resolved: 0,
-  };
+  statusCounts = { open: 0, assigned: 0, inProgress: 0, resolved: 0 };
 
-  // Selected maintenance for editing
+  // Inline edit state (NOT a separate dialog component)
   selectedMaintenance: MaintenanceWithDetails | null = null;
-  isEditModalOpen: boolean = false;
+  isEditModalOpen = false;
 
   constructor(
     private maintenanceService: MaintenanceService,
-    private propertyService: PropertyService
+    private snackBar: MatSnackBar,
   ) { }
 
   ngOnInit(): void {
-    this.loadMaintenanceRequests();
-  }
-  landlordId: string = '';
-
-  loadMaintenanceRequests(): void {
-    this.isLoading = true;
-
     const json = sessionStorage.getItem('currentUser');
     if (json) {
       const currentUser = JSON.parse(json);
-      this.landlordId = currentUser.user?.id;
+      this.landlordId = currentUser.user?.id || '';
     }
+    this.loadMaintenanceRequests();
+  }
 
+  loadMaintenanceRequests(): void {
     if (!this.landlordId) {
-      console.error('Landlord ID not found');
-      this.isLoading = false;
+      this.showSnackBar('Landlord ID not found. Please log in again.', 'error');
       return;
     }
-
-    this.maintenanceService
-      .getMaintenanceByLandlordId(this.landlordId)
-      .subscribe({
-        next: (data) => {
-          console.log('Maintenance requests loaded:', data);
-
-          // Map the data with property and unit names from navigation properties
-          this.maintenanceRequests = data.map((request: any) => ({
-            ...request,
-            propertyName: request.property?.propertyName || 'Unknown Property',
-            unitName: request.unit?.unitName || request.unitId || 'N/A',
-          }));
-
-          this.filteredRequests = [...this.maintenanceRequests];
-          this.calculateStatusCounts();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading maintenance requests:', error);
-          this.isLoading = false;
-        },
-      });
+    this.isLoading = true;
+    this.maintenanceService.getMaintenanceByLandlordId(this.landlordId).subscribe({
+      next: (data) => {
+        this.maintenanceRequests = data.map((req: any) => ({
+          ...req,
+          propertyName: req.property?.propertyName || 'Unknown Property',
+          unitName: req.unit?.unitName || req.unitId || 'N/A',
+        }));
+        this.filteredRequests = [...this.maintenanceRequests];
+        this.calculateStatusCounts();
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+        this.showSnackBar('Error loading maintenance requests.', 'error');
+      },
+    });
   }
 
   calculateStatusCounts(): void {
     this.statusCounts = {
-      open: this.maintenanceRequests.filter((m) => m.status === StatusEnum.Open)
-        .length,
-      assigned: this.maintenanceRequests.filter(
-        (m) => m.status === StatusEnum.Scheduled
-      ).length,
-      inProgress: this.maintenanceRequests.filter(
-        (m) => m.status === StatusEnum.InProgress
-      ).length,
-      resolved: this.maintenanceRequests.filter(
-        (m) => m.status === StatusEnum.Closed
-      ).length,
+      open: this.maintenanceRequests.filter((m) => m.status === StatusEnum.Open).length,
+      assigned: this.maintenanceRequests.filter((m) => m.status === StatusEnum.Scheduled).length,
+      inProgress: this.maintenanceRequests.filter((m) => m.status === StatusEnum.InProgress).length,
+      resolved: this.maintenanceRequests.filter((m) => m.status === StatusEnum.Closed).length,
     };
   }
 
-  filterByStatus(status: number | null): void {
-    this.selectedStatus = status;
-    this.applyFilters();
-  }
-
   onSearchChange(): void {
-    this.applyFilters();
-  }
-
-  applyFilters(): void {
-    let filtered = [...this.maintenanceRequests];
-
-    // Filter by status
-    if (this.selectedStatus !== null) {
-      filtered = filtered.filter((m) => m.status === this.selectedStatus);
-    }
-
-    // Filter by search query
-    if (this.searchQuery.trim()) {
-      const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(
+    if (!this.searchQuery.trim()) {
+      this.filteredRequests = [...this.maintenanceRequests];
+    } else {
+      const q = this.searchQuery.toLowerCase();
+      this.filteredRequests = this.maintenanceRequests.filter(
         (m) =>
-          m.title.toLowerCase().includes(query) ||
-          m.description.toLowerCase().includes(query) ||
-          m.propertyName?.toLowerCase().includes(query) ||
-          m.category.toLowerCase().includes(query)
+          m.title.toLowerCase().includes(q) ||
+          m.description.toLowerCase().includes(q) ||
+          m.propertyName?.toLowerCase().includes(q) ||
+          m.category.toLowerCase().includes(q),
       );
     }
-
-    this.filteredRequests = filtered;
   }
 
   getRequestsByStatus(status: number): MaintenanceWithDetails[] {
@@ -149,76 +139,62 @@ export class MaintenanceComponent implements OnInit {
 
   getStatusText(status: number): string {
     switch (status) {
-      case StatusEnum.Open:
-        return 'Open';
-      case StatusEnum.Scheduled:
-        return 'Assigned';
-      case StatusEnum.InProgress:
-        return 'In Progress';
-      case StatusEnum.Closed:
-        return 'Resolved';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  getStatusClass(status: number): string {
-    switch (status) {
-      case StatusEnum.Open:
-        return 'status-open';
-      case StatusEnum.Scheduled:
-        return 'status-assigned';
-      case StatusEnum.InProgress:
-        return 'status-in-progress';
-      case StatusEnum.Closed:
-        return 'status-resolved';
-      default:
-        return '';
+      case StatusEnum.Open: return 'Open';
+      case StatusEnum.Scheduled: return 'Assigned';
+      case StatusEnum.InProgress: return 'In Progress';
+      case StatusEnum.Closed: return 'Resolved';
+      default: return 'Unknown';
     }
   }
 
   getPriorityText(priority: number): string {
     switch (priority) {
-      case PriorityEnum.Low:
-        return 'Low';
-      case PriorityEnum.Medium:
-        return 'Medium';
-      case PriorityEnum.High:
-        return 'High';
-      default:
-        return 'Medium';
+      case PriorityEnum.Low: return 'Low';
+      case PriorityEnum.Medium: return 'Medium';
+      case PriorityEnum.High: return 'High';
+      default: return 'Medium';
     }
   }
 
-  getPriorityClass(priority: number): string {
+  getPriorityColor(priority: number): string {
     switch (priority) {
-      case PriorityEnum.Low:
-        return 'priority-low';
-      case PriorityEnum.Medium:
-        return 'priority-medium';
-      case PriorityEnum.High:
-        return 'priority-high';
-      default:
-        return 'priority-medium';
+      case PriorityEnum.Low: return '#4caf50';
+      case PriorityEnum.Medium: return '#ff9800';
+      case PriorityEnum.High: return '#f44336';
+      default: return '#ff9800';
+    }
+  }
+
+  getStatusDotColor(status: number): string {
+    switch (status) {
+      case StatusEnum.Open: return '#ff9800';
+      case StatusEnum.Scheduled: return '#f44336';
+      case StatusEnum.InProgress: return '#9c27b0';
+      case StatusEnum.Closed: return '#4caf50';
+      default: return '#888';
+    }
+  }
+
+  getStatusColumnBg(status: number): string {
+    switch (status) {
+      case StatusEnum.Open: return '#fff8e1';
+      case StatusEnum.Scheduled: return '#fce4ec';
+      case StatusEnum.InProgress: return '#f3e5f5';
+      case StatusEnum.Closed: return '#e8f5e9';
+      default: return '#fafafa';
     }
   }
 
   formatDate(date: Date | undefined): string {
     if (!date) return 'N/A';
     const d = new Date(date);
-    return d.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
   }
 
-  // openEditModal(maintenance: MaintenanceWithDetails): void {
-  //   this.selectedMaintenance = { ...maintenance };
-  //   this.isEditModalOpen = true;
-  // }
-  openEditModal(maintenance?: MaintenanceWithDetails): void {
-    this.selectedMaintenance = maintenance ? { ...maintenance } : null;
+  // --- Inline Edit Modal ---
+
+  openEditModal(maintenance: MaintenanceWithDetails): void {
+    this.selectedMaintenance = JSON.parse(JSON.stringify(maintenance));
     this.isEditModalOpen = true;
   }
 
@@ -227,58 +203,37 @@ export class MaintenanceComponent implements OnInit {
     this.isEditModalOpen = false;
   }
 
-  updateStatus(newStatus: number): void {
-    if (!this.selectedMaintenance) return;
-
-    // Ensure status is a number (in case it comes from a select as string)
-    const statusValue = Number(newStatus);
-
-    this.maintenanceService
-      .updateStatus(this.selectedMaintenance.id!, statusValue)
-      .subscribe({
-        next: (response) => {
-          console.log('Status updated successfully:', response);
-          this.closeEditModal();
-          this.loadMaintenanceRequests();
-        },
-        error: (error) => {
-          console.error('Error updating status:', error);
-          alert('Failed to update status. Please try again.');
-        },
-      });
-  }
-
   saveMaintenance(): void {
     if (!this.selectedMaintenance) return;
 
-    // Create a copy of the maintenance object with properly typed values
-    // HTML select elements return strings, but backend expects numbers for enums
-    const maintenanceToSave: Maintenance = {
+    const toSave: Maintenance = {
       ...this.selectedMaintenance,
       status: Number(this.selectedMaintenance.status),
       priority: Number(this.selectedMaintenance.priority),
     };
+    delete (toSave as any).propertyName;
+    delete (toSave as any).unitName;
+    delete (toSave as any).property;
+    delete (toSave as any).unit;
 
-    // Remove navigation properties that shouldn't be sent to the backend
-    delete (maintenanceToSave as any).propertyName;
-    delete (maintenanceToSave as any).unitName;
-    delete (maintenanceToSave as any).property;
-    delete (maintenanceToSave as any).unit;
+    this.maintenanceService.updateMaintenance(toSave).subscribe({
+      next: () => {
+        this.showSnackBar('Maintenance updated successfully!');
+        this.closeEditModal();
+        this.loadMaintenanceRequests();
+      },
+      error: () => {
+        this.showSnackBar('Failed to update maintenance.', 'error');
+      },
+    });
+  }
 
-    console.log('Saving maintenance with status:', maintenanceToSave.status, 'priority:', maintenanceToSave.priority);
-
-    this.maintenanceService
-      .updateMaintenance(maintenanceToSave)
-      .subscribe({
-        next: (response) => {
-          console.log('Maintenance updated successfully:', response);
-          this.closeEditModal();
-          this.loadMaintenanceRequests();
-        },
-        error: (error) => {
-          console.error('Error updating maintenance:', error);
-          alert('Failed to update maintenance. Please try again.');
-        },
-      });
+  private showSnackBar(message: string, type: 'success' | 'error' = 'success'): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: type === 'error' ? ['snack-bar-error'] : ['snack-bar-success'],
+    });
   }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SidebarService } from '../../core/services/sidebar.service';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-top-nav',
@@ -14,8 +15,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class TopNavComponent implements OnInit {
   isProfileDropdownOpen = false;
   currentUser: any = null;
-  apiBaseUrl = 'https://localhost:7197';
-
+ private apiBaseUrl = `${environment.apiUrl}`;
   constructor(
     private router: Router,
     private sidebarService: SidebarService,
@@ -23,10 +23,9 @@ export class TopNavComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const userJson = sessionStorage.getItem('currentUser');
-    if (userJson) {
-      this.currentUser = JSON.parse(userJson);
-    }
+    this.auth.currentUser.subscribe(user => {
+      this.currentUser = user;
+    });
   }
 
   getProfileImageUrl(): string {
@@ -37,7 +36,8 @@ export class TopNavComponent implements OnInit {
     if (url.startsWith('http')) {
       return url;
     }
-    return `${this.apiBaseUrl}${url}`;
+    const serverUrl = this.apiBaseUrl.endsWith('/api') ? this.apiBaseUrl.substring(0, this.apiBaseUrl.length - 4) : this.apiBaseUrl;
+    return `${serverUrl}${url}`;
   }
 
   getUserInitials(): string {

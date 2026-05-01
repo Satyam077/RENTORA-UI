@@ -1,0 +1,182 @@
+<div class="billing-container">
+  <div class="header-section">
+    <div class="title-area">
+      <h1>Billing Management</h1>
+      <p>Manage electricity readings and generate monthly bills</p>
+    </div>
+    <div class="actions-area">
+      <mat-form-field appearance="outline" class="month-selector">
+        <mat-select [(ngModel)]="selectedMonth" (selectionChange)="onDateChange()">
+          <mat-option *ngFor="let m of months" [value]="m.value">{{ m.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="year-selector">
+        <mat-select [(ngModel)]="selectedYear" (selectionChange)="onDateChange()">
+          <mat-option *ngFor="let y of years" [value]="y">{{ y }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" class="generate-btn" (click)="generateBills()">
+        <mat-icon>send</mat-icon> Generate All Bills
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card electricity">
+      <div class="stat-icon"><mat-icon>bolt</mat-icon></div>
+      <div class="stat-info">
+        <span class="label">Electricity Rate</span>
+        <span class="value">₹{{config.electricityRate}}/unit</span>
+      </div>
+    </div>
+    <div class="stat-card maintenance">
+      <div class="stat-icon"><mat-icon>build</mat-icon></div>
+      <div class="stat-info">
+        <span class="label">Maintenance</span>
+        <span class="value">₹{{config.maintenanceCharge}}/mo</span>
+      </div>
+    </div>
+    <div class="stat-card pending">
+      <div class="stat-icon"><mat-icon>assignment_late</mat-icon></div>
+      <div class="stat-info">
+        <span class="label">Pending Bills</span>
+        <span class="value">{{pendingCount}}</span>
+      </div>
+    </div>
+    <div class="stat-card sent">
+      <div class="stat-icon"><mat-icon>send</mat-icon></div>
+      <div class="stat-info">
+        <span class="label">Bills Sent</span>
+        <span class="value">{{sentCount}}</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-card class="config-card">
+    <mat-card-header>
+      <mat-card-title><mat-icon>bolt</mat-icon> Billing Rates Configuration</mat-card-title>
+      <mat-card-subtitle>Set global rates for electricity and maintenance charges</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="config-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Property</mat-label>
+          <mat-select [(ngModel)]="selectedPropertyId" (selectionChange)="onPropertyChange()">
+            <mat-option *ngFor="let p of properties" [value]="p.id">{{ p.propertyName }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Electricity Rate (₹/unit)</mat-label>
+          <input matInput type="number" [(ngModel)]="config.electricityRate">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Maintenance Charge (₹/month)</mat-label>
+          <input matInput type="number" [(ngModel)]="config.maintenanceCharge">
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" class="save-config-btn" (click)="saveConfig()">
+          <mat-icon>save</mat-icon> Save Rates
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="readings-card">
+    <mat-card-header>
+      <mat-card-title>Monthly Electricity Readings</mat-card-title>
+      <mat-card-subtitle>Enter units consumed by each tenant to calculate bills</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-responsive">
+        <table mat-table [dataSource]="bills" class="readings-table">
+          <ng-container matColumnDef="tenant">
+            <th mat-header-cell *matHeaderCellDef>Tenant</th>
+            <td mat-cell *matCellDef="let bill">
+              <div class="tenant-info">
+                <strong>{{bill.tenantName || 'Tenant'}}</strong>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="property">
+            <th mat-header-cell *matHeaderCellDef>Property & Unit</th>
+            <td mat-cell *matCellDef="let bill">
+              <div class="property-unit">
+                <span>{{getPropertyName(bill.propertyId)}}</span>
+                <small>{{bill.unitName || 'Unit'}}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="baseRent">
+            <th mat-header-cell *matHeaderCellDef>Base Rent</th>
+            <td mat-cell *matCellDef="let bill">₹{{bill.baseRent | number}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="unitsUsed">
+            <th mat-header-cell *matHeaderCellDef>Units Used</th>
+            <td mat-cell *matCellDef="let bill">
+              <div class="reading-inputs">
+                <input type="number" class="unit-input" [(ngModel)]="bill.currentReading" 
+                  (input)="updateReading(bill)" placeholder="Enter reading">
+                <small class="prev-reading">Prev: {{bill.previousReading}}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="electricityBill">
+            <th mat-header-cell *matHeaderCellDef>Electricity Bill</th>
+            <td mat-cell *matCellDef="let bill">
+              <div class="bill-calc">
+                <span class="bill-amount">₹{{bill.electricityBill | number}}</span>
+                <small class="calc-detail">{{bill.unitsConsumed}} x ₹{{bill.electricityRate}}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="totalBill">
+            <th mat-header-cell *matHeaderCellDef>Total Bill</th>
+            <td mat-cell *matCellDef="let bill">
+              <span class="total-bill">₹{{bill.totalBill | number}}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let bill">
+              <span class="status-badge" [ngClass]="bill.status.toLowerCase()">{{bill.status}}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let bill">
+              <div class="action-buttons">
+                <button mat-icon-button color="primary" matTooltip="Save Changes" (click)="saveBill(bill)">
+                  <mat-icon>save</mat-icon>
+                </button>
+                <button mat-icon-button color="accent" matTooltip="View Details">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button class="notify-btn" matTooltip="Send Notification" 
+                  (click)="sendNotification(bill)" [disabled]="bill.status === 'Paid'">
+                  <mat-icon>send</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['tenant', 'property', 'baseRent', 'unitsUsed', 'electricityBill', 'totalBill', 'status', 'actions']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['tenant', 'property', 'baseRent', 'unitsUsed', 'electricityBill', 'totalBill', 'status', 'actions'];"></tr>
+        </table>
+        
+        <div *ngIf="bills.length === 0" class="no-data">
+          <mat-icon>description</mat-icon>
+          <p>No bills generated for this period. Click 'Generate All Bills' to start.</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
