@@ -2,7 +2,6 @@
 .main-layout {
   display: flex;
   min-height: 100vh;
-  background-color: #f5f7fa;
 }
 
 /* Main Content Area */
@@ -22,15 +21,16 @@
 .page-content {
   flex: 1;
   padding: 15px;
+  background-color: #f5f7fa;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
-    margin-left: 0;
+    margin-left: 60px;
   }
 
   .page-content {
-    padding: 16px;
+    padding: 12px;
   }
 }

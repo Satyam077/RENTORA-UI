@@ -1,36 +1,38 @@
-<div style="padding: 16px;">
+<div class="property-container">
   <!-- Page Header -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <div>
-      <h1 class="header-title" style="margin: 0;">My Properties</h1>
-      <p class="header-title" style="margin: 4px 0 0;">Manage all your rental properties in one place</p>
+  <div class="page-header">
+    <div class="header-info">
+      <h1 class="page-title">My Properties</h1>
+      <p class="page-subtitle">Manage all your rental properties in one place</p>
     </div>
-    <button mat-flat-button color="primary" (click)="openAddPropertyModal()">
+    <button mat-flat-button class="btn-primary" (click)="openAddPropertyModal()">
       <mat-icon>add</mat-icon>
       Add Property
     </button>
   </div>
 
-  <!-- Search -->
-  <div style="width: 50%; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px;">
-    <mat-form-field appearance="fill" style="width: 100%;">
-      <mat-label>Search properties</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Apartment, City..." #input>
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
+  <!-- Search & Filter Bar -->
+  <div class="search-filter-bar">
+    <div class="search-input-wrapper">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Search properties</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Apartment, City..." #input>
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
   </div>
 
   <!-- Loading State -->
   <app-spinner [isLoading]="isLoadingProperties" message="Loading properties..."></app-spinner>
 
-  <!-- Properties Table -->
-  <div style="border: 1px solid #ccc; border-radius: 4px; overflow: hidden;" [hidden]="isLoadingProperties">
-    <table mat-table [dataSource]="dataSource" matSort style="width: 100%;">
+  <!-- Properties Table Container -->
+  <div class="table-container" [hidden]="isLoadingProperties">
+    <table mat-table [dataSource]="dataSource" matSort>
 
       <!-- Property Name Column -->
       <ng-container matColumnDef="propertyName">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Property Name </th>
-        <td mat-cell *matCellDef="let property" style="color: #c2185b; font-weight: 500;">
+        <td mat-cell *matCellDef="let property" class="property-name-text">
           {{ property.propertyName }}
         </td>
       </ng-container>
@@ -40,7 +42,7 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Type </th>
         <td mat-cell *matCellDef="let property">
           <mat-chip-set>
-            <mat-chip highlighted color="primary">{{ getPropertyTypeLabel(property.type) }}</mat-chip>
+            <mat-chip class="badge-role">{{ getPropertyTypeLabel(property.type) }}</mat-chip>
           </mat-chip-set>
         </td>
       </ng-container>
@@ -53,10 +55,12 @@
 
       <!-- Occupancy Column -->
       <ng-container matColumnDef="occupancy">
-        <th mat-header-cell *matHeaderCellDef> Occupancy (Occupied/Total) </th>
+        <th mat-header-cell *matHeaderCellDef> Occupancy </th>
         <td mat-cell *matCellDef="let property">
-          <strong>{{ getOccupancyString(property) }}</strong>
-          <span style="color: #888; margin-left: 4px;">({{ getOccupancyPercentage(property) }}%)</span>
+          <span class="occupancy-text" [class.fully-occupied]="getOccupancyPercentage(property) === 100">
+            {{ getOccupancyString(property) }}
+          </span>
+          <span class="form-hint" style="display: inline; margin-left: 4px;">({{ getOccupancyPercentage(property) }}%)</span>
         </td>
       </ng-container>
 
@@ -64,11 +68,9 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
         <td mat-cell *matCellDef="let property">
-          <mat-chip-set>
-            <mat-chip highlighted [color]="property.isActive ? 'accent' : 'warn'">
-              {{ property.isActive ? 'ACTIVE' : 'INACTIVE' }}
-            </mat-chip>
-          </mat-chip-set>
+          <span [class]="'badge ' + (property.isActive ? 'badge-active' : 'badge-inactive')">
+            {{ property.isActive ? 'ACTIVE' : 'INACTIVE' }}
+          </span>
         </td>
       </ng-container>
 
@@ -76,15 +78,17 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Actions </th>
         <td mat-cell *matCellDef="let property">
-          <button mat-icon-button color="primary" matTooltip="View" (click)="viewProperty(property)">
-            <mat-icon>visibility</mat-icon>
-          </button>
-          <button mat-icon-button color="accent" matTooltip="Edit" (click)="editProperty(property)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" matTooltip="Delete" (click)="deleteProperty(property)">
-            <mat-icon>delete</mat-icon>
-          </button>
+          <div class="action-buttons">
+            <button mat-icon-button color="primary" matTooltip="View" (click)="viewProperty(property)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" matTooltip="Edit" (click)="editProperty(property)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Delete" (click)="deleteProperty(property)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </td>
       </ng-container>
 
@@ -93,7 +97,7 @@
 
       <!-- No Data Row -->
       <tr class="mat-row" *ngIf="dataSource.data.length === 0">
-        <td class="mat-cell" colspan="6" style="padding: 24px; text-align: center; color: #888;">
+        <td class="mat-cell" colspan="6" class="no-data">
           No properties found matching "{{input.value}}"
         </td>
       </tr>
@@ -102,4 +106,4 @@
     <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons
       aria-label="Select page of properties"></mat-paginator>
   </div>
-</div>
+</div>

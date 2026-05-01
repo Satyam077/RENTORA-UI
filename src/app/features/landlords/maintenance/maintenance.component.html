@@ -1,202 +1,206 @@
-<div style="padding: 16px;">
+<div class="property-container">
   <!-- Page Header -->
-  <div style="margin-bottom: 16px;">
-    <h1 class="header-title" style="margin: 0;">Maintenance</h1>
-    <p class="header-title" style="margin: 4px 0 0;">Track and manage maintenance tickets</p>
+  <div class="page-header">
+    <div class="header-info">
+      <h1 class="page-title">Maintenance</h1>
+      <p class="page-subtitle">Track and manage maintenance tickets from tenants</p>
+    </div>
   </div>
 
-  <!-- Search -->
-  <div style="width: 40%; border: 1px solid #ccc; border-radius: 4px; padding: 2px 8px; margin-bottom: 16px;">
-    <mat-form-field appearance="fill" style="width: 100%;">
-      <mat-label>Search tickets</mat-label>
-      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
-        placeholder="Ex. Plumbing, Property...">
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
+  <!-- Search & Filter Bar -->
+  <div class="search-filter-bar">
+    <div class="search-input-wrapper">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Search tickets</mat-label>
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
+          placeholder="Ex. Plumbing, Property...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
   </div>
 
   <!-- Loading State -->
   <app-spinner [isLoading]="isLoading" message="Loading maintenance requests..."></app-spinner>
 
-  <!-- Kanban Columns -->
-  <div *ngIf="!isLoading" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: start;">
+  <!-- Kanban Board -->
+  <div *ngIf="!isLoading" class="kanban-board">
 
     <!-- Each Status Column -->
-    <ng-container *ngFor="let col of [
+    <div *ngFor="let col of [
       { status: StatusEnum.Open, label: 'Open', count: statusCounts.open },
       { status: StatusEnum.Scheduled, label: 'Assigned', count: statusCounts.assigned },
       { status: StatusEnum.InProgress, label: 'In Progress', count: statusCounts.inProgress },
       { status: StatusEnum.Closed, label: 'Resolved', count: statusCounts.resolved }
-    ]">
-      <mat-card [style.background-color]="getStatusColumnBg(col.status)"
-        style="border-radius: 12px; border: 1px solid #e0e0e0; padding: 0;">
+    ]" class="kanban-column" [style.background-color]="getStatusColumnBg(col.status)">
 
-        <!-- Column Header -->
-        <mat-card-header
-          style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 8px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span [style.background-color]="getStatusDotColor(col.status)"
-              style="width: 10px; height: 10px; border-radius: 50%; display: inline-block;">
+      <!-- Column Header -->
+      <div class="kanban-column-header">
+        <div class="kanban-title-group">
+          <span class="kanban-status-dot" [style.background-color]="getStatusDotColor(col.status)"></span>
+          <h3 class="kanban-column-title">{{ col.label }}</h3>
+        </div>
+        <span class="badge" [style.background-color]="getStatusDotColor(col.status)" style="color: white;">
+          {{ col.count }}
+        </span>
+      </div>
+
+      <!-- Column Content -->
+      <div class="kanban-column-content">
+        <!-- Ticket Cards -->
+        <div *ngFor="let ticket of getRequestsByStatus(col.status)" class="kanban-card" (click)="openEditModal(ticket)">
+          <div class="kanban-card-title">{{ ticket.title }}</div>
+          <div class="kanban-card-subtitle">
+            {{ ticket.propertyName }}
+            <span *ngIf="ticket.unitName !== 'N/A'"> • Unit {{ ticket.unitName }}</span>
+          </div>
+
+          <div class="kanban-card-footer">
+            <span class="badge" [style.background-color]="getPriorityColor(ticket.priority)" style="color: white; font-size: 10px;">
+              {{ getPriorityText(ticket.priority) }}
             </span>
-            <mat-card-title style="font-size: 15px; font-weight: 600; color: #333; margin: 0;">
-              {{ col.label }}
-            </mat-card-title>
+            <span class="kanban-card-date">{{ formatDate(ticket.createdAt) }}</span>
           </div>
-          <mat-chip-set>
-            <mat-chip [highlighted]="true" [style.background-color]="getStatusDotColor(col.status)"
-              style="color: #fff; font-size: 11px; min-height: 22px; padding: 0 8px;">
-              {{ col.count }}
-            </mat-chip>
-          </mat-chip-set>
-        </mat-card-header>
+        </div>
 
-        <mat-card-content style="padding: 8px 12px 12px; min-height: 120px;">
-          <!-- Ticket Cards -->
-          <mat-card *ngFor="let ticket of getRequestsByStatus(col.status)"
-            style="margin-bottom: 10px; border-radius: 8px; border: 1px solid #e0e0e0; cursor: pointer;"
-            (click)="openEditModal(ticket)">
-            <mat-card-content style="padding: 12px;">
-              <div style="font-size: 14px; font-weight: 600; color: #222; margin-bottom: 6px;">
-                {{ ticket.title }}
-              </div>
-              <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
-                {{ ticket.propertyName }}
-                <span *ngIf="ticket.unitName !== 'N/A'"> &nbsp;-&nbsp; Unit {{ ticket.unitName }}</span>
-              </div>
-              <mat-divider></mat-divider>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                <mat-chip-set>
-                  <mat-chip [highlighted]="true" [style.background-color]="getPriorityColor(ticket.priority)"
-                    style="color: #fff; font-size: 10px; font-weight: 600; min-height: 20px; padding: 0 8px;">
-                    {{ getPriorityText(ticket.priority) }}
-                  </mat-chip>
-                </mat-chip-set>
-                <span style="font-size: 11px; color: #888;">{{ formatDate(ticket.createdAt) }}</span>
-              </div>
-            </mat-card-content>
-          </mat-card>
-
-          <!-- Empty state -->
-          <div *ngIf="getRequestsByStatus(col.status).length === 0"
-            style="text-align: center; padding: 24px 0; color: #aaa; font-size: 13px;">
-            <mat-icon style="font-size: 28px; width: 28px; height: 28px; color: #ccc;">check_circle</mat-icon>
-            <p style="margin: 4px 0 0;">No {{ col.label | lowercase }} tickets</p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </ng-container>
+        <!-- Empty state -->
+        <div *ngIf="getRequestsByStatus(col.status).length === 0" class="empty-state-small">
+          <mat-icon style="font-size: 24px; color: #cbd5e1;">check_circle</mat-icon>
+          <p>No {{ col.label | lowercase }} tickets</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-
-<!-- Edit Modal (inline, not a separate component) -->
-<div *ngIf="isEditModalOpen && selectedMaintenance"
-  style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;"
-  (click)="closeEditModal()">
-  <mat-card style="width: 600px; max-height: 85vh; overflow-y: auto; border-radius: 12px;"
-    (click)="$event.stopPropagation()">
+<!-- Edit Modal -->
+<div *ngIf="isEditModalOpen && selectedMaintenance" class="dialog-overlay" (click)="closeEditModal()">
+  <div class="dialog-container" (click)="$event.stopPropagation()">
     <!-- Modal Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 0;">
-      <h2 class="header-title" style="margin: 0;">Maintenance Details</h2>
-      <button mat-icon-button (click)="closeEditModal()">
+    <div class="dialog-header">
+      <h2 class="dialog-title">Ticket Details</h2>
+      <button class="dialog-close" (click)="closeEditModal()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
-    <mat-card-content style="padding: 16px 20px;">
-      <!-- Title (readonly) -->
-      <mat-form-field appearance="fill" style="width: 100%;">
-        <mat-label>Title</mat-label>
-        <input matInput [value]="selectedMaintenance.title" readonly>
-      </mat-form-field>
+    <div class="dialog-body">
+      <div class="user-form">
+        <!-- Title (readonly) -->
+        <div class="form-group full-width">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput [value]="selectedMaintenance.title" readonly>
+          </mat-form-field>
+        </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-        <!-- Category (readonly) -->
-        <mat-form-field appearance="fill">
-          <mat-label>Category</mat-label>
-          <input matInput [value]="selectedMaintenance.category" readonly>
-        </mat-form-field>
+        <div class="form-grid">
+          <!-- Category (readonly) -->
+          <div class="form-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Category</mat-label>
+              <input matInput [value]="selectedMaintenance.category" readonly>
+            </mat-form-field>
+          </div>
 
-        <!-- Priority -->
-        <mat-form-field appearance="fill">
-          <mat-label>Priority</mat-label>
-          <mat-select [(ngModel)]="selectedMaintenance.priority">
-            <mat-option [value]="PriorityEnum.Low">Low</mat-option>
-            <mat-option [value]="PriorityEnum.Medium">Medium</mat-option>
-            <mat-option [value]="PriorityEnum.High">High</mat-option>
-          </mat-select>
-        </mat-form-field>
+          <!-- Priority -->
+          <div class="form-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Priority</mat-label>
+              <mat-select [(ngModel)]="selectedMaintenance.priority">
+                <mat-option [value]="PriorityEnum.Low">Low</mat-option>
+                <mat-option [value]="PriorityEnum.Medium">Medium</mat-option>
+                <mat-option [value]="PriorityEnum.High">High</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-        <!-- Property (readonly) -->
-        <mat-form-field appearance="fill">
-          <mat-label>Property</mat-label>
-          <input matInput [value]="selectedMaintenance.propertyName" readonly>
-        </mat-form-field>
+          <!-- Property (readonly) -->
+          <div class="form-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Property</mat-label>
+              <input matInput [value]="selectedMaintenance.propertyName" readonly>
+            </mat-form-field>
+          </div>
 
-        <!-- Unit (readonly) -->
-        <mat-form-field appearance="fill">
-          <mat-label>Unit</mat-label>
-          <input matInput [value]="selectedMaintenance.unitName" readonly>
-        </mat-form-field>
+          <!-- Unit (readonly) -->
+          <div class="form-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Unit</mat-label>
+              <input matInput [value]="selectedMaintenance.unitName" readonly>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Description (readonly) -->
+        <div class="form-group full-width">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput [value]="selectedMaintenance.description" rows="3" readonly></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-grid">
+          <!-- Status -->
+          <div class="form-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Status</mat-label>
+              <mat-select [(ngModel)]="selectedMaintenance.status">
+                <mat-option [value]="StatusEnum.Open">Open</mat-option>
+                <mat-option [value]="StatusEnum.Scheduled">Assigned</mat-option>
+                <mat-option [value]="StatusEnum.InProgress">In Progress</mat-option>
+                <mat-option [value]="StatusEnum.Closed">Resolved</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Scheduled Date (shown when Assigned) -->
+          <div class="form-group" *ngIf="selectedMaintenance.status == StatusEnum.Scheduled">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Scheduled Date</mat-label>
+              <input matInput [matDatepicker]="schedPicker" [(ngModel)]="selectedMaintenance.scheduledDate">
+              <mat-datepicker-toggle matIconSuffix [for]="schedPicker"></mat-datepicker-toggle>
+              <mat-datepicker #schedPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Rating (shown when Resolved) -->
+        <div *ngIf="selectedMaintenance.status == StatusEnum.Closed && selectedMaintenance.rating"
+          class="form-group full-width" style="margin-bottom: 24px;">
+          <label style="margin-bottom: 8px; display: block;">Tenant Rating</label>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <span *ngFor="let star of [1,2,3,4,5]"
+              [style.color]="star <= (selectedMaintenance.rating || 0) ? '#ffc107' : '#e2e8f0'"
+              style="font-size: 24px;">★</span>
+            <span style="color: #64748b; margin-left: 8px; font-weight: 600;">{{ selectedMaintenance.rating }}/5</span>
+          </div>
+        </div>
+
+        <!-- Dates (readonly) -->
+        <div class="form-grid" *ngIf="selectedMaintenance.createdAt">
+          <div class="form-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Created Date</mat-label>
+              <input matInput [value]="formatDate(selectedMaintenance.createdAt)" readonly>
+            </mat-form-field>
+          </div>
+          <div class="form-group" *ngIf="selectedMaintenance.updatedAt">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Last Updated</mat-label>
+              <input matInput [value]="formatDate(selectedMaintenance.updatedAt)" readonly>
+            </mat-form-field>
+          </div>
+        </div>
       </div>
-
-      <!-- Description (readonly) -->
-      <mat-form-field appearance="fill" style="width: 100%;">
-        <mat-label>Description</mat-label>
-        <textarea matInput [value]="selectedMaintenance.description" rows="3" readonly></textarea>
-      </mat-form-field>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-        <!-- Status -->
-        <mat-form-field appearance="fill">
-          <mat-label>Status</mat-label>
-          <mat-select [(ngModel)]="selectedMaintenance.status">
-            <mat-option [value]="StatusEnum.Open">Open</mat-option>
-            <mat-option [value]="StatusEnum.Scheduled">Assigned</mat-option>
-            <mat-option [value]="StatusEnum.InProgress">In Progress</mat-option>
-            <mat-option [value]="StatusEnum.Closed">Resolved</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <!-- Scheduled Date (shown when Assigned) -->
-        <mat-form-field appearance="fill" *ngIf="selectedMaintenance.status == StatusEnum.Scheduled">
-          <mat-label>Scheduled Date</mat-label>
-          <input matInput [matDatepicker]="schedPicker" [(ngModel)]="selectedMaintenance.scheduledDate">
-          <mat-datepicker-toggle matIconSuffix [for]="schedPicker"></mat-datepicker-toggle>
-          <mat-datepicker #schedPicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <!-- Rating (shown when Resolved) -->
-      <div *ngIf="selectedMaintenance.status == StatusEnum.Closed && selectedMaintenance.rating"
-        style="margin-bottom: 16px;">
-        <span style="font-weight: 500; color: #555;">Rating: </span>
-        <span *ngFor="let star of [1,2,3,4,5]"
-          [style.color]="star <= (selectedMaintenance.rating || 0) ? '#ffc107' : '#e0e0e0'"
-          style="font-size: 20px;">★</span>
-        <span style="color: #888; margin-left: 4px;">{{ selectedMaintenance.rating }}/5</span>
-      </div>
-
-      <!-- Dates (readonly) -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px;" *ngIf="selectedMaintenance.createdAt">
-        <mat-form-field appearance="fill">
-          <mat-label>Created Date</mat-label>
-          <input matInput [value]="formatDate(selectedMaintenance.createdAt)" readonly>
-        </mat-form-field>
-        <mat-form-field appearance="fill" *ngIf="selectedMaintenance.updatedAt">
-          <mat-label>Last Updated</mat-label>
-          <input matInput [value]="formatDate(selectedMaintenance.updatedAt)" readonly>
-        </mat-form-field>
-      </div>
-    </mat-card-content>
+    </div>
 
     <!-- Modal Footer -->
-    <div style="display: flex; justify-content: flex-end; gap: 8px; padding: 0 20px 16px;">
-      <button mat-flat-button (click)="closeEditModal()" style="background-color: #9e9e9e; color: #fff;">
+    <div class="modal-footer">
+      <button mat-button (click)="closeEditModal()" class="btn-secondary">
         Cancel
       </button>
-      <button mat-flat-button (click)="saveMaintenance()" style="background-color: #e91e63; color: #fff;">
+      <button mat-flat-button (click)="saveMaintenance()" class="btn-primary">
         Save Changes
       </button>
     </div>
-  </mat-card>
+  </div>
 </div>

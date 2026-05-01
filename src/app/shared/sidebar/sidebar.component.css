@@ -154,8 +154,17 @@ a {
         padding: 1rem 0.5rem;
     }
 
-    .logo {
-        font-size: 1.25rem;
+    .logo-text {
+        display: none;
+    }
+
+    .logo-container {
+        gap: 0;
+    }
+
+    .logo-img {
+        width: 40px;
+        height: 40px;
     }
 
     .menu-item {

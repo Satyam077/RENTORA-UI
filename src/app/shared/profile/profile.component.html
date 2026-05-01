@@ -1,56 +1,44 @@
 <!-- Loading State -->
 <app-spinner [isLoading]="isLoadingProfile" message="Loading profile..."></app-spinner>
 
-<div *ngIf="!isLoadingProfile">
+<div *ngIf="!isLoadingProfile" class="profile-container">
     <!-- Profile Header Card -->
-    <mat-card style="border-radius: 12px; margin-bottom: 20px; overflow: hidden;
-    background: linear-gradient(135deg, #c2185b 0%, #880e4f 100%); color: #fff;">
-        <mat-card-content style="padding: 24px; display: flex; align-items: center; gap: 24px;">
+    <mat-card class="header-card">
+        <mat-card-content class="header-content">
 
-            <!-- Profile Image — small circle (80px) -->
-            <div style="position: relative;">
-                <div *ngIf="!profileImagePreview" style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2);
-            display: flex; align-items: center; justify-content: center;
-            border: 3px solid rgba(255,255,255,0.4); font-size: 28px; font-weight: 700; color: #fff;">
+            <!-- Profile Image -->
+            <div class="avatar-container">
+                <div *ngIf="!profileImagePreview" class="avatar-placeholder">
                     {{ getInitials() }}
                 </div>
-                <img *ngIf="profileImagePreview" [src]="profileImagePreview" alt="Profile" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
-            border: 3px solid rgba(255,255,255,0.4);">
+                <img *ngIf="profileImagePreview" [src]="profileImagePreview" alt="Profile" class="avatar-img">
 
                 <!-- Upload overlay (edit mode) -->
-                <label *ngIf="isEditing" style="position: absolute; bottom: -2px; right: -2px; width: 28px; height: 28px;
-            border-radius: 50%; background: #fff; color: #c2185b; display: flex;
-            align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);" matTooltip="Upload Photo">
+                <label *ngIf="isEditing" class="upload-label" matTooltip="Upload Photo">
                     <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
                     <mat-icon style="font-size: 16px; width: 16px; height: 16px;">camera_alt</mat-icon>
                 </label>
             </div>
 
             <!-- User Info -->
-            <div style="flex: 1;">
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <span style="font-size: 22px; font-weight: 700;">{{ currentUser?.fullName }}</span>
+            <div class="user-info">
+                <div class="user-name-row">
+                    <span class="user-name">{{ currentUser?.fullName }}</span>
                     <mat-chip-set>
-                        <mat-chip [highlighted]="true"
-                            style="background: rgba(255,255,255,0.2); color: #fff; font-size: 11px; min-height: 22px; padding: 0 10px;">
+                        <mat-chip [highlighted]="true" class="role-chip">
                             {{ getRoleName(currentUser?.role!) }}
                         </mat-chip>
                     </mat-chip-set>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px; flex-wrap: wrap;">
-                    <span style="font-size: 13px; opacity: 0.9;">{{ currentUser?.email }}</span>
+                <div class="user-contact-row">
+                    <span class="user-email">{{ currentUser?.email }}</span>
                     <mat-chip-set>
-                        <mat-chip *ngIf="currentUser?.isEmailVerified" [highlighted]="true"
-                            style="background: rgba(76,175,80,0.3); color: #fff; font-size: 10px; min-height: 20px; padding: 0 8px;">
-                            <mat-icon
-                                style="font-size: 14px; width: 14px; height: 14px; margin-right: 2px;">verified</mat-icon>
+                        <mat-chip *ngIf="currentUser?.isEmailVerified" [highlighted]="true" class="verified-chip">
+                            <mat-icon style="font-size: 14px; width: 14px; height: 14px; margin-right: 2px;">verified</mat-icon>
                             Email Verified
                         </mat-chip>
-                        <mat-chip *ngIf="currentUser?.isMobileVerified" [highlighted]="true"
-                            style="background: rgba(76,175,80,0.3); color: #fff; font-size: 10px; min-height: 20px; padding: 0 8px;">
-                            <mat-icon
-                                style="font-size: 14px; width: 14px; height: 14px; margin-right: 2px;">verified</mat-icon>
+                        <mat-chip *ngIf="currentUser?.isMobileVerified" [highlighted]="true" class="verified-chip">
+                            <mat-icon style="font-size: 14px; width: 14px; height: 14px; margin-right: 2px;">verified</mat-icon>
                             Mobile Verified
                         </mat-chip>
                     </mat-chip-set>
@@ -58,13 +46,12 @@
             </div>
 
             <!-- Edit / Remove buttons -->
-            <div style="display: flex; gap: 8px;">
+            <div class="header-actions">
                 <button *ngIf="isEditing && profileImagePreview" mat-icon-button matTooltip="Remove Photo"
-                    (click)="removeProfilePicture()" style="background: rgba(255,255,255,0.2); color: #fff;">
+                    (click)="removeProfilePicture()" class="edit-btn">
                     <mat-icon>delete</mat-icon>
                 </button>
-                <button *ngIf="!isEditing" mat-flat-button (click)="toggleEdit()"
-                    style="background: rgba(255,255,255,0.2); color: #fff;">
+                <button *ngIf="!isEditing" mat-flat-button (click)="toggleEdit()" class="edit-btn">
                     <mat-icon>edit</mat-icon> Edit Profile
                 </button>
             </div>
@@ -72,22 +59,20 @@
     </mat-card>
 
     <!-- Profile Form Card -->
-    <mat-card style="border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
-        <mat-card-content style="padding: 24px;">
+    <mat-card class="form-card">
+        <mat-card-content class="card-padding">
             <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
 
                 <!-- Personal Information Section -->
                 <h3 class="header-title" style="margin: 0 0 4px;">Personal Information</h3>
                 <mat-divider style="margin-bottom: 16px;"></mat-divider>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
+                <div class="form-grid-2">
                     <mat-form-field appearance="fill">
                         <mat-label>Full Name *</mat-label>
                         <input matInput formControlName="fullName">
-                        <mat-error *ngIf="profileForm.get('fullName')?.errors?.['required']">Full name is
-                            required</mat-error>
-                        <mat-error *ngIf="profileForm.get('fullName')?.errors?.['minlength']">Minimum 2
-                            characters</mat-error>
+                        <mat-error *ngIf="profileForm.get('fullName')?.errors?.['required']">Full name is required</mat-error>
+                        <mat-error *ngIf="profileForm.get('fullName')?.errors?.['minlength']">Minimum 2 characters</mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="fill">
@@ -100,10 +85,8 @@
                     <mat-form-field appearance="fill">
                         <mat-label>Mobile *</mat-label>
                         <input matInput formControlName="mobile" appPhoneMask>
-                        <mat-error *ngIf="profileForm.get('mobile')?.errors?.['required']">Mobile is
-                            required</mat-error>
-                        <mat-error *ngIf="profileForm.get('mobile')?.errors?.['pattern']">Invalid mobile
-                            format</mat-error>
+                        <mat-error *ngIf="profileForm.get('mobile')?.errors?.['required']">Mobile is required</mat-error>
+                        <mat-error *ngIf="profileForm.get('mobile')?.errors?.['pattern']">Invalid mobile format</mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="fill">
@@ -128,7 +111,7 @@
                 <h3 class="header-title" style="margin: 16px 0 4px;">Address Information</h3>
                 <mat-divider style="margin-bottom: 16px;"></mat-divider>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
+                <div class="form-grid-2">
                     <mat-form-field appearance="fill">
                         <mat-label>Address Line 1</mat-label>
                         <input matInput formControlName="addressLine1" placeholder="Street address">
@@ -161,7 +144,7 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div *ngIf="isEditing" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+                <div *ngIf="isEditing" class="form-actions">
                     <button mat-flat-button type="button" (click)="toggleEdit()" [disabled]="loading"
                         style="background-color: #9e9e9e; color: #fff;">Cancel</button>
                     <button mat-flat-button type="submit" [disabled]="profileForm.invalid || loading"
@@ -174,23 +157,21 @@
     </mat-card>
 
     <!-- Security / Password Card -->
-    <mat-card style="border-radius: 12px; border: 1px solid #e0e0e0;">
-        <mat-card-content style="padding: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <div>
-                    <h3 class="header-title" style="margin: 0;">Security</h3>
-                    <p style="font-size: 13px; color: #888; margin: 4px 0 0;">Manage your password and security settings
-                    </p>
+    <mat-card class="form-card">
+        <mat-card-content class="card-padding">
+            <div class="security-header">
+                <div class="security-info">
+                    <h3 class="header-title">Security</h3>
+                    <p class="security-subtitle">Manage your password and security settings</p>
                 </div>
                 <button mat-stroked-button (click)="togglePasswordSection()">
                     {{ showPasswordSection ? 'Cancel' : 'Change Password' }}
                 </button>
             </div>
 
-            <form *ngIf="showPasswordSection" [formGroup]="passwordForm" (ngSubmit)="changePassword()"
-                style="margin-top: 16px;">
+            <form *ngIf="showPasswordSection" [formGroup]="passwordForm" (ngSubmit)="changePassword()" style="margin-top: 16px;">
                 <mat-divider style="margin-bottom: 16px;"></mat-divider>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 16px;">
+                <div class="form-grid-3">
                     <mat-form-field appearance="fill">
                         <mat-label>Current Password *</mat-label>
                         <input matInput type="password" formControlName="currentPassword">
@@ -199,21 +180,17 @@
                     <mat-form-field appearance="fill">
                         <mat-label>New Password *</mat-label>
                         <input matInput type="password" formControlName="newPassword">
-                        <mat-error *ngIf="passwordForm.get('newPassword')?.errors?.['minlength']">
-                            Minimum 6 characters
-                        </mat-error>
+                        <mat-error *ngIf="passwordForm.get('newPassword')?.errors?.['minlength']">Minimum 6 characters</mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="fill">
                         <mat-label>Confirm Password *</mat-label>
                         <input matInput type="password" formControlName="confirmPassword">
-                        <mat-error *ngIf="passwordForm.get('confirmPassword')?.errors?.['passwordMismatch']">
-                            Passwords do not match
-                        </mat-error>
+                        <mat-error *ngIf="passwordForm.get('confirmPassword')?.errors?.['passwordMismatch']">Passwords do not match</mat-error>
                     </mat-form-field>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                <div class="form-actions">
                     <button mat-flat-button type="submit" [disabled]="passwordForm.invalid || loading"
                         style="background-color: #e91e63; color: #fff;">
                         {{ loading ? 'Updating...' : 'Update Password' }}
@@ -222,4 +199,4 @@
             </form>
         </mat-card-content>
     </mat-card>
-</div>
+</div>
